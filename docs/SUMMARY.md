@@ -26,3 +26,9 @@ This set of documents provides a technical analysis of the system for developers
     - Deep dive into custom decorators, recursive serialization, and the alarm system.
 11. [Security and Auditing](security_auditing.md)
     - Overview of activity logging, session auditing, and brute-force protection.
+12. [Master/Slave Middleware](master_slave_middleware.md)
+    - Analysis of distributed read-only enforcement and address discovery.
+13. [Distributed Caching](distributed_caching.md)
+    - Deep dive into periodic cache refresh and change detection mechanisms.
+14. [Data Sync Engine](data_sync_engine.md)
+    - Detailed look at object rename detection and external data mapping.
