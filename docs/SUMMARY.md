@@ -14,7 +14,9 @@ This set of documents provides a technical analysis of the system for developers
    - Custom storage abstractions (RedisStore, RedisVar) and infrastructure roles.
 5. [Module Interaction System](modules.md)
    - Analysis of the registry-based module architecture and dynamic command mapping.
-6. [Critical Workflows](workflows.md)
+6. [Module Catalog](module_catalog.md)
+   - Comprehensive guide to external service APIs (PDU, Switch, Routing, etc.).
+7. [Critical Workflows](workflows.md)
    - Step-by-step breakdown of Multi-Master failover, VXLAN creation, and sync processes.
-7. [External Integrations](external_integrations.md)
+8. [External Integrations](external_integrations.md)
    - Integration details for LDAP, Zabbix, GLPI, and QEMU.
