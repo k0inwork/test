@@ -32,3 +32,5 @@ This set of documents provides a technical analysis of the system for developers
     - Deep dive into periodic cache refresh and change detection mechanisms.
 14. [Data Sync Engine](data_sync_engine.md)
     - Detailed look at object rename detection and external data mapping.
+15. [JSON Dynamic API](json_middleware.md)
+    - Analysis of the transparent conversion of Django views into JSON APIs.
