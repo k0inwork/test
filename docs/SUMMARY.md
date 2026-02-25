@@ -20,3 +20,9 @@ This set of documents provides a technical analysis of the system for developers
    - Step-by-step breakdown of Multi-Master failover, VXLAN creation, and sync processes.
 8. [External Integrations](external_integrations.md)
    - Integration details for LDAP, Zabbix, GLPI, and QEMU.
+9. [WebSSH Terminal](webssh.md)
+   - Analysis of the web terminal, session recording, and playback system.
+10. [Advanced Utilities](advanced_utilities.md)
+    - Deep dive into custom decorators, recursive serialization, and the alarm system.
+11. [Security and Auditing](security_auditing.md)
+    - Overview of activity logging, session auditing, and brute-force protection.
