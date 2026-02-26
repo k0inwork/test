@@ -1,0 +1,23 @@
+{{define "content"}}
+<h1>Dashboard</h1>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Nodes</h5>
+                <p class="card-text">Total Physical Nodes: {{.NodeCount}}</p>
+                <a href="/nodes" class="btn btn-primary">View Nodes</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Users</h5>
+                <p class="card-text">System Users: {{.UserCount}}</p>
+                <a href="/users" class="btn btn-primary">Manage Users</a>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

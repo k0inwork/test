@@ -4,7 +4,10 @@ import (
 	"log"
 	"net/http"
 	"pum-go/pkg/models"
+	"pum-go/services/identity/graph"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -19,7 +22,6 @@ func initDB() {
 		log.Fatal("failed to connect database")
 	}
 
-	// Migrate the schema
 	db.AutoMigrate(&models.User{})
 }
 
@@ -28,13 +30,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	// Basic User REST API
+	// REST API
 	r.GET("/users", func(c *gin.Context) {
 		var users []models.User
 		db.Find(&users)
@@ -49,6 +45,17 @@ func main() {
 		}
 		db.Create(&user)
 		c.JSON(http.StatusOK, user)
+	})
+
+	// GraphQL API
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
+
+	r.POST("/query", func(c *gin.Context) {
+		srv.ServeHTTP(c.Writer, c.Request)
+	})
+
+	r.GET("/", func(c *gin.Context) {
+		playground.Handler("GraphQL playground", "/query").ServeHTTP(c.Writer, c.Request)
 	})
 
 	log.Println("Identity service starting on :8081")
