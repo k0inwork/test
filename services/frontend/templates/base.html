@@ -20,7 +20,84 @@
         </div>
     </nav>
     <div class="container mt-4">
-        {{block "content" .}}{{end}}
+        {{if .IsIndex}} {{template "content_index" .}} {{end}}
+        {{if .IsNodes}} {{template "content_nodes" .}} {{end}}
+        {{if .IsUsers}} {{template "content_users" .}} {{end}}
     </div>
 </body>
 </html>
+
+{{define "content_index"}}
+<h1>Dashboard</h1>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Nodes</h5>
+                <p class="card-text">Total Physical Nodes: {{.NodeCount}}</p>
+                <a href="/nodes" class="btn btn-primary">View Nodes</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Users</h5>
+                <p class="card-text">System Users: {{.UserCount}}</p>
+                <a href="/users" class="btn btn-primary">Manage Users</a>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "content_nodes"}}
+<h1>Physical Nodes</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Region</th>
+            <th>Type</th>
+            <th>State</th>
+            <th>Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .Nodes}}
+        <tr>
+            <td>{{.Name}}</td>
+            <td>{{.Region}}</td>
+            <td>{{.PouType}}</td>
+            <td>{{.State}}</td>
+            <td>{{.Address}}</td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+<form action="/sync" method="POST">
+    <button type="submit" class="btn btn-warning">Sync with GLPI</button>
+</form>
+{{end}}
+
+{{define "content_users"}}
+<h1>User Management</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .Users}}
+        <tr>
+            <td>{{.Username}}</td>
+            <td>{{.Role}}</td>
+            <td>{{.CreatedAt}}</td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+{{end}}

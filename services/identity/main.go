@@ -23,6 +23,14 @@ func initDB() {
 	}
 
 	db.AutoMigrate(&models.User{})
+
+	// Seed data for demo
+	var count int64
+	db.Model(&models.User{}).Count(&count)
+	if count == 0 {
+		db.Create(&models.User{Username: "admin", Role: "admin"})
+		db.Create(&models.User{Username: "operator", Role: "operator"})
+	}
 }
 
 func main() {

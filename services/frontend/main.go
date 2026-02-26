@@ -33,18 +33,22 @@ func main() {
 			json.NewDecoder(respN.Body).Decode(&nodes)
 		}
 
-		c.HTML(http.StatusOK, "index.html", gin.H{
+		c.HTML(http.StatusOK, "base.html", gin.H{
 			"UserCount": len(users),
 			"NodeCount": len(nodes),
+			"IsIndex":   true,
 		})
 	})
 
 	r.GET("/nodes", func(c *gin.Context) {
 		resp, _ := http.Get(ProductSvc + "/nodes")
 		var nodes []models.Product
-		json.NewDecoder(resp.Body).Decode(&nodes)
-		c.HTML(http.StatusOK, "nodes.html", gin.H{
-			"Nodes": nodes,
+		if resp != nil {
+			json.NewDecoder(resp.Body).Decode(&nodes)
+		}
+		c.HTML(http.StatusOK, "base.html", gin.H{
+			"Nodes":   nodes,
+			"IsNodes": true,
 		})
 	})
 
@@ -56,9 +60,12 @@ func main() {
 	r.GET("/users", func(c *gin.Context) {
 		resp, _ := http.Get(IdentitySvc + "/users")
 		var users []models.User
-		json.NewDecoder(resp.Body).Decode(&users)
-		c.HTML(http.StatusOK, "users.html", gin.H{
-			"Users": users,
+		if resp != nil {
+			json.NewDecoder(resp.Body).Decode(&users)
+		}
+		c.HTML(http.StatusOK, "base.html", gin.H{
+			"Users":   users,
+			"IsUsers": true,
 		})
 	})
 
