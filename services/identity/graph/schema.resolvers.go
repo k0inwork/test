@@ -1,0 +1,61 @@
+package graph
+
+import (
+	"context"
+	"pum-go/pkg/models"
+	"pum-go/services/identity/graph/model"
+	"strconv"
+	"time"
+)
+
+func (r *mutationResolver) CreateUser(ctx context.Context, username string, role string) (*model.User, error) {
+	user := models.User{
+		Username: username,
+		Role:     role,
+	}
+	if err := r.DB.Create(&user).Error; err != nil {
+		return nil, err
+	}
+	return &model.User{
+		ID:        strconv.Itoa(int(user.ID)),
+		Username:  user.Username,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt.Format(time.RFC3339),
+	}, nil
+}
+
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	var users []models.User
+	if err := r.DB.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	var gqlUsers []*model.User
+	for _, u := range users {
+		gqlUsers = append(gqlUsers, &model.User{
+			ID:        strconv.Itoa(int(u.ID)),
+			Username:  u.Username,
+			Role:      u.Role,
+			CreatedAt: u.CreatedAt.Format(time.RFC3339),
+		})
+	}
+	return gqlUsers, nil
+}
+
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	var user models.User
+	if err := r.DB.First(&user, id).Error; err != nil {
+		return nil, err
+	}
+	return &model.User{
+		ID:        strconv.Itoa(int(user.ID)),
+		Username:  user.Username,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt.Format(time.RFC3339),
+	}, nil
+}
+
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+func (r *Resolver) Query() QueryResolver    { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
