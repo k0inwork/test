@@ -1,0 +1,24 @@
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  address: String
+  state: String
+  long: String
+  lat: String
+  geo: String
+  operate: Boolean!
+  glpiUUID: String
+  sequentialNumber: Int!
+  pouType: String!
+  region: String!
+}
+
+type Query {
+  products: [Product!]!
+  product(id: ID!): Product
+}
+
+type Mutation {
+  syncProducts: String!
+}
