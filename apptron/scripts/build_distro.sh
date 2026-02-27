@@ -7,7 +7,7 @@ APPTRON_DIR="$REPO_ROOT/apptron"
 BUILD_DIR="$REPO_ROOT/build/distro"
 FINAL_ASSETS_DIR="$APPTRON_DIR/cmd/pum-admin/assets"
 BUNDLE_DIR="$BUILD_DIR/bundle"
-PUM_CLI_SRC="$APPTRON_DIR/services/pum-cli/cmd/pum-cli"
+PUM_CLI_DIR="$APPTRON_DIR/services/pum-cli/cmd/pum-cli"
 APPTRON_SRC="$APPTRON_DIR/apptron"
 
 echo "Initializing build directory..."
@@ -15,7 +15,8 @@ mkdir -p "$BUNDLE_DIR/bin"
 mkdir -p "$FINAL_ASSETS_DIR"
 
 echo "Compiling pum-cli to WASM..."
-GOOS=js GOARCH=wasm go build -o "$BUNDLE_DIR/bin/pum.wasm" "$PUM_CLI_SRC" || echo "Warning: WASM build failed (expected without shims), continuing with prototype..."
+# Use build tags to exclude TUI on WASM target
+GOOS=js GOARCH=wasm go build -o "$BUNDLE_DIR/bin/pum.wasm" "$PUM_CLI_DIR/main.go" "$PUM_CLI_DIR/tui_wasm.go"
 
 echo "Creating bin wrapper..."
 cat <<'EOW' > "$BUNDLE_DIR/bin/pum"

@@ -5,9 +5,7 @@ import (
 	"os"
 	"pum-go/apptron/pkg/actions"
 	pumcli "pum-go/apptron/services/pum-cli/internal/cli"
-	"pum-go/apptron/services/pum-cli/internal/tui"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )
 
@@ -34,19 +32,10 @@ func main() {
 		},
 	})
 
-	// Add dynamic commands from action registry
 	pumcli.AddActionCommands(rootCmd, registry)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
-func startTUI() {
-	p := tea.NewProgram(tui.InitialModel())
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
 }
