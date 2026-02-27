@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
+	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 
 	"github.com/gin-gonic/gin"
@@ -16,16 +17,21 @@ func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("inventory.db"), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to connect database")
+		slog.Error("failed to connect database", "error", err)
+		panic(err)
 	}
 
 	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{})
 }
 
 func main() {
+	logging.Init("inventory")
 	initDB()
 
-	r := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(logging.GinMiddleware())
 
 	r.GET("/switches", func(c *gin.Context) {
 		var switches []models.Switch
@@ -33,6 +39,6 @@ func main() {
 		c.JSON(http.StatusOK, switches)
 	})
 
-	log.Println("Inventory service starting on :8083")
+	slog.Info("Inventory service starting", "port", 8083)
 	r.Run(":8083")
 }

@@ -1,7 +1,7 @@
 package sync
 
 import (
-	"log"
+	"log/slog"
 	"pum-go/pkg/models"
 	"pum-go/services/product/mock"
 	"strconv"
@@ -47,25 +47,43 @@ func ParseName(fullName string) (region string, seq int, pouType string, name st
 }
 
 func (e *SyncEngine) Run() error {
-	log.Println("Starting synchronization with mock GLPI...")
+	slog.Info("Starting synchronization", "provider", "GLPI (Mock)")
 	assets := e.GLPI.GetAssets()
+	slog.Debug("Fetched assets from provider", "count", len(assets))
 
 	for _, asset := range assets {
 		region, seq, pouType, name := ParseName(asset.Name)
+
+		slog.Debug("Processing asset",
+			"glpi_id", asset.ID,
+			"full_name", asset.Name,
+			"parsed_name", name,
+			"region", region,
+			"seq", seq,
+		)
 
 		var product models.Product
 		// 1. Search by Index (Name, Region, SeqNum)
 		result := e.DB.Where("name = ? AND region = ? AND sequential_number = ?", name, region, seq).First(&product)
 
 		if result.Error == gorm.ErrRecordNotFound {
+			slog.Debug("Node not found by name index, checking for rename", "glpi_id", asset.ID)
+
 			// 2. Search by Foreign ID (GLPI UUID) - Rename Detection
 			result = e.DB.Where("glpi_uuid = ?", asset.ID).First(&product)
 			if result.Error == nil {
-				log.Printf("Rename detected: %s -> %s\n", product.Name, name)
+				slog.Info("Rename detected",
+					"glpi_id", asset.ID,
+					"old_name", product.Name,
+					"new_name", name,
+					"region", region,
+				)
 			} else {
-				log.Printf("Creating new node: %s\n", name)
+				slog.Info("New node discovered", "name", name, "glpi_id", asset.ID)
 				product = models.Product{GlpiUUID: asset.ID}
 			}
+		} else {
+			slog.Debug("Matching node found in database", "id", product.ID, "name", product.Name)
 		}
 
 		// Update fields
@@ -80,10 +98,12 @@ func (e *SyncEngine) Run() error {
 		product.GlpiUUID = asset.ID
 
 		if err := e.DB.Save(&product).Error; err != nil {
-			log.Printf("Failed to save product %s: %v\n", name, err)
+			slog.Error("Failed to save product", "name", name, "error", err)
+		} else {
+			slog.Debug("Product updated successfully", "id", product.ID, "name", product.Name)
 		}
 	}
 
-	log.Println("Synchronization complete.")
+	slog.Info("Synchronization complete")
 	return nil
 }

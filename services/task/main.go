@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
+	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 
 	"github.com/gin-gonic/gin"
@@ -16,16 +17,21 @@ func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("task.db"), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to connect database")
+		slog.Error("failed to connect database", "error", err)
+		panic(err)
 	}
 
 	db.AutoMigrate(&models.TaskRecord{})
 }
 
 func main() {
+	logging.Init("task")
 	initDB()
 
-	r := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(logging.GinMiddleware())
 
 	r.GET("/tasks", func(c *gin.Context) {
 		var tasks []models.TaskRecord
@@ -33,6 +39,6 @@ func main() {
 		c.JSON(http.StatusOK, tasks)
 	})
 
-	log.Println("Task service starting on :8085")
+	slog.Info("Task service starting", "port", 8085)
 	r.Run(":8085")
 }

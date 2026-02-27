@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
+	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 	"pum-go/services/identity/graph"
 
@@ -19,7 +20,8 @@ func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("identity.db"), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to connect database")
+		slog.Error("failed to connect database", "error", err)
+		panic(err)
 	}
 
 	db.AutoMigrate(&models.User{})
@@ -28,15 +30,20 @@ func initDB() {
 	var count int64
 	db.Model(&models.User{}).Count(&count)
 	if count == 0 {
+		slog.Info("Seeding initial users")
 		db.Create(&models.User{Username: "admin", Role: "admin"})
 		db.Create(&models.User{Username: "operator", Role: "operator"})
 	}
 }
 
 func main() {
+	logging.Init("identity")
 	initDB()
 
-	r := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(logging.GinMiddleware())
 
 	// REST API
 	r.GET("/users", func(c *gin.Context) {
@@ -48,10 +55,12 @@ func main() {
 	r.POST("/users", func(c *gin.Context) {
 		var user models.User
 		if err := c.ShouldBindJSON(&user); err != nil {
+			slog.Warn("failed to bind user JSON", "error", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		db.Create(&user)
+		slog.Info("user created", "username", user.Username)
 		c.JSON(http.StatusOK, user)
 	})
 
@@ -66,6 +75,6 @@ func main() {
 		playground.Handler("GraphQL playground", "/query").ServeHTTP(c.Writer, c.Request)
 	})
 
-	log.Println("Identity service starting on :8081")
+	slog.Info("Identity service starting", "port", 8081)
 	r.Run(":8081")
 }

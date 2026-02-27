@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
+	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 	"pum-go/services/product/graph"
 	"pum-go/services/product/sync"
@@ -20,16 +21,21 @@ func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("product.db"), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to connect database")
+		slog.Error("failed to connect database", "error", err)
+		panic(err)
 	}
 
 	db.AutoMigrate(&models.Product{})
 }
 
 func main() {
+	logging.Init("product")
 	initDB()
 
-	r := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(logging.GinMiddleware())
 
 	engine := sync.NewSyncEngine(db)
 
@@ -41,8 +47,10 @@ func main() {
 	})
 
 	r.POST("/sync", func(c *gin.Context) {
+		slog.Info("manual sync triggered")
 		err := engine.Run()
 		if err != nil {
+			slog.Error("sync failed", "error", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -60,6 +68,6 @@ func main() {
 		playground.Handler("GraphQL playground", "/query").ServeHTTP(c.Writer, c.Request)
 	})
 
-	log.Println("Product service starting on :8082")
+	slog.Info("Product service starting", "port", 8082)
 	r.Run(":8082")
 }

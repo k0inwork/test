@@ -1,14 +1,20 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
+	"pum-go/pkg/logging"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	r := gin.Default()
+	logging.Init("hardware")
+
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(logging.GinMiddleware())
 
 	r.POST("/call", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -17,6 +23,6 @@ func main() {
 		})
 	})
 
-	log.Println("Hardware service starting on :8086")
+	slog.Info("Hardware service starting", "port", 8086)
 	r.Run(":8086")
 }
