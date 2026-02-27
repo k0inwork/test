@@ -64,3 +64,14 @@ To reach physical network devices from the browser, we need a bridge.
 - Fork Apptron (if needed) or create a custom build script.
 - Pre-install PUM tools in the default image.
 - Customize the VSCode workbench layout for network admins.
+
+## The "pum-admin" Unified Runner
+
+To simplify deployment, we use a single binary approach:
+
+1.  **Binary**: `pum-admin`
+2.  **Responsibility**:
+    - Serves Apptron UI from embedded assets.
+    - Manages the lifecycle of the Bridge Agent.
+    - Orchestrates local port forwarding and DNS resolution for the WASM client.
+3.  **User Experience**: Admin downloads one file, runs it, and gets a full-blown management console with "magic" network access.
