@@ -11,11 +11,14 @@ PUM_CLI_DIR="$APPTRON_DIR/services/pum-cli/cmd/pum-cli"
 APPTRON_SRC="$APPTRON_DIR/apptron"
 
 echo "Initializing build directory..."
+rm -rf "$BUNDLE_DIR"
 mkdir -p "$BUNDLE_DIR/bin"
+# Don't delete FINAL_ASSETS_DIR entirely because it might contain index.html/dashboard.html
+# that we created in cmd/pum-admin/assets.
+# Instead, ensure it exists.
 mkdir -p "$FINAL_ASSETS_DIR"
 
 echo "Compiling pum-cli to WASM..."
-# Use build tags to exclude TUI on WASM target
 GOOS=js GOARCH=wasm go build -o "$BUNDLE_DIR/bin/pum.wasm" "$PUM_CLI_DIR/main.go" "$PUM_CLI_DIR/tui_wasm.go"
 
 echo "Creating bin wrapper..."
@@ -35,7 +38,14 @@ echo "Welcome to the PUM Admin Distro (Phase 1: Mock Mode)"
 EOP
 
 echo "Copying base Apptron assets to runner assets..."
-cp -r "$APPTRON_SRC/assets/"* "$FINAL_ASSETS_DIR/"
+# Use a more robust copy method.
+# On some systems 'cp -r dir/* target/' fails if target/dir exists as a file.
+# We'll copy the contents one by one and handle directories.
+for item in "$APPTRON_SRC/assets/"*; do
+    basename_item=$(basename "$item")
+    rm -rf "$FINAL_ASSETS_DIR/$basename_item"
+    cp -r "$item" "$FINAL_ASSETS_DIR/"
+done
 
 echo "Packaging custom sys.tar.gz into runner assets..."
 tar -C "$BUNDLE_DIR" -czf "$FINAL_ASSETS_DIR/sys.tar.gz" .
