@@ -13,9 +13,6 @@ APPTRON_SRC="$APPTRON_DIR/apptron"
 echo "Initializing build directory..."
 rm -rf "$BUNDLE_DIR"
 mkdir -p "$BUNDLE_DIR/bin"
-# Don't delete FINAL_ASSETS_DIR entirely because it might contain index.html/dashboard.html
-# that we created in cmd/pum-admin/assets.
-# Instead, ensure it exists.
 mkdir -p "$FINAL_ASSETS_DIR"
 
 echo "Compiling pum-cli to WASM..."
@@ -38,9 +35,6 @@ echo "Welcome to the PUM Admin Distro (Phase 1: Mock Mode)"
 EOP
 
 echo "Copying base Apptron assets to runner assets..."
-# Use a more robust copy method.
-# On some systems 'cp -r dir/* target/' fails if target/dir exists as a file.
-# We'll copy the contents one by one and handle directories.
 for item in "$APPTRON_SRC/assets/"*; do
     basename_item=$(basename "$item")
     rm -rf "$FINAL_ASSETS_DIR/$basename_item"
@@ -48,6 +42,7 @@ for item in "$APPTRON_SRC/assets/"*; do
 done
 
 echo "Packaging custom sys.tar.gz into runner assets..."
-tar -C "$BUNDLE_DIR" -czf "$FINAL_ASSETS_DIR/sys.tar.gz" .
+mkdir -p "$FINAL_ASSETS_DIR/bundles"
+tar -C "$BUNDLE_DIR" -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" .
 
 echo "Build complete! Custom Apptron assets are ready for embedding in $FINAL_ASSETS_DIR"
