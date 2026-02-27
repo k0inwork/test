@@ -75,3 +75,22 @@ To simplify deployment, we use a single binary approach:
     - Manages the lifecycle of the Bridge Agent.
     - Orchestrates local port forwarding and DNS resolution for the WASM client.
 3.  **User Experience**: Admin downloads one file, runs it, and gets a full-blown management console with "magic" network access.
+
+
+## Phase 2: Bridge & Microservice Connectivity
+
+Once the mock environment is stable, Phase 2 enables connectivity to the live PUM-Go microservices.
+
+### 1. Enabling Live Mode
+Set `PUM_MODE=live` when running the `pum-admin` binary. This activates the internal Bridge Agent.
+
+### 2. Bridge Agent Tunneling
+The Bridge Agent uses a WebSocket-based tunnel to connect the Apptron Virtual Network (inside the browser) to the host's physical network interfaces.
+- **Outbound**: Traffic from `pum-cli` (WASM) to device IPs is intercepted by the virtual network stack and forwarded through the Bridge Agent.
+- **Inbound**: The Bridge Agent listens for responses from physical devices and injects them back into the virtual network.
+
+### 3. API Proxying
+The `pum-admin` runner acts as a reverse proxy for the main PUM-Go microservices (Identity, Product, etc.). This avoids CORS issues and allows the WASM client to use relative URLs like `/api/identity/users`.
+
+### 4. Dynamic Discovery
+In Live mode, the WASM client can use the Bridge Agent to perform network discovery, identifying live switches and gateways on the local subnet.

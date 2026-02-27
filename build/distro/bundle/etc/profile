@@ -1,3 +1,4 @@
 export PATH=/bin:/usr/bin:/usr/local/bin
 export PUM_SERVER_URL="https://api.pum-nms.local"
-echo "Welcome to the PUM Admin Distro"
+export PUM_MODE="mock"
+echo "Welcome to the PUM Admin Distro (Phase 1: Mock Mode)"

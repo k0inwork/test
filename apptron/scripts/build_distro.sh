@@ -2,10 +2,13 @@
 set -e
 
 # Configuration
-BUILD_DIR="build/distro"
+REPO_ROOT=$(git rev-parse --show-toplevel)
+APPTRON_DIR="$REPO_ROOT/apptron"
+BUILD_DIR="$REPO_ROOT/build/distro"
 ASSETS_DIR="$BUILD_DIR/assets"
 BUNDLE_DIR="$BUILD_DIR/bundle"
-PUM_CLI_SRC="./services/pum-cli/cmd/pum-cli"
+PUM_CLI_SRC="$APPTRON_DIR/services/pum-cli/cmd/pum-cli"
+APPTRON_SRC="$APPTRON_DIR/apptron"
 
 echo "Initializing build directory..."
 mkdir -p "$ASSETS_DIR"
@@ -29,10 +32,14 @@ mkdir -p "$BUNDLE_DIR/etc"
 cat <<'EOP' > "$BUNDLE_DIR/etc/profile"
 export PATH=/bin:/usr/bin:/usr/local/bin
 export PUM_SERVER_URL="https://api.pum-nms.local"
-echo "Welcome to the PUM Admin Distro"
+export PUM_MODE="mock"
+echo "Welcome to the PUM Admin Distro (Phase 1: Mock Mode)"
 EOP
 
-echo "Packaging sys.tar.gz..."
+echo "Copying base Apptron assets..."
+cp -r "$APPTRON_SRC/assets/"* "$ASSETS_DIR/"
+
+echo "Packaging custom sys.tar.gz..."
 tar -C "$BUNDLE_DIR" -czf "$ASSETS_DIR/sys.tar.gz" .
 
 echo "Build complete! Custom Apptron assets are in $ASSETS_DIR"

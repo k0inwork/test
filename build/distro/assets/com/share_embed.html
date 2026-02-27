@@ -1,0 +1,74 @@
+<html>
+<style>
+    @import url("/styles.css");
+    :host { display: block; }
+</style>
+
+<form id="embed-form" method="dialog" class="dialog" style="visibility:hidden">
+<div class="dialog-body">
+    <p id="embed-info" class="info mb-8">Set project to public via Share to enable embedding.</p>
+    <label for="embed-mode">Embed Mode</label>
+    <select id="embed-mode" name="embed-mode" onchange="updateEmbedHTML()">
+        <option value="edit" selected>Editor</option>
+        <option value="console">Console</option>
+    </select>
+    <span class="form-error"></span>
+
+    <label for="embed-src">Embed HTML</label>
+    <textarea id="embed-src" name="embed-src" spellcheck="false" style="height: 6rem;"></textarea>
+</div>
+
+<div class="dialog-footer">
+    <div style="flex-grow: 2;">
+        <button id="copy-src" type="button" class="btn secondary">Copy Source</button>
+    </div>
+    <button class="btn secondary" type="button" onclick="window.modal.finish()">Done</button>
+</div>
+</form>
+
+<script type="module">
+    import { urlFor, getAuth, copyText, currentURL, envUsername, isLocalhost } from "/lib/apptron.js";
+    const { project } = component?.context || {};
+
+    window.updateEmbedHTML = async () => {
+        const mode = $("#embed-mode").value;
+        const url = new URL(await currentURL());
+        url.searchParams.set("embed", "1");
+        const embedURL = url.toString().replace("/edit", "/" + mode);
+
+        console.log("embedURL:", embedURL);
+
+        $("#embed-src").value = `<iframe width="800" height="450" src="${embedURL}" style="border: 0;"></iframe>`;
+    }
+
+    queueMicrotask(async () => {
+        try {
+            const isPublic = project?.visibility === "public";
+            const disabled = !isPublic;
+
+            $("#embed-mode").disabled = disabled;
+            $("#copy-src").disabled = disabled;
+            $("#embed-src").disabled = disabled;
+
+            const info = $("#embed-info");
+            if (info) info.hidden = isPublic;
+
+            $("#copy-src").addEventListener("click", async () => {
+                if (disabled) return;
+
+                const ok = await copyText($("#embed-src").value || "");
+                const oldText = $("#copy-src").textContent;
+                $("#copy-src").textContent = ok ? "Copied!" : "Copy failed";
+                setTimeout(() => ($("#copy-src").textContent = oldText), 1200);
+            });
+
+            await updateEmbedHTML();
+        } finally {
+            await new Promise(requestAnimationFrame);
+            await new Promise(requestAnimationFrame);
+            const form = $("#embed-form");
+            if (form) form.style.visibility = "visible";
+        }
+    });
+</script>
+</html>

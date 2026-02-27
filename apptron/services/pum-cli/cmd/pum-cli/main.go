@@ -3,13 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
-	"pum-go/services/pum-cli/internal/tui"
+	"pum-go/apptron/pkg/actions"
+	pumcli "pum-go/apptron/services/pum-cli/internal/cli"
+	"pum-go/apptron/services/pum-cli/internal/tui"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )
 
 func main() {
+	registry := actions.NewRegistry()
+	registry.Register(actions.RebootAction{})
+
 	var rootCmd = &cobra.Command{
 		Use:   "pum",
 		Short: "PUM Admin CLI/TUI",
@@ -29,6 +34,9 @@ func main() {
 		},
 	})
 
+	// Add dynamic commands from action registry
+	pumcli.AddActionCommands(rootCmd, registry)
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -36,9 +44,6 @@ func main() {
 }
 
 func startTUI() {
-	// Note: Bubbletea has limited support for GOOS=js.
-	// In a real WASM/Wanix environment, we would use a specialized renderer
-	// or ensure the terminal environment is properly shimmed.
 	p := tea.NewProgram(tui.InitialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
