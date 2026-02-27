@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	RegistryURL = "http://localhost:8088"
+var (
+	GlobalConfig *config.Config
 )
 
 type RegisteredService struct {
@@ -23,7 +24,7 @@ type RegisteredService struct {
 }
 
 func getServices() ([]RegisteredService, error) {
-	resp, err := http.Get(RegistryURL + "/services")
+	resp, err := http.Get(GlobalConfig.Discovery.RegistryURL + "/services")
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +47,12 @@ func findServiceByCapability(services []RegisteredService, cap string) string {
 
 func main() {
 	logging.Init("frontend")
+	cfg, err := config.LoadConfig("system.yaml")
+	if err != nil {
+		slog.Error("failed to load system.yaml", "error", err)
+		panic(err)
+	}
+	GlobalConfig = cfg
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -63,8 +70,15 @@ func main() {
 			return
 		}
 
-		// Required core services
-		required := map[string]bool{"identity": false, "product": false}
+		// Required core services defined in system.yaml
+		required := make(map[string]bool)
+		for _, name := range GlobalConfig.CoreServices {
+			if name == "registry" || name == "frontend" {
+				continue // handled separately or current service
+			}
+			required[name] = false
+		}
+
 		for _, s := range services {
 			if _, ok := required[s.Name]; ok {
 				required[s.Name] = true
@@ -79,7 +93,6 @@ func main() {
 			}
 		}
 
-		// Store services in context for handlers
 		c.Set("services", services)
 		c.Next()
 	})
