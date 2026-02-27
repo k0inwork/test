@@ -5,19 +5,16 @@ set -e
 REPO_ROOT=$(git rev-parse --show-toplevel)
 APPTRON_DIR="$REPO_ROOT/apptron"
 BUILD_DIR="$REPO_ROOT/build/distro"
-ASSETS_DIR="$BUILD_DIR/assets"
+FINAL_ASSETS_DIR="$APPTRON_DIR/cmd/pum-admin/assets"
 BUNDLE_DIR="$BUILD_DIR/bundle"
 PUM_CLI_SRC="$APPTRON_DIR/services/pum-cli/cmd/pum-cli"
 APPTRON_SRC="$APPTRON_DIR/apptron"
 
 echo "Initializing build directory..."
-mkdir -p "$ASSETS_DIR"
 mkdir -p "$BUNDLE_DIR/bin"
+mkdir -p "$FINAL_ASSETS_DIR"
 
 echo "Compiling pum-cli to WASM..."
-# Note: Bubbletea has known build issues with pure GOOS=js.
-# In a real environment, we would use a Wanix-compatible build tool or a shimmed library.
-# For this prototype, we skip the actual binary build if it fails to ensure script continuity.
 GOOS=js GOARCH=wasm go build -o "$BUNDLE_DIR/bin/pum.wasm" "$PUM_CLI_SRC" || echo "Warning: WASM build failed (expected without shims), continuing with prototype..."
 
 echo "Creating bin wrapper..."
@@ -36,10 +33,10 @@ export PUM_MODE="mock"
 echo "Welcome to the PUM Admin Distro (Phase 1: Mock Mode)"
 EOP
 
-echo "Copying base Apptron assets..."
-cp -r "$APPTRON_SRC/assets/"* "$ASSETS_DIR/"
+echo "Copying base Apptron assets to runner assets..."
+cp -r "$APPTRON_SRC/assets/"* "$FINAL_ASSETS_DIR/"
 
-echo "Packaging custom sys.tar.gz..."
-tar -C "$BUNDLE_DIR" -czf "$ASSETS_DIR/sys.tar.gz" .
+echo "Packaging custom sys.tar.gz into runner assets..."
+tar -C "$BUNDLE_DIR" -czf "$FINAL_ASSETS_DIR/sys.tar.gz" .
 
-echo "Build complete! Custom Apptron assets are in $ASSETS_DIR"
+echo "Build complete! Custom Apptron assets are ready for embedding in $FINAL_ASSETS_DIR"
