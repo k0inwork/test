@@ -28,6 +28,14 @@ func main() {
 	logging.Init("task")
 	initDB()
 
+	// Register with Registry
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "task",
+		Endpoint:     "http://localhost:8085",
+		Capabilities: []string{"tasks"},
+		IsCore:       false,
+	})
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())

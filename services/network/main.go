@@ -11,6 +11,14 @@ import (
 func main() {
 	logging.Init("network")
 
+	// Register with Registry
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "network",
+		Endpoint:     "http://localhost:8084",
+		Capabilities: []string{"network", "routing"},
+		IsCore:       false,
+	})
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())

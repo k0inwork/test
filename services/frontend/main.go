@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/logging"
@@ -11,9 +12,37 @@ import (
 )
 
 const (
-	IdentitySvc = "http://localhost:8081"
-	ProductSvc  = "http://localhost:8082"
+	RegistryURL = "http://localhost:8088"
 )
+
+type RegisteredService struct {
+	Name         string   `json:"name"`
+	Endpoint     string   `json:"endpoint"`
+	Capabilities []string `json:"capabilities"`
+	IsCore       bool     `json:"is_core"`
+}
+
+func getServices() ([]RegisteredService, error) {
+	resp, err := http.Get(RegistryURL + "/services")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	var services []RegisteredService
+	err = json.NewDecoder(resp.Body).Decode(&services)
+	return services, err
+}
+
+func findServiceByCapability(services []RegisteredService, cap string) string {
+	for _, s := range services {
+		for _, c := range s.Capabilities {
+			if c == cap {
+				return s.Endpoint
+			}
+		}
+	}
+	return ""
+}
 
 func main() {
 	logging.Init("frontend")
@@ -23,72 +52,117 @@ func main() {
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
 
-	// Only base.html exists now
 	r.LoadHTMLGlob("services/frontend/templates/base.html")
 
+	// Middleware to check core services
+	r.Use(func(c *gin.Context) {
+		services, err := getServices()
+		if err != nil {
+			c.String(http.StatusServiceUnavailable, "Registry Service is Offline")
+			c.Abort()
+			return
+		}
+
+		// Required core services
+		required := map[string]bool{"identity": false, "product": false}
+		for _, s := range services {
+			if _, ok := required[s.Name]; ok {
+				required[s.Name] = true
+			}
+		}
+
+		for name, found := range required {
+			if !found {
+				c.String(http.StatusServiceUnavailable, fmt.Sprintf("Core Service Offline: %s", name))
+				c.Abort()
+				return
+			}
+		}
+
+		// Store services in context for handlers
+		c.Set("services", services)
+		c.Next()
+	})
+
 	r.GET("/", func(c *gin.Context) {
+		services := c.MustGet("services").([]RegisteredService)
+
 		var users []models.User
 		var nodes []models.Product
 
-		respU, err := http.Get(IdentitySvc + "/users")
-		if err != nil {
-			slog.Error("failed to fetch users", "error", err)
-		} else {
-			defer respU.Body.Close()
-			json.NewDecoder(respU.Body).Decode(&users)
+		idSvc := findServiceByCapability(services, "users")
+		prodSvc := findServiceByCapability(services, "nodes")
+
+		if idSvc != "" {
+			resp, _ := http.Get(idSvc + "/users")
+			if resp != nil {
+				defer resp.Body.Close()
+				json.NewDecoder(resp.Body).Decode(&users)
+			}
 		}
 
-		respN, err := http.Get(ProductSvc + "/nodes")
-		if err != nil {
-			slog.Error("failed to fetch nodes", "error", err)
-		} else {
-			defer respN.Body.Close()
-			json.NewDecoder(respN.Body).Decode(&nodes)
+		if prodSvc != "" {
+			resp, _ := http.Get(prodSvc + "/nodes")
+			if resp != nil {
+				defer resp.Body.Close()
+				json.NewDecoder(resp.Body).Decode(&nodes)
+			}
 		}
 
 		c.HTML(http.StatusOK, "base.html", gin.H{
 			"UserCount": len(users),
 			"NodeCount": len(nodes),
 			"IsIndex":   true,
+			"Services":  services,
 		})
 	})
 
 	r.GET("/nodes", func(c *gin.Context) {
-		resp, err := http.Get(ProductSvc + "/nodes")
+		services := c.MustGet("services").([]RegisteredService)
+		prodSvc := findServiceByCapability(services, "nodes")
+
 		var nodes []models.Product
-		if err != nil {
-			slog.Error("failed to fetch nodes", "error", err)
-		} else {
-			defer resp.Body.Close()
-			json.NewDecoder(resp.Body).Decode(&nodes)
+		if prodSvc != "" {
+			resp, _ := http.Get(prodSvc + "/nodes")
+			if resp != nil {
+				defer resp.Body.Close()
+				json.NewDecoder(resp.Body).Decode(&nodes)
+			}
 		}
+
 		c.HTML(http.StatusOK, "base.html", gin.H{
-			"Nodes":   nodes,
-			"IsNodes": true,
+			"Nodes":    nodes,
+			"IsNodes":  true,
+			"Services": services,
 		})
 	})
 
 	r.POST("/sync", func(c *gin.Context) {
-		slog.Info("sync requested from UI")
-		_, err := http.Post(ProductSvc+"/sync", "application/json", nil)
-		if err != nil {
-			slog.Error("sync request failed", "error", err)
+		services := c.MustGet("services").([]RegisteredService)
+		prodSvc := findServiceByCapability(services, "sync")
+		if prodSvc != "" {
+			http.Post(prodSvc+"/sync", "application/json", nil)
 		}
 		c.Redirect(http.StatusFound, "/nodes")
 	})
 
 	r.GET("/users", func(c *gin.Context) {
-		resp, err := http.Get(IdentitySvc + "/users")
+		services := c.MustGet("services").([]RegisteredService)
+		idSvc := findServiceByCapability(services, "users")
+
 		var users []models.User
-		if err != nil {
-			slog.Error("failed to fetch users", "error", err)
-		} else {
-			defer resp.Body.Close()
-			json.NewDecoder(resp.Body).Decode(&users)
+		if idSvc != "" {
+			resp, _ := http.Get(idSvc + "/users")
+			if resp != nil {
+				defer resp.Body.Close()
+				json.NewDecoder(resp.Body).Decode(&users)
+			}
 		}
+
 		c.HTML(http.StatusOK, "base.html", gin.H{
-			"Users":   users,
-			"IsUsers": true,
+			"Users":    users,
+			"IsUsers":  true,
+			"Services": services,
 		})
 	})
 

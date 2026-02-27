@@ -11,6 +11,14 @@ import (
 func main() {
 	logging.Init("hardware")
 
+	// Register with Registry
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "hardware",
+		Endpoint:     "http://localhost:8086",
+		Capabilities: []string{"hardware", "pdu", "ipmi"},
+		IsCore:       false,
+	})
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())

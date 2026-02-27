@@ -28,6 +28,14 @@ func main() {
 	logging.Init("inventory")
 	initDB()
 
+	// Register with Registry
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "inventory",
+		Endpoint:     "http://localhost:8083",
+		Capabilities: []string{"inventory", "switches"},
+		IsCore:       false,
+	})
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())

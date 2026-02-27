@@ -32,6 +32,14 @@ func main() {
 	logging.Init("product")
 	initDB()
 
+	// Register with Registry
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "product",
+		Endpoint:     "http://localhost:8082",
+		Capabilities: []string{"nodes", "sync"},
+		IsCore:       true,
+	})
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -39,7 +47,6 @@ func main() {
 
 	engine := sync.NewSyncEngine(db)
 
-	// REST API
 	r.GET("/nodes", func(c *gin.Context) {
 		var products []models.Product
 		db.Find(&products)
@@ -57,7 +64,6 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Sync completed successfully"})
 	})
 
-	// GraphQL API
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db, Sync: engine}}))
 
 	r.POST("/query", func(c *gin.Context) {

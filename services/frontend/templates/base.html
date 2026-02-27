@@ -13,9 +13,24 @@
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/nodes">Nodes</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/users">Users</a></li>
+
+                    {{/* Dynamic Menu based on registered capabilities */}}
+                    {{range .Services}}
+                        {{if (index .Capabilities 0)}}
+                            {{if eq (index .Capabilities 0) "nodes"}}
+                                <li class="nav-item"><a class="nav-link" href="/nodes">Nodes</a></li>
+                            {{else if eq (index .Capabilities 0) "users"}}
+                                <li class="nav-item"><a class="nav-link" href="/users">Users</a></li>
+                            {{/* Add other optional services dynamically if needed */}}
+                            {{else if eq .Name "inventory"}}
+                                <li class="nav-item"><a class="nav-link disabled" href="#">Inventory (Active)</a></li>
+                            {{end}}
+                        {{end}}
+                    {{end}}
                 </ul>
+                <div class="d-flex text-white">
+                   <span class="badge bg-success">Registry Online</span>
+                </div>
             </div>
         </div>
     </nav>
@@ -29,6 +44,9 @@
 
 {{define "content_index"}}
 <h1>Dashboard</h1>
+<div class="alert alert-info">
+    System Architecture: <strong>Registry-based Service Discovery</strong>
+</div>
 <div class="row">
     <div class="col-md-4">
         <div class="card">
@@ -45,6 +63,21 @@
                 <h5 class="card-title">Users</h5>
                 <p class="card-text">System Users: {{.UserCount}}</p>
                 <a href="/users" class="btn btn-primary">Manage Users</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Active Modules</h5>
+                <ul class="list-group list-group-flush">
+                    {{range .Services}}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{.Name}}
+                        <span class="badge bg-secondary rounded-pill">{{index .Capabilities 0}}</span>
+                    </li>
+                    {{end}}
+                </ul>
             </div>
         </div>
     </div>
