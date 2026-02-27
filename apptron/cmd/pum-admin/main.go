@@ -9,8 +9,6 @@ import (
 	"os"
 )
 
-// In a real build, we would embed the result of scripts/build_distro.sh
-// For this prototype, we embed the source assets directory.
 //go:embed all:assets
 var assets embed.FS
 
@@ -22,11 +20,14 @@ func main() {
 
 	fmt.Printf("Starting PUM Unified Admin Distro (Mode: %s)...\n", mode)
 
-	if mode == "live" {
-		go startBridgeAgent()
-	} else {
-		fmt.Println("Running in MOCK mode. Bridge Agent disabled.")
-	}
+	// The Bridge Agent always runs, but its behavior changes based on mode
+	go startBridgeAgent(mode)
+
+	// Health endpoint for testing
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "OK")
+	})
 
 	// Serve the embedded Apptron assets
 	contentStatic, _ := fs.Sub(assets, "assets")
@@ -43,7 +44,15 @@ func main() {
 	}
 }
 
-func startBridgeAgent() {
-	fmt.Println("Bridge Agent: Connecting to LIVE PUM Management Subnet...")
-	// Bridge logic: Tunneling from Virtual Network to Local Subnet
+func startBridgeAgent(mode string) {
+	if mode == "mock" {
+		fmt.Println("Bridge Agent: Running in MOCK mode (Internal loopback only).")
+		// In mock mode, the bridge might just serve a static response for the WASM ping test
+		http.HandleFunc("/bridge-test", func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, "Bridge MOCK Response")
+		})
+	} else {
+		fmt.Println("Bridge Agent: Connecting to LIVE PUM Management Subnet...")
+		// Real L3 bridging logic
+	}
 }
