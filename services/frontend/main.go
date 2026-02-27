@@ -61,7 +61,6 @@ func main() {
 
 	r.LoadHTMLGlob("services/frontend/templates/base.html")
 
-	// Middleware to check core services
 	r.Use(func(c *gin.Context) {
 		services, err := getServices()
 		if err != nil {
@@ -70,11 +69,10 @@ func main() {
 			return
 		}
 
-		// Required core services defined in system.yaml
 		required := make(map[string]bool)
 		for _, name := range GlobalConfig.CoreServices {
 			if name == "registry" || name == "frontend" {
-				continue // handled separately or current service
+				continue
 			}
 			required[name] = false
 		}
@@ -175,6 +173,48 @@ func main() {
 		c.HTML(http.StatusOK, "base.html", gin.H{
 			"Users":    users,
 			"IsUsers":  true,
+			"Services": services,
+		})
+	})
+
+	// New: Inventory View
+	r.GET("/inventory", func(c *gin.Context) {
+		services := c.MustGet("services").([]RegisteredService)
+		invSvc := findServiceByCapability(services, "inventory")
+
+		var switches []models.Switch
+		if invSvc != "" {
+			resp, _ := http.Get(invSvc + "/switches")
+			if resp != nil {
+				defer resp.Body.Close()
+				json.NewDecoder(resp.Body).Decode(&switches)
+			}
+		}
+
+		c.HTML(http.StatusOK, "base.html", gin.H{
+			"Switches":    switches,
+			"IsInventory": true,
+			"Services":    services,
+		})
+	})
+
+	// New: Tasks View
+	r.GET("/tasks", func(c *gin.Context) {
+		services := c.MustGet("services").([]RegisteredService)
+		taskSvc := findServiceByCapability(services, "tasks")
+
+		var tasks []models.TaskRecord
+		if taskSvc != "" {
+			resp, _ := http.Get(taskSvc + "/tasks")
+			if resp != nil {
+				defer resp.Body.Close()
+				json.NewDecoder(resp.Body).Decode(&tasks)
+			}
+		}
+
+		c.HTML(http.StatusOK, "base.html", gin.H{
+			"Tasks":    tasks,
+			"IsTasks":  true,
 			"Services": services,
 		})
 	})
