@@ -6,28 +6,28 @@ The original PUM implementation was built as a monolithic (or semi-distributed) 
 -   **Backend**: Python/Django 4.0.
 -   **Communication**: RabbitMQ with a custom fanout/RPC layer for module interaction.
 -   **State Management**: Centralized PostgreSQL database with heavy use of Redis for volatile state and distributed locking.
--   **Frontend**: Traditional Server-Side Rendering (SSR) with templates and integrated JavaScript (e.g., xterm.js for WebSSH).
--   **Strengths**: Fast initial development, rich ecosystem of Python libraries.
--   **Challenges**: Performance bottlenecks in high-concurrency scenarios, complex deployment of many moving parts (Celery, RabbitMQ, multiple workers).
+-   **Frontend**: Traditional Server-Side Rendering (SSR) with Django templates.
+-   **Terminal**: Integrated via `django-webssh` using WebSockets and server-side proxies.
 
 ## Modern Architecture (PUM-Go)
-The new architecture shifts toward a more performant, scalable, and manageable ecosystem.
+The new architecture shifts toward a more performant, scalable, and manageable ecosystem with a focus on Go and client-side execution.
 
 -   **Backend**: Specialized microservices written in Go.
--   **Communication**: Lightweight inter-service communication (currently transitioning to a unified registry-based model).
+-   **Communication**: Lightweight inter-service communication via a central Registry.
 -   **State Management**: Microservice-specific persistence, with a focus on local-first capabilities in the client.
--   **Frontend**: The Apptron Rich Client. Instead of simple pages, the frontend is an "OS in the browser" that hosts WebViews and WASM applications.
+-   **Frontend Service**: A dedicated Go-based web service (`services/frontend`) that serves high-performance Gin templates for standard web access.
+-   **Rich Client**: The Apptron environment. Instead of simple pages, it serves as an "OS in the browser" that hosts WebViews and WASM applications for power users.
 
 ### Key Architectural Shifts
 
 | Feature | Legacy (Django) | Modern (Go/Apptron) |
 | :--- | :--- | :--- |
 | **Language** | Python | Go |
-| **UI Model** | Server-Side Templates | Apptron WebViews + WASM/WASI |
-| **Tooling** | Browser-based JS Tools | Go-WASM binaries (CLI/TUI) |
-| **Terminal** | Django-WebSSH (Proxy) | WASM-based (Local Execution) |
+| **UI Model** | Django SSR | Go SSR (Gin) + Apptron WASM |
+| **Tooling** | Browser JS Tools | Go-WASM binaries (CLI/TUI) |
+| **Terminal** | Django-WebSSH (Proxy) | WASM-based (Client-Side) |
 | **Latency** | Network Dependent | Local-First (WASM) |
-| **Deployment** | Complex (Django+Celery+RMQ) | Simplified (Go Binaries + Assets) |
+| **Deployment** | Complex (Django+Celery+RMQ) | Streamlined (Go Binaries) |
 
-## The Role of Apptron
-Apptron serves as the bridge between these worlds. It provides the runtime environment that allows us to ship native-like management tools (WASM) alongside traditional web interfaces (Dashboards), all within a single unified application shell.
+## The Coexistence of SSR and Apptron
+The modern architecture doesn't discard server-side rendering. Instead, it uses a Go-based frontend for standard, ubiquitous access while leveraging Apptron for the rich, high-performance "Command Center" experience. This hybrid approach ensures that the system is both accessible and powerful.
