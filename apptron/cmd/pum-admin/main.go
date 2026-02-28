@@ -37,6 +37,14 @@ func init() {
 	}
 }
 
+func logger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		log.Printf("%s %s %s %s", r.Method, r.URL.Path, r.RemoteAddr, time.Since(start))
+	})
+}
+
 func main() {
 	mode := os.Getenv("PUM_MODE")
 	if mode == "" {
@@ -208,7 +216,11 @@ func main() {
 	}
 
 	fmt.Printf("Admin Center available at http://localhost:%s\n", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	server := &http.Server{
+		Addr:    ":" + port,
+		Handler: logger(mux),
+	}
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }

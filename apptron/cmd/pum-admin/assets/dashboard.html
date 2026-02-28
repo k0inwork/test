@@ -8,163 +8,120 @@
     <script src="/lib/html-component.js" type="module"></script>
     <script src="/lib/dropdown.js" type="module"></script>
 </head>
-
 <body>
     <div class="header-container">
         <html-component src="/com/topbar"></html-component>
     </div>
-
     <div class="container">
         <header>
             <h1>Projects</h1>
-            <button id="create-btn" class="create-btn btn primary" type="button"><span>Create Project</span>
-            </button>
+            <button id="create-btn" class="create-btn btn primary" type="button"><span>Create Project</span></button>
         </header>
-
-        <div class="projects-grid" id="projects-grid">
-            <!-- Projects will be populated dynamically -->
-        </div>
+        <div class="projects-grid" id="projects-grid"></div>
     </div>
-
 <script type="module">
-    import { getAuth, getSession, urlFor, redirectTo, modalDialog, getBundle, $ } from "/lib/apptron.js";
+    import { getAuth, getSession, urlFor, redirectTo, getBundle, $, $$ } from "/lib/apptron.js";
     import { showToast } from "/lib/toast.js";
 
-    // Template function to create a project card
     function createProjectCard(project, index) {
-        const username = window.session?.claims?.username || "admin";
+        const username = window.session ? window.session.claims.username : "admin";
         const description = project.description || 'No description available';
-        const timeText = formatProjectTime(project);
-
-        return `
-            <div class="project-card" data-url="${urlFor(\`/edit/\${project.name}\`, {}, username)}">
-            <div class="card-header">
-                <h2 class="title"><a style="text-decoration: none; color: inherit;" href="${urlFor(\`/edit/\${project.name}\`, {}, username)}">\${escapeHtml(project.name)}</a></h2>
-                <apptron-dropdown align="right">
-                <button class="ellipsis-btn btn" type="button">⋮</button>
-                <div class="card-menu" popover role="menu" aria-label="Project menu">
-                    <button class="menu-item btn" role="menuitem" data-action="edit" data-project="\${escapeJSON(JSON.stringify(project))}">Edit Settings</button>
-                    <button class="menu-item danger btn" role="menuitem" data-action="delete" data-project="\${escapeJSON(JSON.stringify(project))}">Delete Project</button>
-                </div>
-                </apptron-dropdown>
-            </div>
-            <p class="desc">\${escapeHtml(description)}</p>
-            <span class="time">\${escapeHtml(timeText)}</span>
-            </div>
-        `;
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function escapeJSON(json) {
-        return json.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    function formatProjectTime(project) {
         const timestamp = project.updated_at || project.modified || project.lastModified;
+        let timeText = 'Recently';
         if (timestamp) {
             const date = new Date(timestamp);
             const now = new Date();
             const diffMs = now - date;
             const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
             const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-
             if (diffDays === 0) {
-                if (diffHours === 0) return 'Just now';
-                else if (diffHours === 1) return '1 hour ago';
-                else return \`\${diffHours} hours ago\`;
-            } else if (diffDays === 1) return '1 day ago';
-            else if (diffDays < 7) return \`\${diffDays} days ago\`;
+                if (diffHours === 0) timeText = 'Just now';
+                else if (diffHours === 1) timeText = '1 hour ago';
+                else timeText = diffHours + ' hours ago';
+            } else if (diffDays === 1) timeText = '1 day ago';
+            else if (diffDays < 7) timeText = diffDays + ' days ago';
             else if (diffDays < 30) {
                 const weeks = Math.floor(diffDays / 7);
-                return weeks === 1 ? '1 week ago' : \`\${weeks} weeks ago\`;
-            } else return date.toLocaleDateString();
+                timeText = (weeks === 1 ? '1 week ago' : weeks + ' weeks ago');
+            } else timeText = date.toLocaleDateString();
         }
-        return 'Recently';
+        const projectUrl = urlFor("/edit/" + project.name, {}, username);
+        return '<div class="project-card" data-url="' + projectUrl + '">' +
+            '<div class="card-header">' +
+                '<h2 class="title"><a style="text-decoration: none; color: inherit;" href="' + projectUrl + '">' + project.name + '</a></h2>' +
+                '<apptron-dropdown align="right">' +
+                '<button class="ellipsis-btn btn" type="button">⋮</button>' +
+                '<div class="card-menu" popover role="menu" aria-label="Project menu">' +
+                    '<button class="menu-item btn" role="menuitem" data-action="edit" data-project=\'' + JSON.stringify(project).replace(/'/g, "&apos;") + '\'>Edit Settings</button>' +
+                    '<button class="menu-item danger btn" role="menuitem" data-action="delete" data-project=\'' + JSON.stringify(project).replace(/'/g, "&apos;") + '\'>Delete Project</button>' +
+                '</div>' +
+                '</apptron-dropdown>' +
+            '</div>' +
+            '<p class="desc">' + description + '</p>' +
+            '<span class="time">' + timeText + '</span>' +
+            '</div>';
     }
 
     function populateProjectsGrid(projects) {
-        const grid = document.getElementById('projects-grid');
+        const grid = $("#projects-grid");
         if (!grid) return;
         if (!projects || projects.length === 0) {
             grid.innerHTML = '<p class="no-projects">No projects found. Create your first project!</p>';
             return;
         }
         grid.innerHTML = projects.map((project, index) => createProjectCard(project, index)).join('');
-
         grid.querySelectorAll('.project-card .menu-item').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const action = e.target.dataset.action;
                 const project = JSON.parse(e.target.dataset.project);
-                const projectName = project.name;
-                const username = window.session?.claims?.username || "admin";
-
+                const username = window.session ? window.session.claims.username : "admin";
                 if (action === 'edit') {
-                    const resp = await window.modal.show("/com/project", {project});
-                    if (!resp) return;
-                    if (!resp.ok) { alert("Failed to update project"); return; }
-                    const listResp = await fetch(urlFor("/projects", {}, username));
-                    const updatedProjects = await listResp.json();
-                    populateProjectsGrid(updatedProjects);
-                } else if (action === 'delete') {
-                    const result = await window.modal.show("/com/confirm_delete_project", { project });
-                    if (!result || !result.confirmed) return;
-                    const resp = await fetch(urlFor(\`/projects/\${projectName}\`, {}, username), { method: "DELETE" });
-                    if (resp.ok) {
+                    const resp = await window.modal.show("/com/project", {project: project});
+                    if (resp && resp.ok) {
                         const listResp = await fetch(urlFor("/projects", {}, username));
-                        const updatedProjects = await listResp.json();
-                        populateProjectsGrid(updatedProjects);
-                        showToast("Project deleted");
-                    } else alert("Failed to delete project");
+                        populateProjectsGrid(await listResp.json());
+                    }
+                } else if (action === 'delete') {
+                    const result = await window.modal.show("/com/confirm_delete_project", { project: project });
+                    if (result && result.confirmed) {
+                        const resp = await fetch(urlFor("/projects/" + project.name, {}, username), { method: "DELETE" });
+                        if (resp.ok) {
+                            const listResp = await fetch(urlFor("/projects", {}, username));
+                            populateProjectsGrid(await listResp.json());
+                            showToast("Project deleted");
+                        }
+                    }
                 }
                 e.target.parentElement.hidePopover();
             });
         });
     }
 
-    const session = await getSession();
-    if (session && session.is_valid) {
-        const auth = await getAuth();
-        window.user = await auth.getUser();
-        window.session = session;
-        const username = session.claims.username;
-
-        fetch(urlFor("/", {}, username), {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(window.user)
+    (async () => {
+        const session = await getSession();
+        if (session && session.is_valid) {
+            const auth = await getAuth();
+            window.user = await auth.getUser();
+            window.session = session;
+            const username = session.claims.username;
+            fetch(urlFor("/", {}, username), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(window.user) });
+            const resp = await fetch(urlFor("/projects", {}, username));
+            populateProjectsGrid(await resp.json());
+        }
+        $("#create-btn").addEventListener("click", async () => {
+            if (!window.modal) return;
+            const resp = await window.modal.show("/com/project", {});
+            if (resp && resp.ok) redirectTo(resp.headers.get("Location"));
         });
-
-        const resp = await fetch(urlFor("/projects", {}, username));
-        const projects = await resp.json();
-        populateProjectsGrid(projects);
-    }
-
-    $("#create-btn").addEventListener("click", async () => {
-        const resp = await window.modal.show("/com/project", {});
-        if (!resp) return;
-        if (!resp.ok) { alert("Failed to create project"); return; }
-        redirectTo(resp.headers.get("Location"));
-    });
-
-    const gridEl = $("#projects-grid");
-    gridEl.addEventListener("click", (e) => {
-        if (e.target.closest("apptron-dropdown")) return;
-        if (e.target.closest(".menu-item")) return;
-        const card = e.target.closest(".project-card");
-        if (!card) return;
-        const url = card.dataset.url;
-        if (url) redirectTo(url);
-    });
-
-    getBundle("/bundles/sys.tar.gz");
-    getBundle("/bundles/pum.tar.gz");
+        $("#projects-grid").addEventListener("click", (e) => {
+            if (e.target.closest("apptron-dropdown") || e.target.closest(".menu-item")) return;
+            const card = e.target.closest(".project-card");
+            if (card && card.dataset.url) redirectTo(card.dataset.url);
+        });
+        getBundle("/bundles/sys.tar.gz");
+        getBundle("/bundles/pum.tar.gz");
+    })();
 </script>
-
 <div id="toast-root"></div>
 </body>
 </html>
