@@ -26,6 +26,9 @@ func main() {
 		IsCore:       false,
 	})
 
+func main() {
+	logging.Init("hardware")
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -66,6 +69,10 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "success",
 			"message": fmt.Sprintf("Server %s: Power %s initiated", req.TargetIP, req.Command),
+	r.POST("/call", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "success",
+			"response": "Hardware call mocked",
 		})
 	})
 

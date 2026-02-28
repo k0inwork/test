@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"log/slog"
 	"os"
 	"time"
 
@@ -61,6 +62,7 @@ func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
 	}()
 }
 
+// GinMiddleware returns a gin.HandlerFunc that logs requests
 func GinMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -82,4 +84,12 @@ func GinMiddleware() gin.HandlerFunc {
 			slog.String("user_agent", c.Request.UserAgent()),
 		)
 	}
+}
+
+// GetLogger returns the global logger
+func GetLogger() *slog.Logger {
+	if L == nil {
+		Init("default")
+	}
+	return L
 }

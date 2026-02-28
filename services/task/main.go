@@ -100,6 +100,10 @@ func main() {
 		c.JSON(http.StatusAccepted, task)
 	})
 
+		db.Find(&tasks)
+		c.JSON(http.StatusOK, tasks)
+	})
+
 	slog.Info("Task service starting", "port", 8085)
 	r.Run(":8085")
 }

@@ -26,6 +26,7 @@ func initDB() {
 
 	db.AutoMigrate(&models.User{})
 
+	// Seed data for demo
 	var count int64
 	db.Model(&models.User{}).Count(&count)
 	if count == 0 {
@@ -52,6 +53,7 @@ func main() {
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
 
+	// REST API
 	r.GET("/users", func(c *gin.Context) {
 		var users []models.User
 		db.Find(&users)
@@ -70,6 +72,7 @@ func main() {
 		c.JSON(http.StatusOK, user)
 	})
 
+	// GraphQL API
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
 
 	r.POST("/query", func(c *gin.Context) {

@@ -23,7 +23,6 @@ go run services/identity/main.go &
 echo "Starting Product Service on :8082..."
 go run services/product/main.go &
 
-# 3. Start Optional Services
 echo "Starting Inventory Service on :8083..."
 go run services/inventory/main.go &
 
@@ -43,12 +42,18 @@ go run services/terminal/main.go &
 sleep 5
 
 # 4. Start Frontend
+# Wait for services to initialize
+
 echo "Starting Frontend Service on :8080..."
 go run services/frontend/main.go &
 
 echo "------------------------------------------------"
+echo "Nodes List: http://localhost:8080/nodes"
+echo "User List: http://localhost:8080/users"
 echo "Registry: http://localhost:8088/services"
+echo "All systems running!"
 echo "Dashboard: http://localhost:8080"
+
 echo "------------------------------------------------"
 
 # Keep script running

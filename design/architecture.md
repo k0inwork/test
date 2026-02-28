@@ -8,6 +8,7 @@ This document outlines the architectural transition of the Product Unit Manageme
 - **Maintainability**: Clear boundaries between domains (Identity, Product, Network, etc.).
 - **Performance**: Leverage Go's concurrency model for hardware interaction and background tasks.
 - **Simplicity**: Use standard stable libraries and SQLite for initial persistence.
+- **Admin Empowerment**: Provide a high-performance, local-first management environment using Apptron.
 
 ## 3. Monorepo Structure
 The project will follow a monorepo approach for easier management of shared models and inter-service coordination.
@@ -22,12 +23,14 @@ The project will follow a monorepo approach for easier management of shared mode
 │   ├── inventory/      # Mocked/Stubs
 │   ├── task/           # Mocked/Stubs
 │   ├── hardware/       # Mocked/Stubs
-│   └── terminal/       # Mocked/Stubs
+│   ├── terminal/       # Mocked/Stubs
+│   └── pum-cli/        # Go-WASM Tool (CLI/TUI)
 ├── pkg/                # Shared packages
 │   ├── common/         # Utils, Middleware, Logging
 │   └── models/         # Shared domain models
 ├── api/                # API definitions (OpenAPI/GraphQL)
-└── design/             # Design documentation
+├── design/             # Design documentation
+└── apptron-docs/       # Apptron integration strategy
 ```
 
 ## 4. Microservices Breakdown

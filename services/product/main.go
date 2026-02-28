@@ -65,6 +65,7 @@ func main() {
 
 	engine := sync.NewSyncEngine(db)
 
+	// REST API
 	r.GET("/nodes", func(c *gin.Context) {
 		var products []models.Product
 		db.Find(&products)
@@ -82,6 +83,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Sync completed successfully"})
 	})
 
+	// GraphQL API
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db, Sync: engine}}))
 
 	r.POST("/query", func(c *gin.Context) {
