@@ -11,9 +11,10 @@ Our goal is to provide network administrators with a single, cohesive environmen
 2.  **Hybrid Frontend Strategy**:
     -   **Go Web Frontend**: Standard HTML templates served via Gin for lightweight, zero-dependency access to core data.
     -   **Apptron Rich Client**: A dedicated runtime environment capable of hosting high-performance, local-first management applications.
-3.  **WASM/WASI Integration**: Advanced management tools are delivered as WebAssembly (WASM) binaries within the Apptron client, providing near-native execution speed directly in the browser.
-4.  **Interface Synergy**: Seamless transitions between high-level visual Dashboards (WebViews) and powerful, keyboard-driven CLI/TUI tools.
-5.  **Local-First, Cloud-Synced**: The client environment feels like a local machine, using WASM/WASI for local operations while bridging to the microservices for global state and device control.
+3.  **Dynamic & Secure**: Features are discovered in real-time via service **Capabilities**, with access controlled by a granular role-to-capability mapping.
+4.  **WASM/WASI Integration**: Advanced management tools are delivered as WebAssembly (WASM) binaries within the Apptron client, providing near-native execution speed directly in the browser.
+5.  **Interface Synergy**: Seamless transitions between high-level visual Dashboards (WebViews) and powerful, keyboard-driven CLI/TUI tools.
+6.  **Local-First, Cloud-Synced**: The client environment feels like a local machine, using WASM/WASI for local operations while bridging to the microservices for global state and device control.
 
 ## Target Audience
 This documentation suite is intended for **internal stakeholders**, including developers, architects, and product managers, to provide a clear roadmap and architectural foundation for the ongoing transition.
