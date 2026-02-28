@@ -9,10 +9,33 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
+	"time"
 )
 
 //go:embed all:assets
 var assets embed.FS
+
+type Project struct {
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Visibility  string    `json:"visibility"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+var (
+	projects   = make(map[string]Project)
+	projectsMu sync.RWMutex
+)
+
+func init() {
+	projects["Main-Datacenter"] = Project{
+		Name:        "Main-Datacenter",
+		Description: "Core infrastructure management",
+		Visibility:  "private",
+		UpdatedAt:   time.Now(),
+	}
+}
 
 func main() {
 	mode := os.Getenv("PUM_MODE")
@@ -22,31 +45,41 @@ func main() {
 
 	fmt.Printf("Starting PUM Unified Admin Distro (Mode: %s)...\n", mode)
 
-	// Custom Router
 	mux := http.NewServeMux()
 
-	// Health endpoint
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "OK")
 	})
 
-	// Mock API for projects
 	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+		projectsMu.RLock()
+		defer projectsMu.RUnlock()
+
 		if r.Method == http.MethodGet {
-			projects := []map[string]interface{}{
-				{
-					"name":        "Main-Datacenter",
-					"description": "Core infrastructure management",
-					"updated_at":  "2024-03-20T10:00:00Z",
-				},
+			var list []Project
+			for _, p := range projects {
+				list = append(list, p)
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(projects)
+			json.NewEncoder(w).Encode(list)
 			return
 		}
+
 		if r.Method == http.MethodPost {
-			w.Header().Set("Location", "/edit/new-project")
+			var p Project
+			if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			p.UpdatedAt = time.Now()
+			projectsMu.RUnlock()
+			projectsMu.Lock()
+			projects[p.Name] = p
+			projectsMu.Unlock()
+			projectsMu.RLock()
+
+			w.Header().Set("Location", "/edit/"+p.Name)
 			w.WriteHeader(http.StatusCreated)
 			return
 		}
@@ -54,21 +87,62 @@ func main() {
 
 	mux.HandleFunc("/projects/", func(w http.ResponseWriter, r *http.Request) {
 		name := strings.TrimPrefix(r.URL.Path, "/projects/")
+		name = strings.Split(name, "?")[0]
+		name = strings.TrimSuffix(name, "/")
+
+		projectsMu.RLock()
+		p, ok := projects[name]
+		projectsMu.RUnlock()
+
 		if r.Method == http.MethodHead {
-			if name == "Main-Datacenter" {
+			if ok {
 				w.WriteHeader(http.StatusOK)
 			} else {
 				w.WriteHeader(http.StatusNotFound)
 			}
 			return
 		}
-		if r.Method == http.MethodDelete || r.Method == http.MethodPut {
+
+		if r.Method == http.MethodGet {
+			if !ok {
+				http.NotFound(w, r)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(p)
+			return
+		}
+
+		if r.Method == http.MethodPut {
+			var update struct {
+				Description string `json:"description"`
+				Visibility  string `json:"visibility"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			projectsMu.Lock()
+			if p, ok := projects[name]; ok {
+				p.Description = update.Description
+				p.Visibility = update.Visibility
+				p.UpdatedAt = time.Now()
+				projects[name] = p
+			}
+			projectsMu.Unlock()
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		if r.Method == http.MethodDelete {
+			projectsMu.Lock()
+			delete(projects, name)
+			projectsMu.Unlock()
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 	})
 
-	// Mock Hanko/Auth
 	mux.HandleFunc("/auth/user", func(w http.ResponseWriter, r *http.Request) {
 		user := map[string]interface{}{
 			"id":       "1",
@@ -84,13 +158,13 @@ func main() {
 			"is_valid": true,
 			"claims": map[string]interface{}{
 				"username": "admin",
+				"sub":      "1",
 			},
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(session)
 	})
 
-	// Assets handler with .html fallback and meta injection
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		if path == "/" {
@@ -100,7 +174,6 @@ func main() {
 
 		contentStatic, _ := fs.Sub(assets, "assets")
 
-		// 1. Try exact path
 		cleanPath := strings.TrimPrefix(path, "/")
 		if data, err := fs.ReadFile(contentStatic, cleanPath); err == nil {
 			contentType := "text/plain"
@@ -119,7 +192,6 @@ func main() {
 			return
 		}
 
-		// 2. Try with .html suffix
 		htmlPath := cleanPath + ".html"
 		if data, err := fs.ReadFile(contentStatic, htmlPath); err == nil {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -147,5 +219,8 @@ func injectMeta(data []byte) []byte {
     <meta name="auth-url" content="/auth">
     <meta name="project" content='{"name": "Local"}'>
     `
-	return []byte(strings.Replace(html, "<head>", "<head>"+meta, 1))
+	if strings.Contains(html, "<head>") {
+		return []byte(strings.Replace(html, "<head>", "<head>"+meta, 1))
+	}
+	return data
 }
