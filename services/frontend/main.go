@@ -4,12 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
-	"pum-go/pkg/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,44 +15,13 @@ import (
 var GlobalConfig *config.Config
 
 type RegisteredService struct {
-	Name         string   `json:"name"`
-	Endpoint     string   `json:"endpoint"`
-	Capabilities []string `json:"capabilities"`
-	IsCore       bool     `json:"is_core"`
-	Enabled      bool     `json:"enabled"`
-}
-
-func hasCap(caps []string, target string) bool {
-	for _, c := range caps {
-		if c == target {
-			return true
-		}
-	}
-	return false
-}
-
-func getServices(admin bool) ([]RegisteredService, error) {
-	url := "http://localhost:8088/services"
-	if admin {
-		url = "http://localhost:8088/admin/services"
-	}
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	var services []RegisteredService
-	err = json.NewDecoder(resp.Body).Decode(&services)
-	return services, err
-}
-
-func findServiceByCapability(services []RegisteredService, cap string) string {
-	for _, s := range services {
-		if hasCap(s.Capabilities, cap) {
-			return s.Endpoint
-		}
-	}
-	return ""
+	Name         string             `json:"name"`
+	Endpoint     string             `json:"endpoint"`
+	Capabilities []string           `json:"capabilities"`
+	IsCore       bool               `json:"is_core"`
+	Enabled      bool               `json:"enabled"`
+	OrderID      int                `json:"order_id"`
+	Menu         []logging.MenuItem `json:"menu"`
 }
 
 func main() {
@@ -62,26 +29,35 @@ func main() {
 	cfg, _ := config.LoadConfig("system.yaml")
 	GlobalConfig = cfg
 
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.New()
-	r.Use(gin.Recovery())
+	r := gin.Default()
 	r.Use(logging.GinMiddleware())
-
-	r.SetFuncMap(template.FuncMap{
-		"HasCap": hasCap,
-	})
 
 	r.LoadHTMLGlob("services/frontend/templates/base.html")
 
 	getCommonH := func(c *gin.Context) gin.H {
 		services, _ := c.Get("services")
-		user, _ := c.Get("user")
-		role, _ := c.Get("role")
+		user, _ := c.Get("pum_user")
+		role, _ := c.Get("pum_role")
+
+		type NavItem struct { Label string; URL string }
+		nav := []NavItem{}
+
+		if services != nil {
+			for _, s := range services.([]RegisteredService) {
+				for _, item := range s.Menu {
+					nav = append(nav, NavItem{
+						Label: item.Label,
+						URL:   fmt.Sprintf("/m/%s%s", s.Name, item.Path),
+					})
+				}
+			}
+		}
+
 		return gin.H{
-			"Services": services,
-			"User":     user,
-			"Role":     role,
-			"IsAdmin":  role == "admin",
+			"Nav":     nav,
+			"User":    user,
+			"Role":    role,
+			"IsAdmin": role == "admin",
 		}
 	}
 
@@ -97,10 +73,16 @@ func main() {
 			c.Abort()
 			return
 		}
-		c.Set("user", user)
-		c.Set("role", role)
-		services, _ := getServices(false)
-		c.Set("services", services)
+		c.Set("pum_user", user)
+		c.Set("pum_role", role)
+
+		resp, err := http.Get("http://localhost:8088/services")
+		if err == nil {
+			var svcs []RegisteredService
+			json.NewDecoder(resp.Body).Decode(&svcs)
+			resp.Body.Close()
+			c.Set("services", svcs)
+		}
 		c.Next()
 	})
 
@@ -109,21 +91,17 @@ func main() {
 	})
 
 	r.POST("/login", func(c *gin.Context) {
-		username := c.PostForm("username")
-		password := c.PostForm("password")
-		loginData := map[string]string{"username": username, "password": password}
-		jsonData, _ := json.Marshal(loginData)
-		resp, err := http.Post("http://localhost:8081/login", "application/json", bytes.NewBuffer(jsonData))
-		if err != nil || resp.StatusCode != http.StatusOK {
-			c.HTML(http.StatusUnauthorized, "base.html", gin.H{"IsLogin": true, "Error": "Invalid credentials"})
+		un := c.PostForm("username")
+		pw := c.PostForm("password")
+		data, _ := json.Marshal(map[string]string{"username": un, "password": pw})
+		resp, err := http.Post("http://localhost:8081/login", "application/json", bytes.NewBuffer(data))
+		if err != nil || resp.StatusCode != 200 {
+			c.HTML(http.StatusUnauthorized, "base.html", gin.H{"IsLogin": true, "Error": "Login failed"})
 			return
 		}
-		defer resp.Body.Close()
-		var res struct {
-			Username string `json:"username"`
-			Role     string `json:"role"`
-		}
+		var res struct { Username, Role string }
 		json.NewDecoder(resp.Body).Decode(&res)
+		resp.Body.Close()
 		c.SetCookie("pum_user", res.Username, 3600, "/", "", false, true)
 		c.SetCookie("pum_role", res.Role, 3600, "/", "", false, true)
 		c.Redirect(http.StatusFound, "/")
@@ -136,65 +114,70 @@ func main() {
 	})
 
 	r.GET("/", func(c *gin.Context) {
-		services := c.MustGet("services").([]RegisteredService)
-		var nodes []models.Product
-		prodSvc := findServiceByCapability(services, "nodes")
-		if prodSvc != "" {
-			resp, _ := http.Get(prodSvc + "/nodes")
-			if resp != nil {
-				defer resp.Body.Close()
-				json.NewDecoder(resp.Body).Decode(&nodes)
-			}
-		}
-		h := getCommonH(c)
-		h["NodeCount"] = len(nodes)
-		h["IsIndex"] = true
-		c.HTML(http.StatusOK, "base.html", h)
+		c.HTML(200, "base.html", appendH(getCommonH(c), gin.H{"IsIndex": true}))
 	})
 
-	r.GET("/nodes", func(c *gin.Context) {
-		services := c.MustGet("services").([]RegisteredService)
-		var nodes []models.Product
-		prodSvc := findServiceByCapability(services, "nodes")
-		if prodSvc != "" {
-			resp, _ := http.Get(prodSvc + "/nodes")
-			if resp != nil {
-				defer resp.Body.Close()
-				json.NewDecoder(resp.Body).Decode(&nodes)
+	r.GET("/m/:module/*path", func(c *gin.Context) {
+		mod := c.Param("module")
+		path := c.Param("path")
+		svcs := c.MustGet("services").([]RegisteredService)
+		var target *RegisteredService
+		for _, s := range svcs {
+			if s.Name == mod {
+				target = &s
+				break
 			}
 		}
-		h := getCommonH(c)
-		h["Nodes"] = nodes
-		h["IsNodes"] = true
-		c.HTML(http.StatusOK, "base.html", h)
+		if target == nil {
+			c.String(404, "Module not found")
+			return
+		}
+		resp, err := http.Get(target.Endpoint + path)
+		if err != nil {
+			c.String(502, "Module unreachable")
+			return
+		}
+		defer resp.Body.Close()
+		var data interface{}
+		json.NewDecoder(resp.Body).Decode(&data)
+		c.HTML(200, "base.html", appendH(getCommonH(c), gin.H{
+			"IsModulePage": true,
+			"ModuleName":   mod,
+			"ModuleData":   data,
+		}))
 	})
 
 	r.GET("/admin", func(c *gin.Context) {
-		role, _ := c.Get("role")
+		role, _ := c.Get("pum_role")
 		if role != "admin" {
 			c.Redirect(http.StatusFound, "/")
 			return
 		}
-		modules, _ := getServices(true)
-		h := getCommonH(c)
-		h["Modules"] = modules
-		h["IsAdminPage"] = true
-		c.HTML(http.StatusOK, "base.html", h)
+		resp, _ := http.Get("http://localhost:8088/admin/services")
+		var svcs []RegisteredService
+		json.NewDecoder(resp.Body).Decode(&svcs)
+		resp.Body.Close()
+		c.HTML(200, "base.html", appendH(getCommonH(c), gin.H{"IsAdminPage": true, "Modules": svcs}))
 	})
 
 	r.POST("/admin/modules/:name/toggle", func(c *gin.Context) {
-		role, _ := c.Get("role")
+		role, _ := c.Get("pum_role")
 		if role != "admin" {
 			c.AbortWithStatus(403)
 			return
 		}
-		name := c.Param("name")
-		enabled := c.PostForm("enabled") == "true"
-		data, _ := json.Marshal(map[string]bool{"enabled": enabled})
-		http.Post(fmt.Sprintf("http://localhost:8088/admin/services/%s/toggle", name), "application/json", bytes.NewBuffer(data))
+		data, _ := json.Marshal(map[string]bool{"enabled": c.PostForm("enabled") == "true"})
+		http.Post(fmt.Sprintf("http://localhost:8088/admin/services/%s/toggle", c.Param("name")), "application/json", bytes.NewBuffer(data))
 		c.Redirect(http.StatusFound, "/admin")
 	})
 
 	slog.Info("Frontend starting", "port", 8080)
 	r.Run(":8080")
+}
+
+func appendH(h1, h2 gin.H) gin.H {
+	for k, v := range h2 {
+		h1[k] = v
+	}
+	return h1
 }

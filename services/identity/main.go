@@ -21,15 +21,11 @@ var ldapMock *ldap.MockLDAPProvider
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("identity.db"), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
+	if err != nil { panic(err) }
 	db.AutoMigrate(&models.User{})
 	var count int64
 	db.Model(&models.User{}).Count(&count)
-	if count == 0 {
-		db.Create(&models.User{Username: "admin", Role: "admin"})
-	}
+	if count == 0 { db.Create(&models.User{Username: "admin", Role: "admin"}) }
 }
 
 func main() {
@@ -42,11 +38,11 @@ func main() {
 		Endpoint:     "http://localhost:8081",
 		Capabilities: []string{"users", "auth"},
 		IsCore:       true,
+		OrderID:      0,
+		Menu:         []logging.MenuItem{{Label: "Users", Path: "/users"}},
 	})
 
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.New()
-	r.Use(gin.Recovery())
+	r := gin.Default()
 	r.Use(logging.GinMiddleware())
 
 	r.GET("/users", func(c *gin.Context) {
@@ -56,19 +52,13 @@ func main() {
 	})
 
 	r.POST("/login", func(c *gin.Context) {
-		var login struct {
-			Username string `json:"username" binding:"required"`
-			Password string `json:"password" binding:"required"`
-		}
-		if err := c.ShouldBindJSON(&login); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "bad request"})
-			return
-		}
+		var login struct { Username, Password string }
+		if err := c.ShouldBindJSON(&login); err != nil { c.JSON(400, gin.H{"error": "err"}); return }
 		success, role, _ := ldapMock.Authenticate(login.Username, login.Password)
 		if success {
-			c.JSON(http.StatusOK, gin.H{"username": login.Username, "role": role, "status": "logged_in"})
+			c.JSON(200, gin.H{"username": login.Username, "role": role, "status": "logged_in"})
 		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			c.JSON(401, gin.H{"error": "unauth"})
 		}
 	})
 

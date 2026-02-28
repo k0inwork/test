@@ -6,17 +6,20 @@ import (
 	"pum-go/pkg/logging"
 	"sync"
 	"time"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 )
 
 type ServiceInfo struct {
-	Name         string    `json:"name"`
-	Endpoint     string    `json:"endpoint"`
-	Capabilities []string  `json:"capabilities"`
-	IsCore       bool      `json:"is_core"`
-	Enabled      bool      `json:"enabled"`
-	LastUpdate   time.Time `json:"last_update"`
+	Name         string             `json:"name"`
+	Endpoint     string             `json:"endpoint"`
+	Capabilities []string           `json:"capabilities"`
+	IsCore       bool               `json:"is_core"`
+	Enabled      bool               `json:"enabled"`
+	OrderID      int                `json:"order_id"`
+	Menu         []logging.MenuItem `json:"menu"`
+	LastUpdate   time.Time          `json:"last_update"`
 }
 
 var (
@@ -28,8 +31,7 @@ func main() {
 	logging.Init("registry")
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
-	r.Use(gin.Recovery())
-	r.Use(logging.GinMiddleware())
+	r.Use(gin.Recovery(), logging.GinMiddleware())
 
 	r.POST("/register", func(c *gin.Context) {
 		var info ServiceInfo
@@ -59,6 +61,7 @@ func main() {
 				active = append(active, *s)
 			}
 		}
+		sort.Slice(active, func(i, j int) bool { return active[i].OrderID < active[j].OrderID })
 		c.JSON(http.StatusOK, active)
 	})
 
@@ -66,17 +69,14 @@ func main() {
 		mu.RLock()
 		defer mu.RUnlock()
 		all := make([]ServiceInfo, 0)
-		for _, s := range registry {
-			all = append(all, *s)
-		}
+		for _, s := range registry { all = append(all, *s) }
+		sort.Slice(all, func(i, j int) bool { return all[i].OrderID < all[j].OrderID })
 		c.JSON(http.StatusOK, all)
 	})
 
 	r.POST("/admin/services/:name/toggle", func(c *gin.Context) {
 		name := c.Param("name")
-		var body struct {
-			Enabled bool `json:"enabled"`
-		}
+		var body struct { Enabled bool `json:"enabled"` }
 		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -85,7 +85,7 @@ func main() {
 		defer mu.Unlock()
 		if s, ok := registry[name]; ok {
 			if s.IsCore {
-				c.JSON(http.StatusForbidden, gin.H{"error": "cannot disable core service"})
+				c.JSON(http.StatusForbidden, gin.H{"error": "cannot disable core"})
 				return
 			}
 			s.Enabled = body.Enabled

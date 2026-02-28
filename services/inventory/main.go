@@ -16,14 +16,11 @@ import (
 )
 
 var db *gorm.DB
-var currentConfig = map[string]string{"sync_interval": "60s"}
 
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("inventory.db"), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
+	if err != nil { panic(err) }
 	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{})
 }
 
@@ -37,6 +34,8 @@ func main() {
 		Endpoint:     "http://localhost:8083",
 		Capabilities: []string{"inventory", "switches", "ports", "sync", "graphql", "configurable"},
 		IsCore:       false,
+		OrderID:      2,
+		Menu:         []logging.MenuItem{{Label: "Switches", Path: "/switches"}},
 	})
 
 	r := gin.Default()
@@ -46,13 +45,6 @@ func main() {
 		var switches []models.Switch
 		db.Find(&switches)
 		c.JSON(200, switches)
-	})
-	r.GET("/config", func(c *gin.Context) { c.JSON(200, currentConfig) })
-	r.POST("/config", func(c *gin.Context) {
-		var nc map[string]string
-		c.ShouldBindJSON(&nc)
-		for k, v := range nc { currentConfig[k] = v }
-		c.JSON(200, currentConfig)
 	})
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db, Sync: engine}}))
