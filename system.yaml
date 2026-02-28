@@ -16,8 +16,9 @@ optional_services:
   - inventory
   - network
   - task
-  - hardware
+  - external-modules
   - terminal
+  - external-data
 
 # External Module Configuration
 external_modules:

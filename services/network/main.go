@@ -45,12 +45,6 @@ func main() {
 		IsCore:       false,
 	})
 
-	"github.com/gin-gonic/gin"
-)
-
-func main() {
-	logging.Init("network")
-
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())

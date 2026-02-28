@@ -1,8 +1,7 @@
 package graph
 
 import (
-	"pum-go/pkg/external"
-	"pum-go/services/product/sync"
+	"pum-go/services/inventory/sync"
 	"gorm.io/gorm"
 )
 
@@ -11,7 +10,6 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	DB       *gorm.DB
-	Sync     *sync.SyncEngine
-	Provider external.Provider
+	DB   *gorm.DB
+	Sync *sync.SyncEngine
 }

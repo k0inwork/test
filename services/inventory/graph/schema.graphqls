@@ -1,0 +1,28 @@
+type Switch {
+  id: ID!
+  name: String!
+  glpiId: String
+  nodeId: Int!
+  logicalType: String!
+  portsCount: Int!
+  ip: String!
+  model: String
+  ports: [SwitchPort!]!
+}
+
+type SwitchPort {
+  id: ID!
+  switchId: String!
+  port: String!
+  description: String
+  vlan: Int!
+}
+
+type Query {
+  switches: [Switch!]!
+  ports: [SwitchPort!]!
+}
+
+type Mutation {
+  syncInventory: String!
+}

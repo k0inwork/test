@@ -13,7 +13,7 @@
 Перечень сервисов, без которых приложение не может функционировать. Если `registry`, `identity` или `product` отключены, GUI переходит в режим ожидания.
 
 ### 3. optional_services (Дополнительные модули)
-Сервисы, которые расширяют функционал системы (Inventory, Network, Task и др.). GUI автоматически обнаруживает их через **Registry Service**.
+Сервисы, которые расширяют функционал системы (Inventory, Network, Task, External Modules, External Data и др.). GUI автоматически обнаруживает их через **Registry Service**.
 
 ### 4. external_modules (Внешние интеграции)
 Определяет статус внешних систем:
@@ -35,7 +35,11 @@ core_services:
 optional_services:
   - inventory
   - network
+  - external-modules
+  - external-data
 external_modules:
   glpi:
+    mode: "mock"
+  rabbitmq:
     mode: "mock"
 ```

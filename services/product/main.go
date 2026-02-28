@@ -3,11 +3,12 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"fmt"
+	"pum-go/pkg/external"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 	"pum-go/services/product/graph"
 	"pum-go/services/product/sync"
-	"fmt"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -63,7 +64,8 @@ func main() {
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
 
-	engine := sync.NewSyncEngine(db)
+	provider := &external.GraphQLClient{Endpoint: "http://localhost:8089/query"}
+	engine := sync.NewSyncEngine(db, provider)
 
 	// REST API
 	r.GET("/nodes", func(c *gin.Context) {
@@ -84,7 +86,11 @@ func main() {
 	})
 
 	// GraphQL API
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db, Sync: engine}}))
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+		DB:       db,
+		Sync:     engine,
+		Provider: provider,
+	}}))
 
 	r.POST("/query", func(c *gin.Context) {
 		srv.ServeHTTP(c.Writer, c.Request)

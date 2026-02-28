@@ -1,0 +1,30 @@
+schema:
+  - graph/*.graphqls
+
+exec:
+  filename: graph/generated.go
+  package: graph
+
+model:
+  filename: graph/model/models_gen.go
+  package: model
+
+resolver:
+  layout: follow-schema
+  dir: graph
+  package: graph
+
+autobind:
+  - pum-go/pkg/external
+
+models:
+  GPDU:
+    model: pum-go/pkg/external.Gpdu
+  GNetworkEquipment:
+    model: pum-go/pkg/external.GNetworkEquipment
+  GComputer:
+    model: pum-go/pkg/external.GComputer
+  ZHost:
+    model: pum-go/pkg/external.ZHost
+  ZProblem:
+    model: pum-go/pkg/external.ZProblem

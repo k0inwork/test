@@ -8,7 +8,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"pum-go/pkg/external"
 	"pum-go/pkg/models"
 	"strconv"
 	"sync/atomic"
@@ -30,8 +29,8 @@ type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
-	Product() ProductResolver
 	Query() QueryResolver
+	Switch() SwitchResolver
 }
 
 type DirectiveRoot struct {
@@ -39,52 +38,46 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		SyncProducts func(childComplexity int) int
-	}
-
-	Product struct {
-		Address          func(childComplexity int) int
-		Description      func(childComplexity int) int
-		Geo              func(childComplexity int) int
-		GlpiUUID         func(childComplexity int) int
-		ID               func(childComplexity int) int
-		Lat              func(childComplexity int) int
-		Long             func(childComplexity int) int
-		Name             func(childComplexity int) int
-		Operate          func(childComplexity int) int
-		PouType          func(childComplexity int) int
-		Problems         func(childComplexity int) int
-		Region           func(childComplexity int) int
-		SequentialNumber func(childComplexity int) int
-		State            func(childComplexity int) int
-		Status           func(childComplexity int) int
+		SyncInventory func(childComplexity int) int
 	}
 
 	Query struct {
-		Product  func(childComplexity int, id string) int
-		Products func(childComplexity int) int
+		Ports    func(childComplexity int) int
+		Switches func(childComplexity int) int
 	}
 
-	ZProblem struct {
-		ID       func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Severity func(childComplexity int) int
-		Time     func(childComplexity int) int
+	Switch struct {
+		GlpiID      func(childComplexity int) int
+		ID          func(childComplexity int) int
+		IP          func(childComplexity int) int
+		LogicalType func(childComplexity int) int
+		Model       func(childComplexity int) int
+		Name        func(childComplexity int) int
+		NodeID      func(childComplexity int) int
+		Ports       func(childComplexity int) int
+		PortsCount  func(childComplexity int) int
+	}
+
+	SwitchPort struct {
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Port        func(childComplexity int) int
+		SwitchID    func(childComplexity int) int
+		Vlan        func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
-	SyncProducts(ctx context.Context) (string, error)
-}
-type ProductResolver interface {
-	ID(ctx context.Context, obj *models.Product) (string, error)
-
-	Problems(ctx context.Context, obj *models.Product) ([]*external.ZProblem, error)
-	Status(ctx context.Context, obj *models.Product) (int, error)
+	SyncInventory(ctx context.Context) (string, error)
 }
 type QueryResolver interface {
-	Products(ctx context.Context) ([]*models.Product, error)
-	Product(ctx context.Context, id string) (*models.Product, error)
+	Switches(ctx context.Context) ([]*models.Switch, error)
+	Ports(ctx context.Context) ([]*models.SwitchPort, error)
+}
+type SwitchResolver interface {
+	NodeID(ctx context.Context, obj *models.Switch) (int, error)
+
+	Ports(ctx context.Context, obj *models.Switch) ([]*models.SwitchPort, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -101,146 +94,111 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Mutation.syncProducts":
-		if e.ComplexityRoot.Mutation.SyncProducts == nil {
+	case "Mutation.syncInventory":
+		if e.ComplexityRoot.Mutation.SyncInventory == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Mutation.SyncProducts(childComplexity), true
+		return e.ComplexityRoot.Mutation.SyncInventory(childComplexity), true
 
-	case "Product.address":
-		if e.ComplexityRoot.Product.Address == nil {
+	case "Query.ports":
+		if e.ComplexityRoot.Query.Ports == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Address(childComplexity), true
-	case "Product.description":
-		if e.ComplexityRoot.Product.Description == nil {
+		return e.ComplexityRoot.Query.Ports(childComplexity), true
+	case "Query.switches":
+		if e.ComplexityRoot.Query.Switches == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Description(childComplexity), true
-	case "Product.geo":
-		if e.ComplexityRoot.Product.Geo == nil {
+		return e.ComplexityRoot.Query.Switches(childComplexity), true
+
+	case "Switch.glpiId":
+		if e.ComplexityRoot.Switch.GlpiID == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Geo(childComplexity), true
-	case "Product.glpiUUID":
-		if e.ComplexityRoot.Product.GlpiUUID == nil {
+		return e.ComplexityRoot.Switch.GlpiID(childComplexity), true
+	case "Switch.id":
+		if e.ComplexityRoot.Switch.ID == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.GlpiUUID(childComplexity), true
-	case "Product.id":
-		if e.ComplexityRoot.Product.ID == nil {
+		return e.ComplexityRoot.Switch.ID(childComplexity), true
+	case "Switch.ip":
+		if e.ComplexityRoot.Switch.IP == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.ID(childComplexity), true
-	case "Product.lat":
-		if e.ComplexityRoot.Product.Lat == nil {
+		return e.ComplexityRoot.Switch.IP(childComplexity), true
+	case "Switch.logicalType":
+		if e.ComplexityRoot.Switch.LogicalType == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Lat(childComplexity), true
-	case "Product.long":
-		if e.ComplexityRoot.Product.Long == nil {
+		return e.ComplexityRoot.Switch.LogicalType(childComplexity), true
+	case "Switch.model":
+		if e.ComplexityRoot.Switch.Model == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Long(childComplexity), true
-	case "Product.name":
-		if e.ComplexityRoot.Product.Name == nil {
+		return e.ComplexityRoot.Switch.Model(childComplexity), true
+	case "Switch.name":
+		if e.ComplexityRoot.Switch.Name == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Name(childComplexity), true
-	case "Product.operate":
-		if e.ComplexityRoot.Product.Operate == nil {
+		return e.ComplexityRoot.Switch.Name(childComplexity), true
+	case "Switch.nodeId":
+		if e.ComplexityRoot.Switch.NodeID == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Operate(childComplexity), true
-	case "Product.pouType":
-		if e.ComplexityRoot.Product.PouType == nil {
+		return e.ComplexityRoot.Switch.NodeID(childComplexity), true
+	case "Switch.ports":
+		if e.ComplexityRoot.Switch.Ports == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.PouType(childComplexity), true
-	case "Product.problems":
-		if e.ComplexityRoot.Product.Problems == nil {
+		return e.ComplexityRoot.Switch.Ports(childComplexity), true
+	case "Switch.portsCount":
+		if e.ComplexityRoot.Switch.PortsCount == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Problems(childComplexity), true
-	case "Product.region":
-		if e.ComplexityRoot.Product.Region == nil {
+		return e.ComplexityRoot.Switch.PortsCount(childComplexity), true
+
+	case "SwitchPort.description":
+		if e.ComplexityRoot.SwitchPort.Description == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Region(childComplexity), true
-	case "Product.sequentialNumber":
-		if e.ComplexityRoot.Product.SequentialNumber == nil {
+		return e.ComplexityRoot.SwitchPort.Description(childComplexity), true
+	case "SwitchPort.id":
+		if e.ComplexityRoot.SwitchPort.ID == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.SequentialNumber(childComplexity), true
-	case "Product.state":
-		if e.ComplexityRoot.Product.State == nil {
+		return e.ComplexityRoot.SwitchPort.ID(childComplexity), true
+	case "SwitchPort.port":
+		if e.ComplexityRoot.SwitchPort.Port == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.State(childComplexity), true
-	case "Product.status":
-		if e.ComplexityRoot.Product.Status == nil {
+		return e.ComplexityRoot.SwitchPort.Port(childComplexity), true
+	case "SwitchPort.switchId":
+		if e.ComplexityRoot.SwitchPort.SwitchID == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Product.Status(childComplexity), true
-
-	case "Query.product":
-		if e.ComplexityRoot.Query.Product == nil {
+		return e.ComplexityRoot.SwitchPort.SwitchID(childComplexity), true
+	case "SwitchPort.vlan":
+		if e.ComplexityRoot.SwitchPort.Vlan == nil {
 			break
 		}
 
-		args, err := ec.field_Query_product_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Query.Product(childComplexity, args["id"].(string)), true
-	case "Query.products":
-		if e.ComplexityRoot.Query.Products == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Query.Products(childComplexity), true
-
-	case "ZProblem.id":
-		if e.ComplexityRoot.ZProblem.ID == nil {
-			break
-		}
-
-		return e.ComplexityRoot.ZProblem.ID(childComplexity), true
-	case "ZProblem.name":
-		if e.ComplexityRoot.ZProblem.Name == nil {
-			break
-		}
-
-		return e.ComplexityRoot.ZProblem.Name(childComplexity), true
-	case "ZProblem.severity":
-		if e.ComplexityRoot.ZProblem.Severity == nil {
-			break
-		}
-
-		return e.ComplexityRoot.ZProblem.Severity(childComplexity), true
-	case "ZProblem.time":
-		if e.ComplexityRoot.ZProblem.Time == nil {
-			break
-		}
-
-		return e.ComplexityRoot.ZProblem.Time(childComplexity), true
+		return e.ComplexityRoot.SwitchPort.Vlan(childComplexity), true
 
 	}
 	return 0, false
@@ -354,17 +312,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_product_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
-	if err != nil {
-		return nil, err
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -417,14 +364,14 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Mutation_syncProducts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_syncInventory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_syncProducts,
+		ec.fieldContext_Mutation_syncInventory,
 		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Mutation().SyncProducts(ctx)
+			return ec.Resolvers.Mutation().SyncInventory(ctx)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -433,7 +380,7 @@ func (ec *executionContext) _Mutation_syncProducts(ctx context.Context, field gr
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_syncProducts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_syncInventory(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -446,468 +393,23 @@ func (ec *executionContext) fieldContext_Mutation_syncProducts(_ context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_switches(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Product_id,
+		ec.fieldContext_Query_switches,
 		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Product().ID(ctx, obj)
+			return ec.Resolvers.Query().Switches(ctx)
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNSwitch2ᚕᚖpumᚑgoᚋpkgᚋmodelsᚐSwitchᚄ,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Product_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_name(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_name,
-		func(ctx context.Context) (any, error) {
-			return obj.Name, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_description(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_description,
-		func(ctx context.Context) (any, error) {
-			return obj.Description, nil
-		},
-		nil,
-		ec.marshalOString2string,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_address(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_address,
-		func(ctx context.Context) (any, error) {
-			return obj.Address, nil
-		},
-		nil,
-		ec.marshalOString2string,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_address(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_state(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_state,
-		func(ctx context.Context) (any, error) {
-			return obj.State, nil
-		},
-		nil,
-		ec.marshalOString2string,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_state(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_long(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_long,
-		func(ctx context.Context) (any, error) {
-			return obj.Long, nil
-		},
-		nil,
-		ec.marshalOString2string,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_long(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_lat(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_lat,
-		func(ctx context.Context) (any, error) {
-			return obj.Lat, nil
-		},
-		nil,
-		ec.marshalOString2string,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_lat(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_geo(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_geo,
-		func(ctx context.Context) (any, error) {
-			return obj.Geo, nil
-		},
-		nil,
-		ec.marshalOString2string,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_geo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_operate(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_operate,
-		func(ctx context.Context) (any, error) {
-			return obj.Operate, nil
-		},
-		nil,
-		ec.marshalNBoolean2bool,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_operate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_glpiUUID(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_glpiUUID,
-		func(ctx context.Context) (any, error) {
-			return obj.GlpiUUID, nil
-		},
-		nil,
-		ec.marshalOString2string,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_glpiUUID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_sequentialNumber(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_sequentialNumber,
-		func(ctx context.Context) (any, error) {
-			return obj.SequentialNumber, nil
-		},
-		nil,
-		ec.marshalNInt2int,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_sequentialNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_pouType(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_pouType,
-		func(ctx context.Context) (any, error) {
-			return obj.PouType, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_pouType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_region(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_region,
-		func(ctx context.Context) (any, error) {
-			return obj.Region, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_region(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_problems(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_problems,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Product().Problems(ctx, obj)
-		},
-		nil,
-		ec.marshalNZProblem2ᚕᚖpumᚑgoᚋpkgᚋexternalᚐZProblemᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_problems(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_ZProblem_id(ctx, field)
-			case "name":
-				return ec.fieldContext_ZProblem_name(ctx, field)
-			case "severity":
-				return ec.fieldContext_ZProblem_severity(ctx, field)
-			case "time":
-				return ec.fieldContext_ZProblem_time(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ZProblem", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_status(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_status,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Product().Status(ctx, obj)
-		},
-		nil,
-		ec.marshalNInt2int,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_products(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_products,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Query().Products(ctx)
-		},
-		nil,
-		ec.marshalNProduct2ᚕᚖpumᚑgoᚋpkgᚋmodelsᚐProductᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_products(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_switches(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -916,60 +418,47 @@ func (ec *executionContext) fieldContext_Query_products(_ context.Context, field
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Product_id(ctx, field)
+				return ec.fieldContext_Switch_id(ctx, field)
 			case "name":
-				return ec.fieldContext_Product_name(ctx, field)
-			case "description":
-				return ec.fieldContext_Product_description(ctx, field)
-			case "address":
-				return ec.fieldContext_Product_address(ctx, field)
-			case "state":
-				return ec.fieldContext_Product_state(ctx, field)
-			case "long":
-				return ec.fieldContext_Product_long(ctx, field)
-			case "lat":
-				return ec.fieldContext_Product_lat(ctx, field)
-			case "geo":
-				return ec.fieldContext_Product_geo(ctx, field)
-			case "operate":
-				return ec.fieldContext_Product_operate(ctx, field)
-			case "glpiUUID":
-				return ec.fieldContext_Product_glpiUUID(ctx, field)
-			case "sequentialNumber":
-				return ec.fieldContext_Product_sequentialNumber(ctx, field)
-			case "pouType":
-				return ec.fieldContext_Product_pouType(ctx, field)
-			case "region":
-				return ec.fieldContext_Product_region(ctx, field)
-			case "problems":
-				return ec.fieldContext_Product_problems(ctx, field)
-			case "status":
-				return ec.fieldContext_Product_status(ctx, field)
+				return ec.fieldContext_Switch_name(ctx, field)
+			case "glpiId":
+				return ec.fieldContext_Switch_glpiId(ctx, field)
+			case "nodeId":
+				return ec.fieldContext_Switch_nodeId(ctx, field)
+			case "logicalType":
+				return ec.fieldContext_Switch_logicalType(ctx, field)
+			case "portsCount":
+				return ec.fieldContext_Switch_portsCount(ctx, field)
+			case "ip":
+				return ec.fieldContext_Switch_ip(ctx, field)
+			case "model":
+				return ec.fieldContext_Switch_model(ctx, field)
+			case "ports":
+				return ec.fieldContext_Switch_ports(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Switch", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_product(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_ports(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_product,
+		ec.fieldContext_Query_ports,
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().Product(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().Ports(ctx)
 		},
 		nil,
-		ec.marshalOProduct2ᚖpumᚑgoᚋpkgᚋmodelsᚐProduct,
+		ec.marshalNSwitchPort2ᚕᚖpumᚑgoᚋpkgᚋmodelsᚐSwitchPortᚄ,
 		true,
-		false,
+		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_product(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_ports(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -978,49 +467,18 @@ func (ec *executionContext) fieldContext_Query_product(ctx context.Context, fiel
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Product_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Product_name(ctx, field)
+				return ec.fieldContext_SwitchPort_id(ctx, field)
+			case "switchId":
+				return ec.fieldContext_SwitchPort_switchId(ctx, field)
+			case "port":
+				return ec.fieldContext_SwitchPort_port(ctx, field)
 			case "description":
-				return ec.fieldContext_Product_description(ctx, field)
-			case "address":
-				return ec.fieldContext_Product_address(ctx, field)
-			case "state":
-				return ec.fieldContext_Product_state(ctx, field)
-			case "long":
-				return ec.fieldContext_Product_long(ctx, field)
-			case "lat":
-				return ec.fieldContext_Product_lat(ctx, field)
-			case "geo":
-				return ec.fieldContext_Product_geo(ctx, field)
-			case "operate":
-				return ec.fieldContext_Product_operate(ctx, field)
-			case "glpiUUID":
-				return ec.fieldContext_Product_glpiUUID(ctx, field)
-			case "sequentialNumber":
-				return ec.fieldContext_Product_sequentialNumber(ctx, field)
-			case "pouType":
-				return ec.fieldContext_Product_pouType(ctx, field)
-			case "region":
-				return ec.fieldContext_Product_region(ctx, field)
-			case "problems":
-				return ec.fieldContext_Product_problems(ctx, field)
-			case "status":
-				return ec.fieldContext_Product_status(ctx, field)
+				return ec.fieldContext_SwitchPort_description(ctx, field)
+			case "vlan":
+				return ec.fieldContext_SwitchPort_vlan(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type SwitchPort", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_product_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -1133,12 +591,12 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _ZProblem_id(ctx context.Context, field graphql.CollectedField, obj *external.ZProblem) (ret graphql.Marshaler) {
+func (ec *executionContext) _Switch_id(ctx context.Context, field graphql.CollectedField, obj *models.Switch) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ZProblem_id,
+		ec.fieldContext_Switch_id,
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
 		},
@@ -1149,9 +607,9 @@ func (ec *executionContext) _ZProblem_id(ctx context.Context, field graphql.Coll
 	)
 }
 
-func (ec *executionContext) fieldContext_ZProblem_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Switch_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ZProblem",
+		Object:     "Switch",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1162,12 +620,12 @@ func (ec *executionContext) fieldContext_ZProblem_id(_ context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _ZProblem_name(ctx context.Context, field graphql.CollectedField, obj *external.ZProblem) (ret graphql.Marshaler) {
+func (ec *executionContext) _Switch_name(ctx context.Context, field graphql.CollectedField, obj *models.Switch) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ZProblem_name,
+		ec.fieldContext_Switch_name,
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
 		},
@@ -1178,9 +636,9 @@ func (ec *executionContext) _ZProblem_name(ctx context.Context, field graphql.Co
 	)
 }
 
-func (ec *executionContext) fieldContext_ZProblem_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Switch_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ZProblem",
+		Object:     "Switch",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1191,14 +649,43 @@ func (ec *executionContext) fieldContext_ZProblem_name(_ context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _ZProblem_severity(ctx context.Context, field graphql.CollectedField, obj *external.ZProblem) (ret graphql.Marshaler) {
+func (ec *executionContext) _Switch_glpiId(ctx context.Context, field graphql.CollectedField, obj *models.Switch) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ZProblem_severity,
+		ec.fieldContext_Switch_glpiId,
 		func(ctx context.Context) (any, error) {
-			return obj.Severity, nil
+			return obj.GlpiID, nil
+		},
+		nil,
+		ec.marshalOString2string,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Switch_glpiId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Switch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Switch_nodeId(ctx context.Context, field graphql.CollectedField, obj *models.Switch) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Switch_nodeId,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Switch().NodeID(ctx, obj)
 		},
 		nil,
 		ec.marshalNInt2int,
@@ -1207,9 +694,67 @@ func (ec *executionContext) _ZProblem_severity(ctx context.Context, field graphq
 	)
 }
 
-func (ec *executionContext) fieldContext_ZProblem_severity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Switch_nodeId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ZProblem",
+		Object:     "Switch",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Switch_logicalType(ctx context.Context, field graphql.CollectedField, obj *models.Switch) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Switch_logicalType,
+		func(ctx context.Context) (any, error) {
+			return obj.LogicalType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Switch_logicalType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Switch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Switch_portsCount(ctx context.Context, field graphql.CollectedField, obj *models.Switch) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Switch_portsCount,
+		func(ctx context.Context) (any, error) {
+			return obj.PortsCount, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Switch_portsCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Switch",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1220,14 +765,14 @@ func (ec *executionContext) fieldContext_ZProblem_severity(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _ZProblem_time(ctx context.Context, field graphql.CollectedField, obj *external.ZProblem) (ret graphql.Marshaler) {
+func (ec *executionContext) _Switch_ip(ctx context.Context, field graphql.CollectedField, obj *models.Switch) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ZProblem_time,
+		ec.fieldContext_Switch_ip,
 		func(ctx context.Context) (any, error) {
-			return obj.Time, nil
+			return obj.IP, nil
 		},
 		nil,
 		ec.marshalNString2string,
@@ -1236,14 +781,229 @@ func (ec *executionContext) _ZProblem_time(ctx context.Context, field graphql.Co
 	)
 }
 
-func (ec *executionContext) fieldContext_ZProblem_time(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Switch_ip(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ZProblem",
+		Object:     "Switch",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Switch_model(ctx context.Context, field graphql.CollectedField, obj *models.Switch) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Switch_model,
+		func(ctx context.Context) (any, error) {
+			return obj.Model, nil
+		},
+		nil,
+		ec.marshalOString2string,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Switch_model(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Switch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Switch_ports(ctx context.Context, field graphql.CollectedField, obj *models.Switch) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Switch_ports,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Switch().Ports(ctx, obj)
+		},
+		nil,
+		ec.marshalNSwitchPort2ᚕᚖpumᚑgoᚋpkgᚋmodelsᚐSwitchPortᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Switch_ports(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Switch",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_SwitchPort_id(ctx, field)
+			case "switchId":
+				return ec.fieldContext_SwitchPort_switchId(ctx, field)
+			case "port":
+				return ec.fieldContext_SwitchPort_port(ctx, field)
+			case "description":
+				return ec.fieldContext_SwitchPort_description(ctx, field)
+			case "vlan":
+				return ec.fieldContext_SwitchPort_vlan(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SwitchPort", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SwitchPort_id(ctx context.Context, field graphql.CollectedField, obj *models.SwitchPort) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SwitchPort_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SwitchPort_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SwitchPort",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SwitchPort_switchId(ctx context.Context, field graphql.CollectedField, obj *models.SwitchPort) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SwitchPort_switchId,
+		func(ctx context.Context) (any, error) {
+			return obj.SwitchID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SwitchPort_switchId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SwitchPort",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SwitchPort_port(ctx context.Context, field graphql.CollectedField, obj *models.SwitchPort) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SwitchPort_port,
+		func(ctx context.Context) (any, error) {
+			return obj.Port, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SwitchPort_port(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SwitchPort",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SwitchPort_description(ctx context.Context, field graphql.CollectedField, obj *models.SwitchPort) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SwitchPort_description,
+		func(ctx context.Context) (any, error) {
+			return obj.Description, nil
+		},
+		nil,
+		ec.marshalOString2string,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_SwitchPort_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SwitchPort",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SwitchPort_vlan(ctx context.Context, field graphql.CollectedField, obj *models.SwitchPort) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SwitchPort_vlan,
+		func(ctx context.Context) (any, error) {
+			return obj.Vlan, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SwitchPort_vlan(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SwitchPort",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2722,194 +2482,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "syncProducts":
+		case "syncInventory":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_syncProducts(ctx, field)
+				return ec._Mutation_syncInventory(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.ProcessDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var productImplementors = []string{"Product"}
-
-func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *models.Product) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, productImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Product")
-		case "id":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Product_id(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "name":
-			out.Values[i] = ec._Product_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "description":
-			out.Values[i] = ec._Product_description(ctx, field, obj)
-		case "address":
-			out.Values[i] = ec._Product_address(ctx, field, obj)
-		case "state":
-			out.Values[i] = ec._Product_state(ctx, field, obj)
-		case "long":
-			out.Values[i] = ec._Product_long(ctx, field, obj)
-		case "lat":
-			out.Values[i] = ec._Product_lat(ctx, field, obj)
-		case "geo":
-			out.Values[i] = ec._Product_geo(ctx, field, obj)
-		case "operate":
-			out.Values[i] = ec._Product_operate(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "glpiUUID":
-			out.Values[i] = ec._Product_glpiUUID(ctx, field, obj)
-		case "sequentialNumber":
-			out.Values[i] = ec._Product_sequentialNumber(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "pouType":
-			out.Values[i] = ec._Product_pouType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "region":
-			out.Values[i] = ec._Product_region(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "problems":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Product_problems(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "status":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Product_status(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2952,7 +2531,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "products":
+		case "switches":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -2961,7 +2540,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_products(ctx, field)
+				res = ec._Query_switches(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -2974,16 +2553,19 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "product":
+		case "ports":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_product(ctx, field)
+				res = ec._Query_ports(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -3024,34 +2606,171 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var zProblemImplementors = []string{"ZProblem"}
+var switchImplementors = []string{"Switch"}
 
-func (ec *executionContext) _ZProblem(ctx context.Context, sel ast.SelectionSet, obj *external.ZProblem) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, zProblemImplementors)
+func (ec *executionContext) _Switch(ctx context.Context, sel ast.SelectionSet, obj *models.Switch) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, switchImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("ZProblem")
+			out.Values[i] = graphql.MarshalString("Switch")
 		case "id":
-			out.Values[i] = ec._ZProblem_id(ctx, field, obj)
+			out.Values[i] = ec._Switch_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._ZProblem_name(ctx, field, obj)
+			out.Values[i] = ec._Switch_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "glpiId":
+			out.Values[i] = ec._Switch_glpiId(ctx, field, obj)
+		case "nodeId":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Switch_nodeId(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "logicalType":
+			out.Values[i] = ec._Switch_logicalType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "portsCount":
+			out.Values[i] = ec._Switch_portsCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "ip":
+			out.Values[i] = ec._Switch_ip(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "model":
+			out.Values[i] = ec._Switch_model(ctx, field, obj)
+		case "ports":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Switch_ports(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var switchPortImplementors = []string{"SwitchPort"}
+
+func (ec *executionContext) _SwitchPort(ctx context.Context, sel ast.SelectionSet, obj *models.SwitchPort) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, switchPortImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SwitchPort")
+		case "id":
+			out.Values[i] = ec._SwitchPort_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "severity":
-			out.Values[i] = ec._ZProblem_severity(ctx, field, obj)
+		case "switchId":
+			out.Values[i] = ec._SwitchPort_switchId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "time":
-			out.Values[i] = ec._ZProblem_time(ctx, field, obj)
+		case "port":
+			out.Values[i] = ec._SwitchPort_port(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "description":
+			out.Values[i] = ec._SwitchPort_description(ctx, field, obj)
+		case "vlan":
+			out.Values[i] = ec._SwitchPort_vlan(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3461,32 +3180,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNProduct2ᚕᚖpumᚑgoᚋpkgᚋmodelsᚐProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Product) graphql.Marshaler {
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
-		fc := graphql.GetFieldContext(ctx)
-		fc.Result = &v[i]
-		return ec.marshalNProduct2ᚖpumᚑgoᚋpkgᚋmodelsᚐProduct(ctx, sel, v[i])
-	})
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNProduct2ᚖpumᚑgoᚋpkgᚋmodelsᚐProduct(ctx context.Context, sel ast.SelectionSet, v *models.Product) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Product(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3503,11 +3196,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNZProblem2ᚕᚖpumᚑgoᚋpkgᚋexternalᚐZProblemᚄ(ctx context.Context, sel ast.SelectionSet, v []*external.ZProblem) graphql.Marshaler {
+func (ec *executionContext) marshalNSwitch2ᚕᚖpumᚑgoᚋpkgᚋmodelsᚐSwitchᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Switch) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNZProblem2ᚖpumᚑgoᚋpkgᚋexternalᚐZProblem(ctx, sel, v[i])
+		return ec.marshalNSwitch2ᚖpumᚑgoᚋpkgᚋmodelsᚐSwitch(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -3519,14 +3212,40 @@ func (ec *executionContext) marshalNZProblem2ᚕᚖpumᚑgoᚋpkgᚋexternalᚐZ
 	return ret
 }
 
-func (ec *executionContext) marshalNZProblem2ᚖpumᚑgoᚋpkgᚋexternalᚐZProblem(ctx context.Context, sel ast.SelectionSet, v *external.ZProblem) graphql.Marshaler {
+func (ec *executionContext) marshalNSwitch2ᚖpumᚑgoᚋpkgᚋmodelsᚐSwitch(ctx context.Context, sel ast.SelectionSet, v *models.Switch) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._ZProblem(ctx, sel, v)
+	return ec._Switch(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSwitchPort2ᚕᚖpumᚑgoᚋpkgᚋmodelsᚐSwitchPortᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.SwitchPort) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNSwitchPort2ᚖpumᚑgoᚋpkgᚋmodelsᚐSwitchPort(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNSwitchPort2ᚖpumᚑgoᚋpkgᚋmodelsᚐSwitchPort(ctx context.Context, sel ast.SelectionSet, v *models.SwitchPort) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SwitchPort(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -3698,13 +3417,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
-}
-
-func (ec *executionContext) marshalOProduct2ᚖpumᚑgoᚋpkgᚋmodelsᚐProduct(ctx context.Context, sel ast.SelectionSet, v *models.Product) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Product(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v any) (string, error) {

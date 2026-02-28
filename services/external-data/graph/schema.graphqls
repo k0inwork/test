@@ -1,0 +1,46 @@
+type GNetworkEquipment {
+  id: ID!
+  name: String!
+  model: String
+  ip: String
+  status: String
+  serial: String
+}
+
+type GPDU {
+  id: ID!
+  name: String!
+  long: String
+  lat: String
+  address: String
+  model: String
+}
+
+type GComputer {
+  id: ID!
+  name: String!
+  ip: String
+  status: String
+}
+
+type ZProblem {
+  id: ID!
+  name: String!
+  severity: Int!
+  time: String!
+}
+
+type ZHost {
+  id: ID!
+  name: String!
+  ip: String
+  status: Int!
+  problems: [ZProblem!]!
+}
+
+type Query {
+  networkEquipment: [GNetworkEquipment!]!
+  pdus: [GPDU!]!
+  computers: [GComputer!]!
+  hosts: [ZHost!]!
+}

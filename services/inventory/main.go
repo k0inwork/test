@@ -3,10 +3,14 @@ package main
 import (
 	"fmt"
 	"log/slog"
-	"net/http"
+	"pum-go/pkg/external"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
+	"pum-go/services/inventory/graph"
+	"pum-go/services/inventory/sync"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -27,7 +31,7 @@ func initDB() {
 	var count int64
 	db.Model(&models.Switch{}).Count(&count)
 	if count == 0 {
-		for i := 1; i <= 10; i++ {
+		for i := 1; i <= 5; i++ {
 			swID := fmt.Sprintf("sw-%d", i)
 			sw := models.Switch{
 				ID: swID, Name: fmt.Sprintf("Switch-%02d", i),
@@ -42,7 +46,7 @@ func initDB() {
 				db.Create(&models.SwitchPort{
 					ID: fmt.Sprintf("p-%d-%d", i, p),
 					SwitchID: swID,
-					Port: fmt.Sprintf("GigabitEthernet1/0/%d", p),
+					Port: fmt.Sprintf("%s:Port %d", sw.Name, p),
 					Vlan: 10 * p,
 				})
 			}
@@ -54,10 +58,13 @@ func main() {
 	logging.Init("inventory")
 	initDB()
 
+	provider := &external.GraphQLClient{Endpoint: "http://localhost:8089/query"}
+	engine := sync.NewSyncEngine(db, provider)
+
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "inventory",
 		Endpoint:     "http://localhost:8083",
-		Capabilities: []string{"inventory", "switches", "ports"},
+		Capabilities: []string{"inventory", "switches", "ports", "sync", "graphql"},
 		IsCore:       false,
 	})
 
@@ -66,49 +73,38 @@ func main() {
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
 
+	// REST API
 	r.GET("/switches", func(c *gin.Context) {
 		var switches []models.Switch
 		db.Find(&switches)
-		c.JSON(http.StatusOK, switches)
+		c.JSON(200, switches)
 	})
 
-	r.GET("/switches/:id", func(c *gin.Context) {
-		var sw models.Switch
-		if err := db.First(&sw, "id = ?", c.Param("id")).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Switch not found"})
-			return
-		}
-		c.JSON(http.StatusOK, sw)
-	})
-
-	r.GET("/switches/:id/ports", func(c *gin.Context) {
+	r.GET("/ports", func(c *gin.Context) {
 		var ports []models.SwitchPort
-		db.Where("switch_id = ?", c.Param("id")).Find(&ports)
-		c.JSON(http.StatusOK, ports)
+		db.Find(&ports)
+		c.JSON(200, ports)
 	})
 
-	r.POST("/switches", func(c *gin.Context) {
-		var sw models.Switch
-		if err := c.ShouldBindJSON(&sw); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	r.POST("/sync", func(c *gin.Context) {
+		slog.Info("manual inventory sync triggered")
+		err := engine.Run()
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		db.Create(&sw)
-		c.JSON(http.StatusCreated, sw)
+		c.JSON(200, gin.H{"message": "Inventory sync completed"})
 	})
 
-	r.PUT("/ports/:id/vlan", func(c *gin.Context) {
-		var input struct {
-			Vlan int `json:"vlan"`
-		}
-		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+	// GraphQL API
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db, Sync: engine}}))
 
-		db.Model(&models.SwitchPort{}).Where("id = ?", c.Param("id")).Update("vlan", input.Vlan)
-		slog.Info("VLAN updated on port", "id", c.Param("id"), "vlan", input.Vlan)
-		c.JSON(http.StatusOK, gin.H{"status": "updated"})
+	r.POST("/query", func(c *gin.Context) {
+		srv.ServeHTTP(c.Writer, c.Request)
+	})
+
+	r.GET("/", func(c *gin.Context) {
+		playground.Handler("GraphQL playground", "/query").ServeHTTP(c.Writer, c.Request)
 	})
 
 	slog.Info("Inventory service starting", "port", 8083)
