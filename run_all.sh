@@ -9,9 +9,14 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
-echo "Starting PUM Microservices (Go Rewrite)..."
+echo "Starting PUM Microservices (Go Registry-based Architecture)..."
 
-# Start Core Services
+# 1. Start Registry FIRST
+echo "Starting Registry Service on :8088..."
+go run services/registry/main.go &
+sleep 2
+
+# 2. Start Core Services
 echo "Starting Identity Service on :8081..."
 go run services/identity/main.go &
 
@@ -33,17 +38,22 @@ go run services/hardware/main.go &
 echo "Starting Terminal Service on :8087..."
 go run services/terminal/main.go &
 
+# Wait for services to initialize and register
+sleep 5
+
+# 4. Start Frontend
 # Wait for services to initialize
-sleep 3
 
 echo "Starting Frontend Service on :8080..."
 go run services/frontend/main.go &
 
 echo "------------------------------------------------"
-echo "All systems running!"
-echo "Dashboard: http://localhost:8080"
 echo "Nodes List: http://localhost:8080/nodes"
 echo "User List: http://localhost:8080/users"
+echo "Registry: http://localhost:8088/services"
+echo "All systems running!"
+echo "Dashboard: http://localhost:8080"
+
 echo "------------------------------------------------"
 
 # Keep script running

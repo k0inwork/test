@@ -40,6 +40,14 @@ func main() {
 	logging.Init("identity")
 	initDB()
 
+	// Register with Registry
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "identity",
+		Endpoint:     "http://localhost:8081",
+		Capabilities: []string{"users", "auth"},
+		IsCore:       true,
+	})
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())

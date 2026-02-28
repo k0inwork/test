@@ -7,6 +7,7 @@ import (
 	"pum-go/pkg/models"
 	"pum-go/services/product/graph"
 	"pum-go/services/product/sync"
+	"fmt"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -26,11 +27,36 @@ func initDB() {
 	}
 
 	db.AutoMigrate(&models.Product{})
+
+	var count int64
+	db.Model(&models.Product{}).Count(&count)
+	if count == 0 {
+		for i := 1; i <= 10; i++ {
+			region := "MSK"
+			if i > 5 {
+				region = "SPB"
+			}
+			db.Create(&models.Product{
+				Name:             fmt.Sprintf("Rack %d", i),
+				Region:           region,
+				SequentialNumber: i,
+				PouType:          "ПОУ",
+				Address:          fmt.Sprintf("DataCenter Row %d", i),
+			})
+		}
+	}
 }
 
 func main() {
 	logging.Init("product")
 	initDB()
+
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "product",
+		Endpoint:     "http://localhost:8082",
+		Capabilities: []string{"nodes", "sync"},
+		IsCore:       true,
+	})
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()

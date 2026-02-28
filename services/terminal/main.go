@@ -11,6 +11,14 @@ import (
 func main() {
 	logging.Init("terminal")
 
+	// Register with Registry
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "terminal",
+		Endpoint:     "http://localhost:8087",
+		Capabilities: []string{"terminal", "ssh"},
+		IsCore:       false,
+	})
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())

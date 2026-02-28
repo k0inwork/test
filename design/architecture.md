@@ -35,26 +35,43 @@ The project will follow a monorepo approach for easier management of shared mode
 
 ## 4. Microservices Breakdown
 
-*(Sections 4.1 to 4.6 remain unchanged)*
+### 4.1 Identity Service
+- **Responsibility**: Authentication, Authorization, User management, Roles.
+- **Integration**: Initially internal DB, later CAS.
+- **APIs**: REST (Login, CRUD Users), GraphQL (Query User profiles).
 
-### 4.7 Apptron Admin Center (New)
-The Admin Center is a browser-based, local-first client environment powered by Apptron. It consists of:
-- **Headless WASM Core**: A background service in the browser that handles local data state and caching.
-- **pum-cli**: A WASM-compiled Go tool providing both a CLI for scripting and a TUI for interactive management.
-- **Web Dashboards**: HTML/JS views integrated into the Apptron workspace.
-- **Bridge Agent**: A local native Go agent that bridges the browser's virtual network to physical hardware.
+### 4.2 Product Service
+- **Responsibility**: Lifecycle of "Physical Nodes" (previously Products/PDUs), Geo-mapping.
+- **Data Model**: Maps to the current `Product` Django model (Node focus).
+- **APIs**: REST (CRUD Nodes), GraphQL (Deep queries).
+
+### 4.3 Network & Gateway Service
+- **Responsibility**: Routing, IP Allocation, DNS/DHCP.
+- **Mocking**: External routing modules and IPAM backends will be mocked.
+
+### 4.4 Inventory Service
+- **Responsibility**: Switches, Ports, Physical Connections.
+- **Mocking**: External switch configuration modules will be mocked.
+
+### 4.5 Task & Audit Service
+- **Responsibility**: System-wide activity logs, Async task tracking.
+
+### 4.6 Hardware Communication Service
+- **Responsibility**: Asynchronous proxy for RabbitMQ-accessible modules.
+- **Mocking**: RabbitMQ and specific hardware module responses will be mocked.
 
 ## 5. Technology Stack
 - **Language**: Go (Golang) 1.25+
 - **Web Framework**: Gin Gonic (for REST)
-- **WASM Client Framework**: Bubbletea (for TUI), syscall/js (for Headless Core)
+- **GraphQL**: gqlgen
+- **ORM**: GORM (with SQLite driver)
 - **Database**: SQLite (local file per service)
-- **Admin Environment**: Apptron (x86 emulation + WASM)
+- **Mocking**: Interface-based stubs for un-implemented services.
 
 ## 6. Communication Patterns
-- **Inter-service**: RESTful HTTP calls.
-- **Admin to Server**: REST/GraphQL over HTTPS.
-- **Admin to Hardware**: Tunneled TCP via Bridge Agent and Apptron Virtual Network.
+- **Inter-service**: RESTful HTTP calls (Internal).
+- **External API**: REST (JSON) with `?json=true` compatibility (optional) and GraphQL.
+- **Frontend**: Similar to existing Bootstrap-based Django templates, potentially moved to a separate SPA or maintained as Go-rendered templates.
 
 ## 7. Mocking Strategy
-*(Remains unchanged)*
+Un-implemented services will be represented by Go interfaces. In Phase 1, the `Product` service will interact with a `MockInventoryService` and `MockNetworkService` that return static or randomized data, allowing for UI and logic development without full implementation.
