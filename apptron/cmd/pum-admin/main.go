@@ -9,10 +9,41 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
+	"time"
 )
 
 //go:embed all:assets
 var assets embed.FS
+
+type Project struct {
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Visibility  string    `json:"visibility"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+var (
+	projects   = make(map[string]Project)
+	projectsMu sync.RWMutex
+)
+
+func init() {
+	projects["Main-Datacenter"] = Project{
+		Name:        "Main-Datacenter",
+		Description: "Core infrastructure management",
+		Visibility:  "private",
+		UpdatedAt:   time.Now(),
+	}
+}
+
+func logger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		log.Printf("%s %s %s %s", r.Method, r.URL.Path, r.RemoteAddr, time.Since(start))
+	})
+}
 
 func main() {
 	mode := os.Getenv("PUM_MODE")
@@ -22,34 +53,109 @@ func main() {
 
 	fmt.Printf("Starting PUM Unified Admin Distro (Mode: %s)...\n", mode)
 
-	// Custom Router
 	mux := http.NewServeMux()
 
-	// Health endpoint
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "OK")
 	})
 
-	// Mock API for projects (matches apptron.js urlFor logic)
 	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
-		projects := []map[string]interface{}{
-			{
-				"name":        "Main-Datacenter",
-				"description": "Core infrastructure management",
-				"updated_at":  "2024-03-20T10:00:00Z",
-			},
+		projectsMu.RLock()
+		defer projectsMu.RUnlock()
+
+		if r.Method == http.MethodGet {
+			var list []Project
+			for _, p := range projects {
+				list = append(list, p)
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(list)
+			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(projects)
+
+		if r.Method == http.MethodPost {
+			var p Project
+			if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			p.UpdatedAt = time.Now()
+			projectsMu.RUnlock()
+			projectsMu.Lock()
+			projects[p.Name] = p
+			projectsMu.Unlock()
+			projectsMu.RLock()
+
+			w.Header().Set("Location", "/edit/"+p.Name)
+			w.WriteHeader(http.StatusCreated)
+			return
+		}
 	})
 
-	// Mock Hanko/Auth
+	mux.HandleFunc("/projects/", func(w http.ResponseWriter, r *http.Request) {
+		name := strings.TrimPrefix(r.URL.Path, "/projects/")
+		name = strings.Split(name, "?")[0]
+		name = strings.TrimSuffix(name, "/")
+
+		projectsMu.RLock()
+		p, ok := projects[name]
+		projectsMu.RUnlock()
+
+		if r.Method == http.MethodHead {
+			if ok {
+				w.WriteHeader(http.StatusOK)
+			} else {
+				w.WriteHeader(http.StatusNotFound)
+			}
+			return
+		}
+
+		if r.Method == http.MethodGet {
+			if !ok {
+				http.NotFound(w, r)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(p)
+			return
+		}
+
+		if r.Method == http.MethodPut {
+			var update struct {
+				Description string `json:"description"`
+				Visibility  string `json:"visibility"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			projectsMu.Lock()
+			if val, ok := projects[name]; ok {
+				val.Description = update.Description
+				val.Visibility = update.Visibility
+				val.UpdatedAt = time.Now()
+				projects[name] = val
+			}
+			projectsMu.Unlock()
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		if r.Method == http.MethodDelete {
+			projectsMu.Lock()
+			delete(projects, name)
+			projectsMu.Unlock()
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+	})
+
 	mux.HandleFunc("/auth/user", func(w http.ResponseWriter, r *http.Request) {
 		user := map[string]interface{}{
-			"id": "1",
+			"id":       "1",
 			"username": "admin",
-			"email": "admin@example.com",
+			"email":    "admin@example.com",
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(user)
@@ -60,13 +166,13 @@ func main() {
 			"is_valid": true,
 			"claims": map[string]interface{}{
 				"username": "admin",
+				"sub":      "1",
 			},
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(session)
 	})
 
-	// Assets handler with .html fallback and meta injection
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		if path == "/" {
@@ -76,7 +182,6 @@ func main() {
 
 		contentStatic, _ := fs.Sub(assets, "assets")
 
-		// 1. Try exact path
 		cleanPath := strings.TrimPrefix(path, "/")
 		if data, err := fs.ReadFile(contentStatic, cleanPath); err == nil {
 			contentType := "text/plain"
@@ -95,7 +200,6 @@ func main() {
 			return
 		}
 
-		// 2. Try with .html suffix
 		htmlPath := cleanPath + ".html"
 		if data, err := fs.ReadFile(contentStatic, htmlPath); err == nil {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -112,7 +216,11 @@ func main() {
 	}
 
 	fmt.Printf("Admin Center available at http://localhost:%s\n", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	server := &http.Server{
+		Addr:    ":" + port,
+		Handler: logger(mux),
+	}
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -123,5 +231,8 @@ func injectMeta(data []byte) []byte {
     <meta name="auth-url" content="/auth">
     <meta name="project" content='{"name": "Local"}'>
     `
-	return []byte(strings.Replace(html, "<head>", "<head>"+meta, 1))
+	if strings.Contains(html, "<head>") {
+		return []byte(strings.Replace(html, "<head>", "<head>"+meta, 1))
+	}
+	return data
 }
