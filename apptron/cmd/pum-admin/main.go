@@ -131,11 +131,11 @@ func main() {
 				return
 			}
 			projectsMu.Lock()
-			if p, ok := projects[name]; ok {
-				p.Description = update.Description
-				p.Visibility = update.Visibility
-				p.UpdatedAt = time.Now()
-				projects[name] = p
+			if val, ok := projects[name]; ok {
+				val.Description = update.Description
+				val.Visibility = update.Visibility
+				val.UpdatedAt = time.Now()
+				projects[name] = val
 			}
 			projectsMu.Unlock()
 			w.WriteHeader(http.StatusOK)

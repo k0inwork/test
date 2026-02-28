@@ -19,11 +19,12 @@
         </header>
         <div class="projects-grid" id="projects-grid"></div>
     </div>
+
 <script type="module">
     import { getAuth, getSession, urlFor, redirectTo, getBundle, $, $$ } from "/lib/apptron.js";
     import { showToast } from "/lib/toast.js";
 
-    function createProjectCard(project, index) {
+    function createProjectCard(project) {
         const username = window.session ? window.session.claims.username : "admin";
         const description = project.description || 'No description available';
         const timestamp = project.updated_at || project.modified || project.lastModified;
@@ -45,21 +46,22 @@
                 timeText = (weeks === 1 ? '1 week ago' : weeks + ' weeks ago');
             } else timeText = date.toLocaleDateString();
         }
+
         const projectUrl = urlFor("/edit/" + project.name, {}, username);
-        return '<div class="project-card" data-url="' + projectUrl + '">' +
-            '<div class="card-header">' +
-                '<h2 class="title"><a style="text-decoration: none; color: inherit;" href="' + projectUrl + '">' + project.name + '</a></h2>' +
-                '<apptron-dropdown align="right">' +
-                '<button class="ellipsis-btn btn" type="button">⋮</button>' +
-                '<div class="card-menu" popover role="menu" aria-label="Project menu">' +
-                    '<button class="menu-item btn" role="menuitem" data-action="edit" data-project=\'' + JSON.stringify(project).replace(/'/g, "&apos;") + '\'>Edit Settings</button>' +
-                    '<button class="menu-item danger btn" role="menuitem" data-action="delete" data-project=\'' + JSON.stringify(project).replace(/'/g, "&apos;") + '\'>Delete Project</button>' +
-                '</div>' +
-                '</apptron-dropdown>' +
-            '</div>' +
-            '<p class="desc">' + description + '</p>' +
-            '<span class="time">' + timeText + '</span>' +
-            '</div>';
+        return `<div class="project-card" data-url="${projectUrl}">
+            <div class="card-header">
+                <h2 class="title"><a style="text-decoration: none; color: inherit;" href="${projectUrl}">${project.name}</a></h2>
+                <apptron-dropdown align="right">
+                <button class="ellipsis-btn btn" type="button">⋮</button>
+                <div class="card-menu" popover role="menu" aria-label="Project menu">
+                    <button class="menu-item btn" role="menuitem" data-action="edit" data-project='${JSON.stringify(project).replace(/'/g, "&apos;")}'>Edit Settings</button>
+                    <button class="menu-item danger btn" role="menuitem" data-action="delete" data-project='${JSON.stringify(project).replace(/'/g, "&apos;")}'>Delete Project</button>
+                </div>
+                </apptron-dropdown>
+            </div>
+            <p class="desc">${description}</p>
+            <span class="time">${timeText}</span>
+            </div>`;
     }
 
     function populateProjectsGrid(projects) {
@@ -69,14 +71,14 @@
             grid.innerHTML = '<p class="no-projects">No projects found. Create your first project!</p>';
             return;
         }
-        grid.innerHTML = projects.map((project, index) => createProjectCard(project, index)).join('');
+        grid.innerHTML = projects.map(createProjectCard).join('');
         grid.querySelectorAll('.project-card .menu-item').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const action = e.target.dataset.action;
                 const project = JSON.parse(e.target.dataset.project);
                 const username = window.session ? window.session.claims.username : "admin";
                 if (action === 'edit') {
-                    const resp = await window.modal.show("/com/project", {project: project});
+                    const resp = await window.modal.show("/com/project", { project: project });
                     if (resp && resp.ok) {
                         const listResp = await fetch(urlFor("/projects", {}, username));
                         populateProjectsGrid(await listResp.json());

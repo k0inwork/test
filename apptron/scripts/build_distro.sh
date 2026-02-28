@@ -41,11 +41,8 @@ for item in "$APPTRON_SRC/assets/"*; do
     cp -r "$item" "$FINAL_ASSETS_DIR/"
 done
 
-echo "Packaging custom pum.tar.gz into runner assets..."
+echo "Packaging custom sys.tar.gz into runner assets..."
 mkdir -p "$FINAL_ASSETS_DIR/bundles"
-tar -C "$BUNDLE_DIR" -czf "$FINAL_ASSETS_DIR/bundles/pum.tar.gz" .
-
-# Ensure we have a default sys.tar.gz (maybe just a small one if needed, or link to pum)
-cp "$FINAL_ASSETS_DIR/bundles/pum.tar.gz" "$FINAL_ASSETS_DIR/bundles/sys.tar.gz"
+tar -C "$BUNDLE_DIR" -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" .
 
 echo "Build complete! Custom Apptron assets are ready for embedding in $FINAL_ASSETS_DIR"
