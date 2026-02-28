@@ -15,5 +15,10 @@ resolver:
   package: graph
 
 autobind:
-  - pum-go/pkg/external
   - pum-go/pkg/models
+
+models:
+  Switch:
+    model: pum-go/pkg/models.Switch
+  SwitchPort:
+    model: pum-go/pkg/models.SwitchPort

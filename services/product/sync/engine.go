@@ -1,9 +1,10 @@
 package sync
 
 import (
+	"context"
 	"log/slog"
+	"pum-go/pkg/external"
 	"pum-go/pkg/models"
-	"pum-go/services/product/mock"
 	"strconv"
 	"strings"
 
@@ -11,14 +12,14 @@ import (
 )
 
 type SyncEngine struct {
-	DB   *gorm.DB
-	GLPI *mock.GLPIProvider
+	DB       *gorm.DB
+	Provider external.Provider
 }
 
-func NewSyncEngine(db *gorm.DB) *SyncEngine {
+func NewSyncEngine(db *gorm.DB, provider external.Provider) *SyncEngine {
 	return &SyncEngine{
-		DB:   db,
-		GLPI: &mock.GLPIProvider{},
+		DB:       db,
+		Provider: provider,
 	}
 }
 
@@ -47,8 +48,12 @@ func ParseName(fullName string) (region string, seq int, pouType string, name st
 }
 
 func (e *SyncEngine) Run() error {
-	slog.Info("Starting synchronization", "provider", "GLPI (Mock)")
-	assets := e.GLPI.GetAssets()
+	slog.Info("Starting synchronization", "provider", "External Data Service")
+	assets, err := e.Provider.GetPDUs(context.Background())
+	if err != nil {
+		slog.Error("Failed to fetch assets from provider", "error", err)
+		return err
+	}
 	slog.Debug("Fetched assets from provider", "count", len(assets))
 
 	for _, asset := range assets {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"pum-go/pkg/external"
 	"pum-go/pkg/models"
 	"pum-go/services/product/sync"
 	"testing"
@@ -26,7 +27,8 @@ func TestProductAPI(t *testing.T) {
 	db = testDB
 
 	r := gin.Default()
-	engine := sync.NewSyncEngine(db)
+	provider := &external.MockProvider{}
+	engine := sync.NewSyncEngine(db, provider)
 
 	r.GET("/nodes", func(c *gin.Context) {
 		var products []models.Product

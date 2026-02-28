@@ -1,8 +1,8 @@
 package sync
 
 import (
+	"pum-go/pkg/external"
 	"pum-go/pkg/models"
-	"pum-go/services/product/mock"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,8 @@ func TestSyncEngine_Run(t *testing.T) {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	db.AutoMigrate(&models.Product{})
 
-	engine := NewSyncEngine(db)
+	provider := &external.MockProvider{}
+	engine := NewSyncEngine(db, provider)
 
 	// 1. Initial Sync
 	err := engine.Run()
@@ -25,24 +26,21 @@ func TestSyncEngine_Run(t *testing.T) {
 	assert.Equal(t, int64(2), count)
 
 	var p1 models.Product
-	db.Where("glpi_uuid = ?", "glpi-1").First(&p1)
+	// In MockProvider, the PDU ID is "pdu-1" and name "MSK/1-ПОУ Rack 1"
+	db.Where("glpi_uuid = ?", "pdu-1").First(&p1)
 	assert.Equal(t, "Rack 1", p1.Name)
 	assert.Equal(t, "MSK", p1.Region)
 
-	// 2. Rename Detection Mocking
-	// Modify the mock provider to return a renamed asset
-	engine.GLPI = &mock.GLPIProvider{} // Using a custom mock for rename would be better, but let's simulate manually
-
-	// Simulate rename in GLPI: glpi-1 is now "MSK/1-ПОУ New Rack Name"
-	renamedAsset := mock.GLPIAsset{
-		ID:      "glpi-1",
+	// 2. Rename Detection Test
+	// Simulate rename: glpi-1 is now "MSK/1-ПОУ New Rack Name"
+	renamedAsset := external.Gpdu{
+		ID:      "pdu-1",
 		Name:    "MSK/1-ПОУ New Rack Name",
 		Long:    "37.6173",
 		Lat:     "55.7558",
 		Address: "New Address",
 	}
 
-	// Manually run sync logic for renamed asset
 	region, seq, _, name := ParseName(renamedAsset.Name)
 	var product models.Product
 	// Search by Index (Old Name) - Should fail

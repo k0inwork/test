@@ -32,8 +32,11 @@ go run services/network/main.go &
 echo "Starting Task Service on :8085..."
 go run services/task/main.go &
 
-echo "Starting Hardware Service on :8086..."
-go run services/hardware/main.go &
+echo "Starting External Modules Proxy on :8086..."
+go run services/external-modules/main.go &
+
+echo "Starting External Data Service on :8089..."
+go run services/external-data/main.go &
 
 echo "Starting Terminal Service on :8087..."
 go run services/terminal/main.go &
