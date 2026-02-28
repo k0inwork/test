@@ -10,7 +10,7 @@ The transition from PUM-Django to PUM-Go is an ongoing process. Below is the cur
 | **Product / PDU** | Ported | Go Microservice | Basic inventory and mock sync implemented. |
 | **Inventory / GLPI** | Partial | Go Microservice | Integration engine in progress. |
 | **Network / DNS / DHCP**| Pending | Django (Legacy) | Still running in the original monolith. |
-| **GWS / VXLAN** | Pending | Django (Legacy) | Coordination logic needs porting to Go. |
+| **GWS** | Pending | Django (Legacy) | Logical management points still in legacy code. |
 | **Web Frontend** | Active | Go (Gin SSR) | Provides standard web access to core data. |
 | **Apptron Runner** | Active | Go (Native) | Host for the new "Command Center" UI. |
 | **WebSSH** | In Transition| WASM | Moving to a client-side WASM implementation. |

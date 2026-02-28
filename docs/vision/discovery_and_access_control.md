@@ -6,12 +6,12 @@ The PUM-Go architecture is built for extensibility. Instead of a hard-coded set 
 ## Dynamic Service Discovery
 The **Registry Service** acts as the source of truth for the entire ecosystem.
 -   **Registration**: When a microservice (e.g., Inventory, Network) starts, it registers its endpoint and its **Capabilities** with the Registry.
--   **Capabilities**: These are machine-readable tags (e.g., `users`, `nodes`, `port-control`, `vxlan-manage`) that define what functions the service provides.
+-   **Capabilities**: These are machine-readable tags (e.g., `users`, `nodes`, `port-control`, `network-manage`) that define what functions the service provides.
 -   **Heartbeats**: Services maintain an active status via regular heartbeats, ensuring that the UI only presents available features.
 
 ## Capability-Based UI (The "Ghost" Interface)
 Both the Go-based frontend and the Apptron rich client use the Registry to build their interfaces dynamically.
--   **Feature Detection**: If the "vxlan-manage" capability is not present in the Registry, the corresponding menus, dashboards, and CLI commands are hidden.
+-   **Feature Detection**: If the "network-manage" capability is not present in the Registry, the corresponding menus, dashboards, and CLI commands are hidden.
 -   **Resilience**: The UI gracefully degrades or upgrades based on the real-time availability of backend services.
 
 ## The Future of Access Control (RBAC)
