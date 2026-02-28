@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/config"
@@ -23,10 +25,15 @@ type RegisteredService struct {
 	Endpoint     string   `json:"endpoint"`
 	Capabilities []string `json:"capabilities"`
 	IsCore       bool     `json:"is_core"`
+	Enabled      bool     `json:"enabled"`
 }
 
-func getServices() ([]RegisteredService, error) {
-	resp, err := http.Get("http://localhost:8088/services")
+func getServices(admin bool) ([]RegisteredService, error) {
+	url := "http://localhost:8088/services"
+	if admin {
+		url = "http://localhost:8088/admin/services"
+	}
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -61,15 +68,48 @@ func main() {
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
 
+	r.SetFuncMap(template.FuncMap{
+		"HasCap": func(caps []string, target string) bool {
+			for _, c := range caps {
+				if c == target {
+					return true
+				}
+			}
+			return false
+		},
+	})
+
 	r.LoadHTMLGlob("services/frontend/templates/base.html")
 
-	// Middleware to inject services and check core availability
+	getCommonH := func(c *gin.Context) gin.H {
+		services, _ := c.Get("services")
+		user, _ := c.Get("user")
+		role, _ := c.Get("role")
+		return gin.H{
+			"Services": services,
+			"User":     user,
+			"Role":     role,
+			"IsAdmin":  role == "admin",
+		}
+	}
+
 	r.Use(func(c *gin.Context) {
-		if c.Request.URL.Path == "/health" {
+		if c.Request.URL.Path == "/login" || c.Request.URL.Path == "/health" {
 			c.Next()
 			return
 		}
-		services, err := getServices()
+
+		user, _ := c.Cookie("pum_user")
+		role, _ := c.Cookie("pum_role")
+		if user == "" {
+			c.Redirect(http.StatusFound, "/login")
+			c.Abort()
+			return
+		}
+		c.Set("user", user)
+		c.Set("role", role)
+
+		services, err := getServices(false)
 		if err != nil {
 			c.String(http.StatusServiceUnavailable, "Registry Service is Offline")
 			c.Abort()
@@ -102,6 +142,41 @@ func main() {
 		c.Next()
 	})
 
+	r.GET("/login", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "base.html", gin.H{"IsLogin": true})
+	})
+
+	r.POST("/login", func(c *gin.Context) {
+		username := c.PostForm("username")
+		password := c.PostForm("password")
+
+		loginData := map[string]string{"username": username, "password": password}
+		jsonData, _ := json.Marshal(loginData)
+		resp, err := http.Post("http://localhost:8081/login", "application/json", bytes.NewBuffer(jsonData))
+		if err != nil || resp.StatusCode != http.StatusOK {
+			c.HTML(http.StatusUnauthorized, "base.html", gin.H{"IsLogin": true, "Error": "Invalid credentials"})
+			return
+		}
+		defer resp.Body.Close()
+
+		var result struct {
+			Username string `json:"username"`
+			Role     string `json:"role"`
+		}
+		json.NewDecoder(resp.Body).Decode(&result)
+
+		c.SetCookie("pum_user", result.Username, 3600, "/", "localhost", false, true)
+		c.SetCookie("pum_role", result.Role, 3600, "/", "localhost", false, true)
+
+		c.Redirect(http.StatusFound, "/")
+	})
+
+	r.GET("/logout", func(c *gin.Context) {
+		c.SetCookie("pum_user", "", -1, "/", "localhost", false, true)
+		c.SetCookie("pum_role", "", -1, "/", "localhost", false, true)
+		c.Redirect(http.StatusFound, "/login")
+	})
+
 	r.GET("/", func(c *gin.Context) {
 		services := c.MustGet("services").([]RegisteredService)
 		var users []models.User
@@ -126,12 +201,11 @@ func main() {
 			}
 		}
 
-		c.HTML(http.StatusOK, "base.html", gin.H{
-			"UserCount": len(users),
-			"NodeCount": len(nodes),
-			"IsIndex":   true,
-			"Services":  services,
-		})
+		h := getCommonH(c)
+		h["UserCount"] = len(users)
+		h["NodeCount"] = len(nodes)
+		h["IsIndex"] = true
+		c.HTML(http.StatusOK, "base.html", h)
 	})
 
 	r.GET("/nodes", func(c *gin.Context) {
@@ -147,15 +221,14 @@ func main() {
 			}
 		}
 
-		c.HTML(http.StatusOK, "base.html", gin.H{
-			"Nodes":    nodes,
-			"IsNodes":  true,
-			"Services": services,
-		})
+		h := getCommonH(c)
+		h["Nodes"] = nodes
+		h["IsNodes"] = true
+		c.HTML(http.StatusOK, "base.html", h)
 	})
 
 	r.POST("/sync/nodes", func(c *gin.Context) {
-		services, _ := getServices()
+		services, _ := getServices(false)
 		prodSvc := findServiceByCapability(services, "sync")
 		if prodSvc != "" {
 			http.Post(prodSvc+"/sync", "application/json", nil)
@@ -176,11 +249,10 @@ func main() {
 			}
 		}
 
-		c.HTML(http.StatusOK, "base.html", gin.H{
-			"Users":    users,
-			"IsUsers":  true,
-			"Services": services,
-		})
+		h := getCommonH(c)
+		h["Users"] = users
+		h["IsUsers"] = true
+		c.HTML(http.StatusOK, "base.html", h)
 	})
 
 	r.GET("/inventory", func(c *gin.Context) {
@@ -196,11 +268,10 @@ func main() {
 			}
 		}
 
-		c.HTML(http.StatusOK, "base.html", gin.H{
-			"Switches":    switches,
-			"IsInventory": true,
-			"Services":    services,
-		})
+		h := getCommonH(c)
+		h["Switches"] = switches
+		h["IsInventory"] = true
+		c.HTML(http.StatusOK, "base.html", h)
 	})
 
 	r.GET("/ports", func(c *gin.Context) {
@@ -216,15 +287,14 @@ func main() {
 			}
 		}
 
-		c.HTML(http.StatusOK, "base.html", gin.H{
-			"Ports":    ports,
-			"IsPorts":  true,
-			"Services": services,
-		})
+		h := getCommonH(c)
+		h["Ports"] = ports
+		h["IsPorts"] = true
+		c.HTML(http.StatusOK, "base.html", h)
 	})
 
 	r.POST("/sync/inventory", func(c *gin.Context) {
-		services, _ := getServices()
+		services, _ := getServices(false)
 		invSvc := findServiceByCapability(services, "sync")
 		if invSvc != "" {
 			http.Post(invSvc+"/sync", "application/json", nil)
@@ -252,11 +322,10 @@ func main() {
 			}
 		}
 
-		c.HTML(http.StatusOK, "base.html", gin.H{
-			"Hosts":        hosts,
-			"IsMonitoring": true,
-			"Services":     services,
-		})
+		h := getCommonH(c)
+		h["Hosts"] = hosts
+		h["IsMonitoring"] = true
+		c.HTML(http.StatusOK, "base.html", h)
 	})
 
 	r.GET("/tasks", func(c *gin.Context) {
@@ -272,11 +341,41 @@ func main() {
 			}
 		}
 
-		c.HTML(http.StatusOK, "base.html", gin.H{
-			"Tasks":    tasks,
-			"IsTasks":  true,
-			"Services": services,
-		})
+		h := getCommonH(c)
+		h["Tasks"] = tasks
+		h["IsTasks"] = true
+		c.HTML(http.StatusOK, "base.html", h)
+	})
+
+	r.GET("/admin", func(c *gin.Context) {
+		role, _ := c.Get("role")
+		if role != "admin" {
+			c.Redirect(http.StatusFound, "/")
+			return
+		}
+
+		modules, _ := getServices(true)
+
+		h := getCommonH(c)
+		h["Modules"] = modules
+		h["IsAdminPage"] = true
+		c.HTML(http.StatusOK, "base.html", h)
+	})
+
+	r.POST("/admin/modules/:name/toggle", func(c *gin.Context) {
+		role, _ := c.Get("role")
+		if role != "admin" {
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+		name := c.Param("name")
+		enabled := c.PostForm("enabled") == "true"
+
+		data, _ := json.Marshal(map[string]bool{"enabled": enabled})
+		url := fmt.Sprintf("http://localhost:8088/admin/services/%s/toggle", name)
+		http.Post(url, "application/json", bytes.NewBuffer(data))
+
+		c.Redirect(http.StatusFound, "/admin")
 	})
 
 	slog.Info("Frontend service starting", "port", 8080)
