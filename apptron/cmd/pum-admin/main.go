@@ -31,25 +31,49 @@ func main() {
 		fmt.Fprint(w, "OK")
 	})
 
-	// Mock API for projects (matches apptron.js urlFor logic)
+	// Mock API for projects
 	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
-		projects := []map[string]interface{}{
-			{
-				"name":        "Main-Datacenter",
-				"description": "Core infrastructure management",
-				"updated_at":  "2024-03-20T10:00:00Z",
-			},
+		if r.Method == http.MethodGet {
+			projects := []map[string]interface{}{
+				{
+					"name":        "Main-Datacenter",
+					"description": "Core infrastructure management",
+					"updated_at":  "2024-03-20T10:00:00Z",
+				},
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(projects)
+			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(projects)
+		if r.Method == http.MethodPost {
+			w.Header().Set("Location", "/edit/new-project")
+			w.WriteHeader(http.StatusCreated)
+			return
+		}
+	})
+
+	mux.HandleFunc("/projects/", func(w http.ResponseWriter, r *http.Request) {
+		name := strings.TrimPrefix(r.URL.Path, "/projects/")
+		if r.Method == http.MethodHead {
+			if name == "Main-Datacenter" {
+				w.WriteHeader(http.StatusOK)
+			} else {
+				w.WriteHeader(http.StatusNotFound)
+			}
+			return
+		}
+		if r.Method == http.MethodDelete || r.Method == http.MethodPut {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 	})
 
 	// Mock Hanko/Auth
 	mux.HandleFunc("/auth/user", func(w http.ResponseWriter, r *http.Request) {
 		user := map[string]interface{}{
-			"id": "1",
+			"id":       "1",
 			"username": "admin",
-			"email": "admin@example.com",
+			"email":    "admin@example.com",
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(user)
