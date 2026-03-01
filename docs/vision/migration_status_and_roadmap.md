@@ -30,6 +30,7 @@ The transition from PUM-Django to PUM-Go is an ongoing process. Below is the cur
 -   **Technical Milestone**: Transition inter-service communication to a high-performance bus (e.g., NATS).
 -   Expand the Action Registry to cover core networking tasks (Port management, VLANs).
 -   Implement the initial Go-based "Hardware Proxies" for Switches.
+-   **Technical Milestone**: Implementation of legacy SQL views (`ports_view`, `switch_view`) within the Inventory service database to support external GUIs.
 
 ### Phase 3: Service Abstraction & Rich Client
 -   Port the **Services** and **Integrity** modules to Go.
