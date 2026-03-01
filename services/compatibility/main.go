@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/logging"
@@ -33,19 +34,67 @@ func main() {
 	// Compatibility Group
 	comp := r.Group("/compatibility")
 	{
-		// Mimic User list from identity service
-		comp.GET("/users", func(c *gin.Context) {
-			proxyLegacy(c, "http://localhost:8081/users", "users")
-		})
+		// --- Ported Services (Active Proxies) ---
 
-		// Mimic Product/Node list from product service
-		comp.GET("/nodes", func(c *gin.Context) {
-			proxyLegacy(c, "http://localhost:8082/nodes", "products")
-		})
+		// Identity / Accounts
+		comp.GET("/accounts/list/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8081/users", "users") })
+		comp.GET("/accounts/currentuser", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8081/users/current", "user") })
+
+		// Products
+		comp.GET("/products/products/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8082/nodes", "products") })
+		comp.GET("/products/products/:pk/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8082/nodes/"+c.Param("pk"), "product") })
+
+		// --- Legacy Service Stubs (Exact paths from original urls.py) ---
+
+		// products app
+		comp.GET("/products/nodes-problems/", stubHandler("nodes_problems"))
+		comp.GET("/products/zabbix_problems/", stubHandler("zabbix_problems"))
+
+		// data app
+		comp.GET("/data/switch/", stubHandler("switch_list"))
+		comp.GET("/data/pdu/list", stubHandler("pdu_list"))
+		comp.GET("/data/ipmi/list", stubHandler("ipmi_list"))
+
+		// network app
+		comp.GET("/network/dhcp/", stubHandler("dhcp_list"))
+		comp.GET("/network/dns/", stubHandler("dns_list"))
+		comp.GET("/network/subnetwork/", stubHandler("subnetwork_list"))
+
+		// gws app
+		comp.GET("/gws/gws/", stubHandler("gateways"))
+		comp.GET("/gws/historysession/", stubHandler("session_history"))
+
+		// services app
+		comp.GET("/services/listkeyservice/", stubHandler("key_services"))
+		comp.GET("/services/listdataservice/", stubHandler("data_services"))
+
+		// tasks app
+		comp.GET("/tasks/viewtasks/", stubHandler("tasks"))
+
+		// accounts app (extra)
+		comp.GET("/accounts/activitylist/", stubHandler("activity_list"))
+		comp.GET("/accounts/group/list", stubHandler("groups"))
 	}
 
 	slog.Info("Compatibility Service starting", "port", 8090)
 	r.Run(":8090")
+}
+
+func stubHandler(contextKey string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		isJSON := c.Query("json") == "true"
+		if isJSON {
+			c.JSON(http.StatusOK, LegacyResponse{
+				Context: map[string]interface{}{
+					contextKey: []interface{}{},
+					"message":    fmt.Sprintf("Legacy endpoint for %s is not yet implemented in Go microservices.", contextKey),
+				},
+				Errors: []string{},
+			})
+		} else {
+			c.String(http.StatusNotImplemented, "Endpoint %s not yet implemented", contextKey)
+		}
+	}
 }
 
 func proxyLegacy(c *gin.Context, targetURL string, contextKey string) {
@@ -65,7 +114,6 @@ func proxyLegacy(c *gin.Context, targetURL string, contextKey string) {
 	}
 
 	if isJSON {
-		// Mimic the Django json_middleware structure
 		c.JSON(http.StatusOK, LegacyResponse{
 			Context: map[string]interface{}{
 				contextKey: data,
@@ -73,7 +121,6 @@ func proxyLegacy(c *gin.Context, targetURL string, contextKey string) {
 			Errors: []string{},
 		})
 	} else {
-		// For side-by-side comparison, return raw data if json=true is missing
 		c.JSON(http.StatusOK, data)
 	}
 }
