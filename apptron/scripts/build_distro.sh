@@ -34,12 +34,6 @@ export PUM_MODE="mock"
 echo "Welcome to the PUM Admin Distro (Phase 1: Mock Mode)"
 EOP
 
-echo "Copying base Apptron assets to runner assets..."
-for item in "$APPTRON_SRC/assets/"*; do
-    basename_item=$(basename "$item")
-    rm -rf "$FINAL_ASSETS_DIR/$basename_item"
-    cp -r "$item" "$FINAL_ASSETS_DIR/"
-done
 
 echo "Packaging custom sys.tar.gz into runner assets..."
 mkdir -p "$FINAL_ASSETS_DIR/bundles"
