@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 	"pum-go/services/identity/graph"
@@ -22,7 +23,7 @@ func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("identity.db"), &gorm.Config{})
 	if err != nil { panic(err) }
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.Group{})
 	var count int64
 	db.Model(&models.User{}).Count(&count)
 	if count == 0 { db.Create(&models.User{Username: "admin", Role: "admin"}) }
@@ -54,12 +55,49 @@ func main() {
 	r.POST("/login", func(c *gin.Context) {
 		var login struct { Username, Password string }
 		if err := c.ShouldBindJSON(&login); err != nil { c.JSON(400, gin.H{"error": "err"}); return }
-		success, role, _ := ldapMock.Authenticate(login.Username, login.Password)
+		success, role, groups, _ := ldapMock.Authenticate(login.Username, login.Password)
 		if success {
-			c.JSON(200, gin.H{"username": login.Username, "role": role, "status": "logged_in"})
+			// Sync user to DB
+			var user models.User
+			if err := db.Where("username = ?", login.Username).First(&user).Error; err != nil {
+				user = models.User{Username: login.Username, Role: role}
+				db.Create(&user)
+			}
+
+			// Clear existing groups and re-associate
+			db.Model(&user).Association("Groups").Clear()
+
+			var caps []string
+			for _, g := range groups {
+				var group models.Group
+				// Sync group to DB
+				if err := db.Where("name = ?", g.Name).First(&group).Error; err != nil {
+					group = models.Group{Name: g.Name, Capabilities: strings.Join(g.Capabilities, ",")}
+					db.Create(&group)
+				} else {
+					// Update capabilities if they changed in LDAP
+					group.Capabilities = strings.Join(g.Capabilities, ",")
+					db.Save(&group)
+				}
+				db.Model(&user).Association("Groups").Append(&group)
+				caps = append(caps, g.Capabilities...)
+			}
+
+			c.JSON(200, gin.H{
+				"username": login.Username,
+				"role": role,
+				"status": "logged_in",
+				"capabilities": strings.Join(caps, ","),
+			})
 		} else {
 			c.JSON(401, gin.H{"error": "unauth"})
 		}
+	})
+
+	r.GET("/groups", func(c *gin.Context) {
+		var groups []models.Group
+		db.Find(&groups)
+		c.JSON(http.StatusOK, groups)
 	})
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
 
@@ -38,17 +39,50 @@ func main() {
 		services, _ := c.Get("services")
 		user, _ := c.Get("pum_user")
 		role, _ := c.Get("pum_role")
+		capsStr, _ := c.Get("pum_caps")
+
+		var caps []string
+		if capsStr != nil {
+			caps = strings.Split(capsStr.(string), ",")
+		}
+		hasAll := false
+		for _, cap := range caps {
+			if cap == "*" || cap == "all" {
+				hasAll = true
+				break
+			}
+		}
 
 		type NavItem struct { Label string; URL string }
 		nav := []NavItem{}
 
 		if services != nil {
 			for _, s := range services.([]RegisteredService) {
-				for _, item := range s.Menu {
-					nav = append(nav, NavItem{
-						Label: item.Label,
-						URL:   fmt.Sprintf("/m/%s%s", s.Name, item.Path),
-					})
+				// Check capabilities
+				allowed := false
+				if hasAll {
+					allowed = true
+				} else {
+					for _, reqCap := range s.Capabilities {
+						for _, userCap := range caps {
+							if reqCap == userCap {
+								allowed = true
+								break
+							}
+						}
+						if allowed {
+							break
+						}
+					}
+				}
+
+				if allowed {
+					for _, item := range s.Menu {
+						nav = append(nav, NavItem{
+							Label: item.Label,
+							URL:   fmt.Sprintf("/m/%s%s", s.Name, item.Path),
+						})
+					}
 				}
 			}
 		}
@@ -68,6 +102,7 @@ func main() {
 		}
 		user, _ := c.Cookie("pum_user")
 		role, _ := c.Cookie("pum_role")
+		caps, _ := c.Cookie("pum_caps")
 		if user == "" {
 			c.Redirect(http.StatusFound, "/login")
 			c.Abort()
@@ -75,6 +110,7 @@ func main() {
 		}
 		c.Set("pum_user", user)
 		c.Set("pum_role", role)
+		c.Set("pum_caps", caps)
 
 		resp, err := http.Get("http://localhost:8088/services")
 		if err == nil {
@@ -99,17 +135,19 @@ func main() {
 			c.HTML(http.StatusUnauthorized, "base.html", gin.H{"IsLogin": true, "Error": "Login failed"})
 			return
 		}
-		var res struct { Username, Role string }
+		var res struct { Username, Role, Capabilities string }
 		json.NewDecoder(resp.Body).Decode(&res)
 		resp.Body.Close()
 		c.SetCookie("pum_user", res.Username, 3600, "/", "", false, true)
 		c.SetCookie("pum_role", res.Role, 3600, "/", "", false, true)
+		c.SetCookie("pum_caps", res.Capabilities, 3600, "/", "", false, true)
 		c.Redirect(http.StatusFound, "/")
 	})
 
 	r.GET("/logout", func(c *gin.Context) {
 		c.SetCookie("pum_user", "", -1, "/", "", false, true)
 		c.SetCookie("pum_role", "", -1, "/", "", false, true)
+		c.SetCookie("pum_caps", "", -1, "/", "", false, true)
 		c.Redirect(http.StatusFound, "/login")
 	})
 
