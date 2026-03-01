@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Apptron</title>
+
+  <!-- Mobile tweaks -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Code">
+
+  <!-- Disable pinch zooming -->
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+
+  <!-- Icons (disabled for now) -->
+  <!-- <link rel="apple-touch-icon" href="/vscode/code-192.png" /> -->
+  <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/lib/html-component.js" type="module"></script>
+  <script src="/lib/dropdown.js" type="module"></script>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    iframe {
+      border: 0;
+      flex: 1;
+      pointer-events: auto !important;
+      user-select: none;
+    }
+
+    .wanix-terminal {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .xterm {
+      height: 100%;
+      width: 100%;
+    }
+
+    .xterm-viewport,
+    .xterm-screen {
+      width: 100%;
+      height: 100%;
+    }
+
+    .xterm-screen {
+      padding: 4px 5px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <script type="module">
+    console.log("crossOriginIsolated", crossOriginIsolated, location.origin);
+
+    // not ready to deploy service worker yet, can uncomment in dev
+    // import { register } from "/sw.js";
+    // const handle = await register(null, { timeout: 20000, prefix: "/:/" });
+
+
+    const mode = location.pathname.slice(1).split("/")[0];
+    if (mode === "edit") {
+      // load the iframe after service worker is ready
+      document.querySelector("#vscode-frame").src = "/_vscode";
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("topbar") === "0" || params.get("embed") === "1") {
+      document.querySelector("#topbar").style.display = "none";
+    }
+
+    import { setupWanix, getAuth, envUUID, getMeta, getOrigin, redirectTo, urlFor } from "/lib/apptron.js";
+
+    const loader = document.getElementById("loader");
+    loader.showModal();
+    loader.loaded = () => {
+      loader.classList.add("fade-out");
+      setTimeout(() => {
+        loader.close();
+        loader.remove();
+      }, 200);
+    };
+
+    let project = JSON.parse(getMeta("project"));
+    const auth = await getAuth();
+    window.apptron = {
+      mode: mode,
+      user: new Promise(async (resolve, reject) => {
+        try {
+          const session = await auth.validatedSession;
+          if (!session.is_valid) {
+            if (project["visibility"] !== "public") {
+              redirectTo(urlFor("/signin"));
+              return;
+            }
+            resolve(null);
+            return;
+          }
+          setInterval(async () => {
+            const session = await auth.validateSession();
+            if (!session.is_valid) {
+              redirectTo(urlFor("/signin"));
+            }
+          }, 300 * 1000); // every 5 minutes
+          resolve(await auth.getUser());
+        } catch (error) {
+          resolve(null);
+        }
+      }),
+      origin: window.location.origin,
+      env: project,
+      refreshEnv: async () => {
+        const tokenParam = { token: (await getAuth()).getSessionToken() };
+        fetch(urlFor(`/projects/${project.name}`, tokenParam, window.session.claims.username))
+        .then(resp => resp.json())
+        .then(data => {
+          project = data;
+          window.apptron.env = data;
+        });
+      }
+    }
+
+    window.apptron.instance = await setupWanix();
+
+    // set service worker handler after wanix is available
+    // handle(async (req) => {
+    //   await window.apptron.instance.ready();
+    //   const url = new URL(req.url);
+    //   const path = url.pathname.slice(3); // remove the leading /:/
+    //   try {
+    //     const data = await window.apptron.instance.readFile(path);
+    //     return new Response(data, { status: 200 });
+    //   } catch (error) {
+    //     console.warn(error);
+    //     return new Response("Not found", { status: 404 });
+    //   }
+    // });
+
+    // register "wanix port factory" service over messagechannel sent to top frame
+    // so other frames can request a wanix port from the top frame
+    const topChannel = new MessageChannel();
+    topChannel.port2.onmessage = async (e) => {
+      await window.apptron.instance.ready();
+      const wport = window.apptron.instance.createPort();
+      const p9channel = new MessageChannel();
+      p9channel.port1.onmessage = (e) => {
+        window.apptron.instance._virtioHandle(e.data, (buf) => {
+          p9channel.port1.postMessage(buf);
+        })
+      };
+      e.data.port.postMessage({ wanix: wport, p9: p9channel.port2 }, [wport, p9channel.port2]);
+    };
+    top.postMessage({ factory: topChannel.port1 }, getOrigin(), [topChannel.port1]);
+
+
+    // need to register this as early as possible
+    window.addEventListener("message", async (event) => {
+      if (event.data.port && mode === "edit") {
+        console.log("vscode waiting for apptron...");
+        await window.apptron.instance.ready();
+        loader.loaded();
+        const port = window.apptron.instance.createPort();
+        event.data.port.postMessage({ wanix: port }, [port]);
+      }
+    });
+
+    if (mode === "console") {
+      await window.apptron.instance.ready();
+      const w = window.apptron.instance;
+      const xid = (await w.readText("web/dom/new/xterm")).trim();
+      await w.writeFile("task/1/ctl", `bind #console/data web/dom/${xid}/data`);
+      await w.writeFile("web/dom/body/ctl", `append-child ${xid}`);
+      loader.loaded();
+    }
+
+  </script>
+  <div id="topbar">
+    <html-component src="/com/topbar"></html-component>
+  </div>
+  <iframe id="vscode-frame" allow="clipboard-read; clipboard-write; cross-origin-isolated"
+    sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox"></iframe>
+
+  <dialog id="loader">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </dialog>
+</body>
+</html>

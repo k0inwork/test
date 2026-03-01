@@ -1,0 +1,136 @@
+<html>
+<style>
+    @import url("/styles.css");
+    :host { display: block; }
+</style>
+
+<div id="share-body" class="dialog-body" style="visibility:hidden">
+
+<fieldset class="visibility-group" role="radiogroup" aria-labelledby="visibility-legend">
+    <legend id="visibility-legend">Visibility</legend>
+
+    <label class="radio-option p-2" for="vis-public">
+        <input type="radio" id="vis-public" name="visibility" value="public"
+               aria-describedby="vis-public-help">
+        <span class="option-title">Public</span>
+        <span id="vis-public-help" class="option-help">
+            Anyone with a link has View access
+        </span>
+    </label>
+
+    <label class="radio-option p-2" for="vis-private">
+        <input type="radio" id="vis-private" name="visibility" value="private" checked
+               aria-describedby="vis-private-help">
+        <span class="option-title">Private 🔒</span>
+        <span id="vis-private-help" class="option-help">
+            Only people you've directly invited can access this project
+        </span>
+    </label>
+</fieldset>
+
+<div id="share-block">
+    <label for="share-url">Share URL</label>
+    <div class="input-row">
+        <input id="share-url" type="text" readonly spellcheck="false" />
+        <button type="button" id="copy-url" class="icon-btn secondary btn" aria-label="Copy URL" title="Copy">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M6 6L7.5 4.5H15.621L21 9.879V21L19.5 22.5H7.5L6 21V6ZM19.5 10.5L15 6H7.5V21H19.5V10.5Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M4.5 1.5L3 3V18L4.5 19.5V3H14.121L12.621 1.5H4.5Z" fill="white"/>
+            </svg>
+        </button>
+    </div>
+
+</div>
+
+<div class="dialog-footer">
+    <button id="save-btn" type="button" class="btn primary" disabled><span>Save</span></button>
+</div>
+
+</div>
+
+<script type="module">
+    import { urlFor, getAuth, copyText, isLocalhost, currentURL } from "/lib/apptron.js";
+    const { project } = component?.context || {};
+
+    const CHECK_SVG = `
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M21.6464 4.98438L8.94145 19.9844L7.75645 19.9304L2.73145 12.7754L3.95845 11.9144L8.42545 18.2744L20.5019 4.01538L21.6479 4.98438H21.6464Z" fill="white"/>
+    </svg>
+    `;
+
+    queueMicrotask(async () => {
+        try {
+            const copyBtn = $("#copy-url");
+            if (copyBtn) {
+                copyBtn.addEventListener("click", async () => {
+                    const ok = await copyText($("#share-url").value || "");
+                    if (!ok) return;
+
+                    const original = copyBtn.innerHTML;
+                    copyBtn.innerHTML = CHECK_SVG;
+                    copyBtn.setAttribute("aria-label", "Copied");
+
+                    setTimeout(() => {
+                        copyBtn.innerHTML = original;
+                        copyBtn.setAttribute("aria-label", "Copy URL");
+                    }, 1200);
+                });
+            }
+            // Build share URL
+            $("#share-url").value = await currentURL();
+
+            // toggle the share block and copy button visibility
+            function toggleShareBlock(visibility) {
+                const isPublic = visibility === "public";
+                $("#share-block").toggleAttribute("hidden", !isPublic);
+                $("#copy-url").toggleAttribute("hidden", !isPublic);
+                $("#save-btn").disabled = (visibility === project.visibility);
+            }
+
+            // set visibility and check the radio button
+            toggleShareBlock(project.visibility);
+            $(`#vis-${project.visibility}`).checked = true;
+            $("#vis-public").addEventListener("change", (e) => toggleShareBlock(e.target.value));
+            $("#vis-private").addEventListener("change", (e) => toggleShareBlock(e.target.value));
+
+            // save the visibility to the server
+            $("#save-btn").addEventListener("click", async () => {
+                const visibility = $('input[name="visibility"]:checked').value;
+
+                // doubled check if anything changed
+                if (visibility === project.visibility) {
+                    return;
+                }
+
+                $("#save-btn").classList.add("btn-loading");
+                try {
+                    const tokenParam = { token: (await getAuth()).getSessionToken() };
+                    const username   = window.session?.claims?.username;
+
+                    const resp = await fetch(
+                        urlFor(`/projects/${project.name}`, tokenParam, username),
+                        {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({visibility})
+                        }
+                    );
+
+                    if (!resp.ok) {
+                        throw new Error(resp.status);
+                    }
+                } catch (err) {
+                    console.error("Error updating visibility", err);
+                }
+                $("#save-btn").classList.remove("btn-loading");
+
+                // Close and resolve
+                window.modal.finish({ saved: true });
+            });
+        } finally {
+            const body = $("#share-body");
+            if (body) body.style.visibility = "visible";
+        }
+    });
+</script>
+</html>

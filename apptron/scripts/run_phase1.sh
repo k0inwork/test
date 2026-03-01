@@ -10,6 +10,12 @@ if [ ! -d "$APPTRON_SRC" ]; then
     git clone --depth 1 https://github.com/tractordev/apptron "$APPTRON_SRC"
 fi
 
+if [ ! -d "$APPTRON_DIR/cmd/pum-admin/assets/vscode" ]; then
+    echo "Extracting VSCode assets..."
+    unzip -q "$APPTRON_DIR/cmd/pum-admin/assets/vscode.zip" -d "$APPTRON_DIR/cmd/pum-admin/assets/.tmp-vscode"
+    mv "$APPTRON_DIR/cmd/pum-admin/assets/.tmp-vscode/dist/vscode" "$APPTRON_DIR/cmd/pum-admin/assets/vscode"
+    rm -rf "$APPTRON_DIR/cmd/pum-admin/assets/.tmp-vscode"
+fi
 echo "Building PUM Admin Distro (Phase 1)..."
 bash "$APPTRON_DIR/scripts/build_distro.sh"
 
