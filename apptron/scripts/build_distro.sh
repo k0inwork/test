@@ -51,6 +51,13 @@ if [ -d "$APPTRON_DIR/scripts/v86" ]; then
     cp "$APPTRON_DIR/scripts/v86/"* "$BUILD_DIR/sys-bundle/v86/" 2>/dev/null || true
 fi
 
-tar -C "$BUILD_DIR/sys-bundle" -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" rootfs v86
+# Add kernel to sys-bundle
+rm -rf "$BUILD_DIR/sys-bundle/kernel"
+mkdir -p "$BUILD_DIR/sys-bundle/kernel"
+if [ -d "$APPTRON_DIR/scripts/kernel" ]; then
+    cp "$APPTRON_DIR/scripts/kernel/"* "$BUILD_DIR/sys-bundle/kernel/" 2>/dev/null || true
+fi
+
+tar -C "$BUILD_DIR/sys-bundle" -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" rootfs v86 kernel
 
 echo "Build complete! Custom Apptron assets are ready for embedding in $FINAL_ASSETS_DIR"
