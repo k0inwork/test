@@ -6,6 +6,7 @@ import (
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 	"pum-go/services/identity/graph"
+	"pum-go/services/identity/ldap"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -15,74 +16,56 @@ import (
 )
 
 var db *gorm.DB
+var ldapMock *ldap.MockLDAPProvider
 
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("identity.db"), &gorm.Config{})
-	if err != nil {
-		slog.Error("failed to connect database", "error", err)
-		panic(err)
-	}
-
+	if err != nil { panic(err) }
 	db.AutoMigrate(&models.User{})
-
-	// Seed data for demo
 	var count int64
 	db.Model(&models.User{}).Count(&count)
-	if count == 0 {
-		slog.Info("Seeding initial users")
-		db.Create(&models.User{Username: "admin", Role: "admin"})
-		db.Create(&models.User{Username: "operator", Role: "operator"})
-	}
+	if count == 0 { db.Create(&models.User{Username: "admin", Role: "admin"}) }
 }
 
 func main() {
 	logging.Init("identity")
 	initDB()
+	ldapMock = ldap.NewMockLDAPProvider()
 
-	// Register with Registry
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "identity",
 		Endpoint:     "http://localhost:8081",
 		Capabilities: []string{"users", "auth"},
 		IsCore:       true,
+		OrderID:      0,
+		Menu:         []logging.MenuItem{{Label: "Users", Path: "/users"}},
 	})
 
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.New()
-	r.Use(gin.Recovery())
+	r := gin.Default()
 	r.Use(logging.GinMiddleware())
 
-	// REST API
 	r.GET("/users", func(c *gin.Context) {
 		var users []models.User
 		db.Find(&users)
 		c.JSON(http.StatusOK, users)
 	})
 
-	r.POST("/users", func(c *gin.Context) {
-		var user models.User
-		if err := c.ShouldBindJSON(&user); err != nil {
-			slog.Warn("failed to bind user JSON", "error", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+	r.POST("/login", func(c *gin.Context) {
+		var login struct { Username, Password string }
+		if err := c.ShouldBindJSON(&login); err != nil { c.JSON(400, gin.H{"error": "err"}); return }
+		success, role, _ := ldapMock.Authenticate(login.Username, login.Password)
+		if success {
+			c.JSON(200, gin.H{"username": login.Username, "role": role, "status": "logged_in"})
+		} else {
+			c.JSON(401, gin.H{"error": "unauth"})
 		}
-		db.Create(&user)
-		slog.Info("user created", "username", user.Username)
-		c.JSON(http.StatusOK, user)
 	})
 
-	// GraphQL API
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
+	r.POST("/query", func(c *gin.Context) { srv.ServeHTTP(c.Writer, c.Request) })
+	r.GET("/", func(c *gin.Context) { playground.Handler("GraphQL", "/query").ServeHTTP(c.Writer, c.Request) })
 
-	r.POST("/query", func(c *gin.Context) {
-		srv.ServeHTTP(c.Writer, c.Request)
-	})
-
-	r.GET("/", func(c *gin.Context) {
-		playground.Handler("GraphQL playground", "/query").ServeHTTP(c.Writer, c.Request)
-	})
-
-	slog.Info("Identity service starting", "port", 8081)
+	slog.Info("Identity starting", "port", 8081)
 	r.Run(":8081")
 }
