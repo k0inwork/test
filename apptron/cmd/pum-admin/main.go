@@ -35,8 +35,13 @@ func main() {
 	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
 		projects := []map[string]interface{}{
 			{
-				"name":        "Main-Datacenter",
-				"description": "Core infrastructure management",
+				"name":        "Apptron-Core",
+				"uuid":        "00000000-0000-0000-0000-000000000001",
+				"description": "Apptron local management",
+				"directory":   "/apptron",
+				"owner":       "1",
+				"ownername":   "admin",
+				"visibility":  "private",
 				"updated_at":  "2024-03-20T10:00:00Z",
 			},
 		}
@@ -60,6 +65,7 @@ func main() {
 			"is_valid": true,
 			"claims": map[string]interface{}{
 				"username": "admin",
+				"sub":      "1",
 			},
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -70,7 +76,7 @@ func main() {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		if path == "/" {
-			http.Redirect(w, r, "/dashboard.html", http.StatusFound)
+			http.Redirect(w, r, "/edit/Apptron-Core", http.StatusFound)
 			return
 		}
 
@@ -121,7 +127,7 @@ func injectMeta(data []byte) []byte {
 	html := string(data)
 	meta := `
     <meta name="auth-url" content="/auth">
-    <meta name="project" content='{"name": "Local"}'>
+    <meta name="project" content='{"name": "Apptron-Core", "uuid": "00000000-0000-0000-0000-000000000001", "directory": "/apptron"}'>
     `
 	return []byte(strings.Replace(html, "<head>", "<head>"+meta, 1))
 }
