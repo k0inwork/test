@@ -1,0 +1,50 @@
+{
+  "feedback_schema": {
+    "type": "object",
+    "properties": {
+      "session_id": { "type": "string" },
+      "event": {
+        "type": "string",
+        "enum": ["SESSION_STARTED", "PLAN_CREATED", "STEP_STARTED", "STEP_COMPLETED", "TASK_FINISHED", "ERROR"]
+      },
+      "payload": {
+        "type": "object",
+        "properties": {
+          "plan": {
+             "type": "array",
+             "items": {
+               "type": "object",
+               "properties": {
+                 "id": { "type": "integer" },
+                 "description": { "type": "string" },
+                 "status": { "type": "string", "enum": ["pending", "running", "completed", "failed"] }
+               }
+             }
+          },
+          "error_message": { "type": "string" }
+        }
+      }
+    }
+  },
+  "control_schema": {
+    "type": "object",
+    "properties": {
+      "command": {
+        "type": "string",
+        "enum": ["CONTINUE", "REJECT", "PAUSE", "EDIT_PLAN", "STOP"]
+      },
+      "modified_plan": {
+        "type": "array",
+        "items": {
+           "type": "object",
+           "properties": {
+             "id": { "type": "integer" },
+             "description": { "type": "string" }
+           }
+        }
+      },
+      "message": { "type": "string" }
+    },
+    "required": ["command"]
+  }
+}
