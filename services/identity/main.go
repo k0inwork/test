@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 	"pum-go/services/identity/graph"
@@ -22,7 +23,7 @@ func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("identity.db"), &gorm.Config{})
 	if err != nil { panic(err) }
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.Group{})
 	var count int64
 	db.Model(&models.User{}).Count(&count)
 	if count == 0 { db.Create(&models.User{Username: "admin", Role: "admin"}) }
@@ -39,7 +40,10 @@ func main() {
 		Capabilities: []string{"users", "auth"},
 		IsCore:       true,
 		OrderID:      0,
-		Menu:         []logging.MenuItem{{Label: "Users", Path: "/users"}},
+		Menu:         []logging.MenuItem{
+			{Label: "Users", Path: "/users"},
+			{Label: "Groups", Path: "/groups"},
+		},
 	})
 
 	r := gin.Default()
@@ -47,19 +51,125 @@ func main() {
 
 	r.GET("/users", func(c *gin.Context) {
 		var users []models.User
-		db.Find(&users)
-		c.JSON(http.StatusOK, users)
+		db.Preload("Groups").Find(&users)
+
+		// Map response for better table rendering
+		var res []map[string]interface{}
+		for _, u := range users {
+			groupNames := []string{}
+			for _, g := range u.Groups {
+				groupNames = append(groupNames, g.Name)
+			}
+			res = append(res, map[string]interface{}{
+				"id": u.ID,
+				"username": u.Username,
+				"role": u.Role,
+				"groups": strings.Join(groupNames, ", "),
+			})
+		}
+		c.JSON(http.StatusOK, res)
 	})
 
 	r.POST("/login", func(c *gin.Context) {
 		var login struct { Username, Password string }
 		if err := c.ShouldBindJSON(&login); err != nil { c.JSON(400, gin.H{"error": "err"}); return }
-		success, role, _ := ldapMock.Authenticate(login.Username, login.Password)
+		success, role, groups, _ := ldapMock.Authenticate(login.Username, login.Password)
 		if success {
-			c.JSON(200, gin.H{"username": login.Username, "role": role, "status": "logged_in"})
+			// Sync user to DB
+			var user models.User
+			if err := db.Preload("Groups").Where("username = ?", login.Username).First(&user).Error; err != nil {
+				user = models.User{Username: login.Username, Role: role}
+				db.Create(&user)
+			}
+
+			// Add/Update LDAP groups without clearing manually assigned ones
+			for _, g := range groups {
+				var group models.Group
+				if err := db.Where("name = ?", g.Name).First(&group).Error; err != nil {
+					group = models.Group{Name: g.Name, Capabilities: strings.Join(g.Capabilities, ",")}
+					db.Create(&group)
+				} else {
+					group.Capabilities = strings.Join(g.Capabilities, ",")
+					db.Save(&group)
+				}
+
+				// Only append if not already present
+				hasGroup := false
+				for _, ug := range user.Groups {
+					if ug.ID == group.ID {
+						hasGroup = true
+						break
+					}
+				}
+				if !hasGroup {
+					db.Model(&user).Association("Groups").Append(&group)
+				}
+			}
+
+			// Reload user to get all groups (including manually assigned ones)
+			db.Preload("Groups").First(&user, user.ID)
+
+			var caps []string
+			for _, g := range user.Groups {
+				if g.Capabilities != "" {
+					caps = append(caps, strings.Split(g.Capabilities, ",")...)
+				}
+			}
+
+			c.JSON(200, gin.H{
+				"username": login.Username,
+				"role": role,
+				"status": "logged_in",
+				"capabilities": strings.Join(caps, ","),
+			})
 		} else {
 			c.JSON(401, gin.H{"error": "unauth"})
 		}
+	})
+
+	r.GET("/groups", func(c *gin.Context) {
+		var groups []models.Group
+		db.Preload("Users").Find(&groups)
+
+		// Map response for better table rendering
+		var res []map[string]interface{}
+		for _, g := range groups {
+			userNames := []string{}
+			for _, u := range g.Users {
+				userNames = append(userNames, u.Username)
+			}
+			res = append(res, map[string]interface{}{
+				"id": g.ID,
+				"name": g.Name,
+				"capabilities": g.Capabilities,
+				"users": strings.Join(userNames, ", "),
+			})
+		}
+		c.JSON(http.StatusOK, res)
+	})
+
+	r.POST("/users/:username/groups", func(c *gin.Context) {
+		username := c.Param("username")
+		var body struct { GroupName string `json:"group"` }
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+			return
+		}
+
+		var user models.User
+		if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+
+		var group models.Group
+		if err := db.Where("name = ?", body.GroupName).First(&group).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "group not found"})
+			return
+		}
+
+		db.Model(&user).Association("Groups").Append(&group)
+		c.JSON(http.StatusOK, gin.H{"status": "assigned"})
 	})
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))

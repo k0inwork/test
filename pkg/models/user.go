@@ -6,6 +6,16 @@ import (
 	"gorm.io/gorm"
 )
 
+type Group struct {
+	ID           uint           `gorm:"primaryKey" json:"id"`
+	Name         string         `gorm:"uniqueIndex;not null" json:"name"`
+	Capabilities string         `json:"capabilities"` // Comma-separated list of capabilities
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
+	Users        []User         `gorm:"many2many:user_groups;" json:"users,omitempty"`
+}
+
 type User struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	Username  string         `gorm:"uniqueIndex;not null" json:"username"`
@@ -14,4 +24,5 @@ type User struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	Groups    []Group        `gorm:"many2many:user_groups;" json:"groups,omitempty"`
 }

@@ -73,7 +73,7 @@ func main() {
 
 		// accounts app (extra)
 		comp.GET("/accounts/activitylist/", stubHandler("activity_list"))
-		comp.GET("/accounts/group/list", stubHandler("groups"))
+		comp.GET("/accounts/group/list", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8081/groups", "groups") })
 	}
 
 	slog.Info("Compatibility Service starting", "port", 8090)
