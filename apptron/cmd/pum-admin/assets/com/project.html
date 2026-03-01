@@ -141,9 +141,11 @@
                 try { dupAbort?.abort(); } catch {}
                 dupAbort = new AbortController();
 
-                const tokenParam = { token: (await getAuth()).getSessionToken() };
+                const auth = await getAuth();
+                const tokenParam = { token: auth.session.get()?.jwt || "" };
+                const username = window.session?.claims?.username || "";
                 const resp = await fetch(
-                    urlFor(`/projects/${encodeURIComponent(name)}`, tokenParam, window.session.claims.username),
+                    urlFor(`/projects/${encodeURIComponent(name)}`, tokenParam, username),
                     { method: "HEAD", signal: dupAbort.signal }
                 );
 
@@ -233,9 +235,11 @@
                 }
                 $("#project-submit").disabled = true;
 
-                const tokenParam = { token: (await getAuth()).getSessionToken() };
+                const auth = await getAuth();
+                const tokenParam = { token: auth.session.get()?.jwt || "" };
+                const username = window.session?.claims?.username || "";
                 const headResp = await fetch(
-                    urlFor(`/projects/${encodeURIComponent(name)}`, tokenParam, window.session.claims.username),
+                    urlFor(`/projects/${encodeURIComponent(name)}`, tokenParam, username),
                     { method: "HEAD" }
                 );
                 if (headResp.status === 200) {
@@ -247,14 +251,16 @@
                 }
             }
 
-            const tokenParam = { token: (await getAuth()).getSessionToken() };
+            const auth = await getAuth();
+            const tokenParam = { token: auth.session.get()?.jwt || "" };
+            const username = window.session?.claims?.username || "";
             const resp = (project)
-                ? await fetch(urlFor(`/projects/${encodeURIComponent(project.name)}`, tokenParam, window.session.claims.username), {
+                ? await fetch(urlFor(`/projects/${encodeURIComponent(project.name)}`, tokenParam, username), {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ description, visibility })
                 })
-                : await fetch(urlFor("/projects", {}, window.session.claims.username), {
+                : await fetch(urlFor("/projects", {}, username), {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ name, description, visibility })

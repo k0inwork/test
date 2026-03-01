@@ -104,8 +104,9 @@
 
                 $("#save-btn").classList.add("btn-loading");
                 try {
-                    const tokenParam = { token: (await getAuth()).getSessionToken() };
-                    const username   = window.session?.claims?.username;
+                    const auth = await getAuth();
+                    const tokenParam = { token: auth.session.get()?.jwt || "" };
+                    const username = window.session?.claims?.username || "";
 
                     const resp = await fetch(
                         urlFor(`/projects/${project.name}`, tokenParam, username),

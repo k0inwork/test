@@ -32,7 +32,80 @@ func main() {
 	})
 
 	// Mock API for projects (matches apptron.js urlFor logic)
+	mux.HandleFunc("/projects/", func(w http.ResponseWriter, r *http.Request) {
+		// e.g. /projects/test-project
+		path := strings.TrimPrefix(r.URL.Path, "/projects/")
+
+		if path == "" {
+			if r.Method == "POST" {
+				var req struct {
+					Name string `json:"name"`
+				}
+				json.NewDecoder(r.Body).Decode(&req)
+				projName := req.Name
+				if projName == "" {
+					projName = "New-Project"
+				}
+
+				w.Header().Set("Location", "/edit/"+projName)
+				w.WriteHeader(http.StatusCreated)
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"name":        projName,
+					"description": "Mock newly created project",
+					"updated_at":  "2024-03-21T10:00:00Z",
+				})
+				return
+			}
+
+			// GET /projects/
+			projects := []map[string]interface{}{
+				{
+					"name":        "Main-Datacenter",
+					"description": "Core infrastructure management",
+					"updated_at":  "2024-03-20T10:00:00Z",
+				},
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(projects)
+			return
+		}
+
+		// Handle specific project requests like HEAD /projects/{projectName}
+		if r.Method == "HEAD" {
+			// Simulating that the project does not exist
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"name": path,
+		})
+	})
+
 	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			var req struct {
+				Name string `json:"name"`
+			}
+			json.NewDecoder(r.Body).Decode(&req)
+			projName := req.Name
+			if projName == "" {
+				projName = "New-Project"
+			}
+
+			w.Header().Set("Location", "/edit/"+projName)
+			w.WriteHeader(http.StatusCreated)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"name":        projName,
+				"description": "Mock newly created project",
+				"updated_at":  "2024-03-21T10:00:00Z",
+			})
+			return
+		}
 		projects := []map[string]interface{}{
 			{
 				"name":        "Main-Datacenter",
@@ -75,6 +148,29 @@ func main() {
 		}
 
 		contentStatic, _ := fs.Sub(assets, "assets")
+
+		// Serve _env.html for editor and console directly in mock mode
+		if strings.HasPrefix(path, "/edit/") || strings.HasPrefix(path, "/console/") {
+			if data, err := fs.ReadFile(contentStatic, "_env.html"); err == nil {
+				// Inject meta
+				parts := strings.Split(path, "/")
+				if len(parts) >= 3 {
+					projName := parts[2]
+
+					html := string(data)
+					// Make sure it has a valid project meta for the mock apptron.js
+					meta := fmt.Sprintf(`
+    <meta name="auth-url" content="/auth">
+    <meta name="project" content='{"name": "%s"}'>
+    `, projName)
+					html = strings.Replace(html, "<head>", "<head>"+meta, 1)
+
+					w.Header().Set("Content-Type", "text/html; charset=utf-8")
+					w.Write([]byte(html))
+					return
+				}
+			}
+		}
 
 		// 1. Try exact path
 		cleanPath := strings.TrimPrefix(path, "/")
