@@ -32,7 +32,60 @@ func main() {
 	})
 
 	// Mock API for projects (matches apptron.js urlFor logic)
+	mux.HandleFunc("/projects/", func(w http.ResponseWriter, r *http.Request) {
+		// e.g. /projects/test-project
+		path := strings.TrimPrefix(r.URL.Path, "/projects/")
+
+		if path == "" {
+			if r.Method == "POST" {
+				w.WriteHeader(http.StatusCreated)
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"name":        "New-Project",
+					"description": "Mock newly created project",
+					"updated_at":  "2024-03-21T10:00:00Z",
+				})
+				return
+			}
+
+			// GET /projects/
+			projects := []map[string]interface{}{
+				{
+					"name":        "Main-Datacenter",
+					"description": "Core infrastructure management",
+					"updated_at":  "2024-03-20T10:00:00Z",
+				},
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(projects)
+			return
+		}
+
+		// Handle specific project requests like HEAD /projects/{projectName}
+		if r.Method == "HEAD" {
+			// Simulating that the project does not exist
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"name": path,
+		})
+	})
+
 	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			w.WriteHeader(http.StatusCreated)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"name":        "New-Project",
+				"description": "Mock newly created project",
+				"updated_at":  "2024-03-21T10:00:00Z",
+			})
+			return
+		}
 		projects := []map[string]interface{}{
 			{
 				"name":        "Main-Datacenter",

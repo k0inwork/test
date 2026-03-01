@@ -102,9 +102,11 @@
                     return;
                 }
                 const project = component.context.project;
-                const tokenParam = { token: (await getAuth()).getSessionToken() };
+                const auth = await getAuth();
+                const tokenParam = { token: auth.session.get()?.jwt || "" };
+                const username = window.session?.claims?.username || "";
                 let publishSource = $("#publish-source").value.replace(/^\/+|\/+$/g, ""); // trim slashes
-                const resp = await fetch(urlFor(`/projects/${project.name}`, tokenParam, window.session.claims.username), {
+                const resp = await fetch(urlFor(`/projects/${project.name}`, tokenParam, username), {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ publish_source: publishSource })
