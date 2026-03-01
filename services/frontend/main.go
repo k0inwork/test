@@ -60,12 +60,16 @@ func main() {
 			for _, s := range services.([]RegisteredService) {
 				// Check capabilities
 				allowed := false
-				if hasAll {
+
+				// Allow if service requires no capabilities
+				if len(s.Capabilities) == 0 {
+					allowed = true
+				} else if hasAll {
 					allowed = true
 				} else {
 					for _, reqCap := range s.Capabilities {
 						for _, userCap := range caps {
-							if reqCap == userCap {
+							if reqCap == userCap && reqCap != "" {
 								allowed = true
 								break
 							}
