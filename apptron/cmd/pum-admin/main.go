@@ -80,6 +80,16 @@ func main() {
 			return
 		}
 
+		// Handle /edit/:project and /console/:project by serving _env.html
+		if strings.HasPrefix(path, "/edit/") || strings.HasPrefix(path, "/console/") {
+			contentStatic, _ := fs.Sub(assets, "assets")
+			if data, err := fs.ReadFile(contentStatic, "_env.html"); err == nil {
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+				w.Write(injectMeta(data))
+				return
+			}
+		}
+
 		contentStatic, _ := fs.Sub(assets, "assets")
 
 		// 1. Try exact path
