@@ -26,7 +26,7 @@ EOW
 chmod +x "$BUNDLE_DIR/bin/pum"
 
 echo "Customizing /etc/profile..."
-mkdir -p "$BUNDLE_DIR/etc"
+mkdir -p "$BUNDLE_DIR/etc/profile.d"
 cat <<'EOP' > "$BUNDLE_DIR/etc/profile"
 export PATH=/bin:/usr/bin:/usr/local/bin
 export PUM_SERVER_URL="https://api.pum-nms.local"
@@ -37,6 +37,10 @@ EOP
 
 echo "Packaging custom sys.tar.gz into runner assets..."
 mkdir -p "$FINAL_ASSETS_DIR/bundles"
-tar -C "$BUNDLE_DIR" -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" .
+
+# Apptron's boot.go expects the contents to be inside a 'rootfs' directory within the tar
+mkdir -p "$BUILD_DIR/sys-bundle/rootfs"
+cp -r "$BUNDLE_DIR"/* "$BUILD_DIR/sys-bundle/rootfs/"
+tar -C "$BUILD_DIR/sys-bundle" -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" rootfs
 
 echo "Build complete! Custom Apptron assets are ready for embedding in $FINAL_ASSETS_DIR"
