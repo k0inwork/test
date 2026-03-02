@@ -35,10 +35,11 @@ if ! grep -q "assets/vscode.zip;" Makefile; then
     sed -i.bak 's/curl -sL $(VSCODE_URL) -o assets\/vscode.zip/if [ -f "..\/cmd\/pum-admin\/assets\/vscode.zip" ]; then cp "..\/cmd\/pum-admin\/assets\/vscode.zip" assets\/vscode.zip; else curl -sL $(VSCODE_URL) -o assets\/vscode.zip; fi/g' Makefile
 
     # 2. Prevent Docker from failing when downloading wanix by simply pulling from github release directly, instead of extracting docker blobs
-    sed -i.bak 's/$(DOCKER_CMD) rm -f apptron-wanix/cp "..\/cmd\/pum-admin\/assets\/wanix.min.js" assets\/wanix.min.js/g' Makefile
-    sed -i.bak 's/$(DOCKER_CMD) pull --platform linux\/amd64 ghcr.io\/tractordev\/wanix:runtime/cp "..\/cmd\/pum-admin\/assets\/wanix.min.js" assets\/wanix.js/g' Makefile
+    sed -i.bak '/$(DOCKER_CMD) rm -f apptron-wanix/d' Makefile
+    sed -i.bak '/$(DOCKER_CMD) pull --platform linux\/amd64 ghcr.io\/tractordev\/wanix:runtime/d' Makefile
     sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
-    sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
+    sed -i.bak 's/$(DOCKER_CMD) cp apptron-wanix:\/wanix.min.js assets\/wanix.min.js/curl -sL https:\/\/github.com\/tractordev\/wanix\/releases\/download\/v0.3\/wanix_0.3_runtime.zip -o assets\/.tmp_wanix.zip \&\& unzip -p assets\/.tmp_wanix.zip assets\/wanix.min.js > assets\/wanix.min.js/g' Makefile
+    sed -i.bak 's/$(DOCKER_CMD) cp apptron-wanix:\/wanix.js assets\/wanix.js/unzip -p assets\/.tmp_wanix.zip assets\/wanix.min.js > assets\/wanix.js \&\& rm -f assets\/.tmp_wanix.zip/g' Makefile
 fi
 
 make clean
