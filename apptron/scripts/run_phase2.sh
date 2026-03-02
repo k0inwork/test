@@ -34,12 +34,12 @@ if [ ! -f "assets/wanix.js" ] && [ -f "$REPO_ROOT/apptron/cmd/pum-admin/assets/w
     cp "$REPO_ROOT/apptron/cmd/pum-admin/assets/wanix.min.js" assets/wanix.js # wanix.js is not present there, so copy min.js or vice versa
 fi
 
-# Patch Makefile to prevent it from trying to run docker commands for assets/wanix.min.js
-if ! grep -q "echo bypassed-docker" Makefile; then
-    sed -i.bak 's/$(DOCKER_CMD) rm -f apptron-wanix/echo bypassed-docker/g' Makefile
-    sed -i.bak 's/$(DOCKER_CMD) pull --platform linux\/amd64 ghcr.io\/tractordev\/wanix:runtime/echo bypassed-docker/g' Makefile
-    sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
-    sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
+# Patch Makefile to use docker pull and save instead of docker create which fails in overlayfs within sandbox
+if ! grep -q "wanix_temp/wanix.js" Makefile; then
+    sed -i.bak 's/$(DOCKER_CMD) pull --platform linux\/amd64 ghcr.io\/tractordev\/wanix:runtime/$(DOCKER_CMD) pull ghcr.io\/tractordev\/wanix:runtime/g' Makefile
+    sed -i.bak 's/$(DOCKER_CMD) create --name apptron-wanix.*/mkdir -p .\/wanix_temp \&\& $(DOCKER_CMD) save ghcr.io\/tractordev\/wanix:runtime -o .\/wanix_temp\/wanix.tar \&\& tar -xf .\/wanix_temp\/wanix.tar -C .\/wanix_temp\/ \&\& find .\/wanix_temp\/blobs\/sha256 -type f -exec sh -c '\''tar -xf "{}" -C .\/wanix_temp\/ 2>\/dev\/null'\'' \\;/g' Makefile
+    sed -i.bak 's/$(DOCKER_CMD) cp apptron-wanix:\/wanix.min.js assets\/wanix.min.js/cp .\/wanix_temp\/wanix.min.js assets\/wanix.min.js/g' Makefile
+    sed -i.bak 's/$(DOCKER_CMD) cp apptron-wanix:\/wanix.js assets\/wanix.js/cp .\/wanix_temp\/wanix.js assets\/wanix.js/g' Makefile
 fi
 
 make clean
