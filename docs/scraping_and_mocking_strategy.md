@@ -84,7 +84,39 @@ The legacy system relies heavily on RabbitMQ for hardware control and alarm prop
 1. For testing Go microservices that publish to RabbitMQ, the scraped data formats dictate the Go struct models we must create for serialization (e.g., `AsuIksRouteRequest`, `AsuIksReport`).
 2. We can develop a Go-based "Mock Hardware Controller" that binds to these queues, consumes the `create`/`delete` requests, and automatically publishes a corresponding `report` response to simulate the full lifecycle of a hardware interaction.
 
-## 4. Summary of Execution Steps
+## 4. Knowledge Extraction Reference
+
+During the investigation of the original repository (`pum/test` directory), the following key information was extracted which will be essential when re-implementing logic in Go:
+
+### 4.1. Core Application Variables & Definitions
+- **LDAP Groups:** `tsumadm` (Admin), `trafadm` (Traffic Admin), `devadm` (Device Admin), `user` (Regular User).
+- **Global Settings Keys (`/core/settings`):** `CONTROL`, `TSUM`, `ARM ADDRESS`, `FOREIGN ARMs`, `SPDU`, `STATE`, `ALARMS`, `MAP_SERVER`, `SWITCH_NETWORK`, `ZABBIX_NODEGROUP_PREFIX`, `MAP_REGION`, `ZABBIX_SEVERITY`, `ZABBIX_MAP`, `ZABBIX_TRANSPORT`, `ZABBIX_CONTROL`, `graylog_url_setting`.
+
+### 4.2. Target API Endpoints and Payloads
+These HTTP endpoints return specific nested structures that the frontend relies on. The scraping script should fetch and preserve these arrays/objects:
+- `/data/ipmi/list?json=true` returns a JSON object. We expect arrays of data where an IP is found at `response['data'][0]['interface']['ip']`.
+- `/data/switch/?json=true` returns a JSON object. We expect arrays where an IP is found at `response['switch_list'][0]['ip']`.
+- `/data/ipmi/{ip}/status` triggers an async task and returns a `task_id`.
+- `/data/switch/{ip}/status1` triggers an async task and returns a `task_id`.
+- `/tasks/viewtasks/` lists all tasks and statuses (e.g. `COMPLETED`, `FAILED`).
+- `/accounts/currentuser?json=true` returns the current user profile including `id`.
+- `/core/settings?json=true&json_object_list` returns system configurations, primarily parsed by extracting objects from the `object_list` array matching a specific `key`.
+
+### 4.3. RabbitMQ Queues & Exchanges
+The application uses specific queues and exchanges to communicate with background processors and hardware. When implementing Go RabbitMQ consumers/producers, these exact names must be mapped:
+- **ASU IKS Control:** `asu-iks-queue` (or `asuiks_channels1` as noted in some tests)
+- **ASU IKS Exchange:** `asu.iks` (Used for publishing incoming event reports/alarms)
+- **Switch Checker:** `netdevcheker`
+- **IPMI Config:** `ipmictrl`
+- **Switch Config:** `switch-ctrld`
+- **IP Config Service:** `ipservice`
+- **PDU Control:** `netdevpdu`
+- **Service Routes:** `SSttrreel1A`
+- **SPDU Queues:** `spdu-1`, `spdu-2`
+- **Sentry Readiness:** `sentryd-p-factor`
+- **Inter-ARM Exchange:** `amqp.fanout`
+
+## 5. Summary of Execution Steps
 1. Provision SSH access to the live VM.
 2. Develop `scrape_legacy.py` based on `common.py` from the legacy test suite.
 3. Execute the script on the live VM and export the resulting `.json` files.
