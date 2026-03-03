@@ -26,23 +26,24 @@ export async function validateToken(hankoApiUrl: string, token: string): Promise
 }' worker/src/auth.ts
 fi
 
+# Always start from a clean Makefile to ensure patches apply correctly on multiple runs
+git checkout Makefile 2>/dev/null || true
+
 # To properly and cleanly resolve missing components
-if ! grep -q "assets/vscode.zip;" Makefile; then
-    echo "Patching Makefile to download dependencies cleanly..."
+echo "Patching Makefile to download dependencies cleanly..."
 
-    # Use absolute path for copying to ensure it works reliably regardless of working directory
-    PUM_ADMIN_ASSETS="$REPO_ROOT/apptron/cmd/pum-admin/assets"
+# Use absolute path for copying to ensure it works reliably regardless of working directory
+PUM_ADMIN_ASSETS="$REPO_ROOT/apptron/cmd/pum-admin/assets"
 
-    # 1. Update vscode extraction target to prevent curl errors and unzip natively
-    # Use the local cache if available, else download cleanly.
-    sed -i.bak "s|curl -sL \$(VSCODE_URL) -o assets/vscode.zip|if [ -f \"$PUM_ADMIN_ASSETS/vscode.zip\" ]; then cp \"$PUM_ADMIN_ASSETS/vscode.zip\" assets/vscode.zip; else curl -sL \$(VSCODE_URL) -o assets/vscode.zip; fi|g" Makefile
+# 1. Update vscode extraction target to prevent curl errors and unzip natively
+# Use the local cache if available, else download cleanly.
+sed -i.bak "s|curl -sL \$(VSCODE_URL) -o assets/vscode.zip|if [ -f \"$PUM_ADMIN_ASSETS/vscode.zip\" ]; then cp \"$PUM_ADMIN_ASSETS/vscode.zip\" assets/vscode.zip; else curl -sL \$(VSCODE_URL) -o assets/vscode.zip; fi|g" Makefile
 
-    # 2. Prevent Docker from failing when downloading wanix by simply pulling from github release directly, instead of extracting docker blobs
-    sed -i.bak "s|\$(DOCKER_CMD) rm -f apptron-wanix|cp \"$PUM_ADMIN_ASSETS/wanix.min.js\" assets/wanix.min.js|g" Makefile
-    sed -i.bak "s|\$(DOCKER_CMD) pull --platform linux/amd64 ghcr.io/tractordev/wanix:runtime|cp \"$PUM_ADMIN_ASSETS/wanix.min.js\" assets/wanix.js|g" Makefile
-    sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
-    sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
-fi
+# 2. Prevent Docker from failing when downloading wanix by simply pulling from github release directly, instead of extracting docker blobs
+sed -i.bak "s|\$(DOCKER_CMD) rm -f apptron-wanix|cp \"$PUM_ADMIN_ASSETS/wanix.min.js\" assets/wanix.min.js|g" Makefile
+sed -i.bak "s|\$(DOCKER_CMD) pull --platform linux/amd64 ghcr.io/tractordev/wanix:runtime|cp \"$PUM_ADMIN_ASSETS/wanix.min.js\" assets/wanix.js|g" Makefile
+sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
+sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
 
 make clean
 
