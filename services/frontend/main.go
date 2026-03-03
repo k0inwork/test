@@ -199,7 +199,23 @@ func main() {
 		var svcs []RegisteredService
 		json.NewDecoder(resp.Body).Decode(&svcs)
 		resp.Body.Close()
-		c.HTML(200, "base.html", appendH(getCommonH(c), gin.H{"IsAdminPage": true, "Modules": svcs}))
+
+		// Collect external modules configuration to show in Admin UI
+		extModules := make(map[string]map[string]string)
+		if GlobalConfig != nil && GlobalConfig.ExternalModules != nil {
+			for name, moduleConf := range GlobalConfig.ExternalModules {
+				extModules[name] = map[string]string{
+					"mode":     moduleConf.Mode,
+					"endpoint": moduleConf.Endpoint,
+				}
+			}
+		}
+
+		c.HTML(200, "base.html", appendH(getCommonH(c), gin.H{
+			"IsAdminPage": true,
+			"Modules": svcs,
+			"ExternalModules": extModules,
+		}))
 	})
 
 	r.POST("/admin/modules/:name/toggle", func(c *gin.Context) {

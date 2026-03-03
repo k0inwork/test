@@ -30,9 +30,7 @@ The following modules must respect this configuration across all Go microservice
 *   **`ldap`** (Identity Service): Directory authentication.
 *   **`glpi`** (Inventory/Product Services): CMDB synchronization.
 *   **`zabbix`** (External-Data Service): Polling problems and alerts.
-*   **`bpkgw`** (GWS Service): Orchestrating VXLAN tunnels and routing.
-*   **`hardware_controllers`** (External-Modules Service): Proxying IPMI, PDU, and switch config commands.
-*   **`rabbitmq`** (Task/Network Services): Message broker for asynchronous actions and RPC.
+*   **`rabbitmq`** (Task/Network/GWS/External-Modules): Message broker for asynchronous actions and RPC. Note: External modules (hardware controllers, PDU/IPMI) and routing orchestrators (bpkgw) do not need independent HTTP mocking configurations; from the microservices' perspective, interacting with them simply involves reading/writing to specific RabbitMQ queues.
 
 ## Example Configuration (`system.yaml`)
 
@@ -41,7 +39,7 @@ external_modules:
   zabbix:
     mode: "mock" # Can be "mock", "emulated", or "real"
     endpoint: "http://localhost:8080/zabbix"
-  bpkgw:
+  rabbitmq:
     mode: "emulated"
-    endpoint: "http://localhost:5000/api/v1"
+    endpoint: "amqp://test:test@localhost:5672"
 ```

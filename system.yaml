@@ -35,12 +35,6 @@ external_modules:
   zabbix:
     mode: "mock"
     endpoint: "http://localhost:8080/zabbix"
-  bpkgw:
-    mode: "mock" # For gws (Gateways & Sessions) tunnel orchestration
-    endpoint: "http://localhost:8080/bpkgw"
-  hardware_controllers: # For data/inventory PDU, IPMI, Switch actions
-    mode: "mock"
-    endpoint: "http://localhost:8080/controllers"
   rabbitmq:
     mode: "mock"
     endpoint: "amqp://guest:guest@localhost:5672"
