@@ -23,7 +23,7 @@ func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("identity.db"), &gorm.Config{})
 	if err != nil { panic(err) }
-	db.AutoMigrate(&models.User{}, &models.Group{})
+	db.AutoMigrate(&models.User{}, &models.Group{}, &models.ActivityLog{})
 	var count int64
 	db.Model(&models.User{}).Count(&count)
 	if count == 0 { db.Create(&models.User{Username: "admin", Role: "admin"}) }
@@ -37,12 +37,13 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "identity",
 		Endpoint:     "http://localhost:8081",
-		Capabilities: []string{"users", "auth"},
+		Capabilities: []string{"users", "auth", "audit"},
 		IsCore:       true,
 		OrderID:      0,
 		Menu:         []logging.MenuItem{
 			{Label: "Users", Path: "/users"},
 			{Label: "Groups", Path: "/groups"},
+			{Label: "Audit Log", Path: "/activitylist"},
 		},
 	})
 
@@ -170,6 +171,25 @@ func main() {
 
 		db.Model(&user).Association("Groups").Append(&group)
 		c.JSON(http.StatusOK, gin.H{"status": "assigned"})
+	})
+
+	// Auditing (formerly /accounts/activitylist/)
+	r.GET("/activitylist", func(c *gin.Context) {
+		var activities []models.ActivityLog
+		db.Order("datetime desc").Limit(100).Find(&activities)
+
+		// Provide a dummy initial log entry if empty to mimic old behavior
+		if len(activities) == 0 {
+			dummyLog := models.ActivityLog{
+				Username:      "system",
+				RequestMethod: "SYSTEM_INIT",
+				RequestURL:    "/",
+				ResponseCode:  200,
+			}
+			activities = append(activities, dummyLog)
+		}
+
+		c.JSON(http.StatusOK, activities)
 	})
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))

@@ -47,6 +47,23 @@ func main() {
 		c.JSON(200, switches)
 	})
 
+	// PDU Mock list (formerly /data/pdu/list)
+	r.GET("/pdus", func(c *gin.Context) {
+		// Mock response mimicking legacy Django
+		c.JSON(200, []map[string]interface{}{
+			{"id": "pdu-1", "name": "MSK/1-ПОУ Rack 1", "ip": "10.10.1.5", "status": "Online"},
+			{"id": "pdu-2", "name": "SPB/2-ПОУ Rack 2", "ip": "10.20.1.5", "status": "Offline"},
+		})
+	})
+
+	// IPMI Mock list (formerly /data/ipmi/list)
+	r.GET("/ipmi", func(c *gin.Context) {
+		// Mock response mimicking legacy Django
+		c.JSON(200, []map[string]interface{}{
+			{"id": "ipmi-1", "name": "Server-01-IPMI", "ip": "10.10.2.100", "status": "Online"},
+		})
+	})
+
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db, Sync: engine}}))
 	r.POST("/query", func(c *gin.Context) { srv.ServeHTTP(c.Writer, c.Request) })
 	r.GET("/", func(c *gin.Context) { playground.Handler("GraphQL", "/query").ServeHTTP(c.Writer, c.Request) })

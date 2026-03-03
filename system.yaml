@@ -21,13 +21,26 @@ optional_services:
   - external-data
 
 # External Module Configuration
+# Modes available:
+#   "mock"     - Internal Go code stub. No network calls are made. Logs payload and returns success immediately.
+#   "emulated" - Connects to a standalone dummy service (e.g. a local mock Python server) running at the endpoint.
+#   "real"     - Connects to the actual production or staging external service.
 external_modules:
   ldap:
-    mode: "mock" # options: mock, remote
+    mode: "mock"
     endpoint: "ldap://localhost:389"
   glpi:
-    mode: "mock" # options: mock, remote
+    mode: "mock"
     endpoint: "http://localhost:8080/glpi"
+  zabbix:
+    mode: "mock"
+    endpoint: "http://localhost:8080/zabbix"
+  bpkgw:
+    mode: "mock" # For gws (Gateways & Sessions) tunnel orchestration
+    endpoint: "http://localhost:8080/bpkgw"
+  hardware_controllers: # For data/inventory PDU, IPMI, Switch actions
+    mode: "mock"
+    endpoint: "http://localhost:8080/controllers"
   rabbitmq:
     mode: "mock"
     endpoint: "amqp://guest:guest@localhost:5672"
