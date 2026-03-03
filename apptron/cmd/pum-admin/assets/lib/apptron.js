@@ -57,7 +57,7 @@ export async function getAuth() {
 
     // Bypass Hanko auth in local mock mode to fix duplicate check validation
     // This allows the app to function locally without a real auth server
-    if (authUrl === "/auth" && isLocalhost()) {
+    // if (authUrl === "/auth" && isLocalhost()) {
         const mockSession = {
             is_valid: true,
             claims: {
@@ -87,19 +87,19 @@ export async function getAuth() {
             }
         });
         return auth;
-    }
+    // }
 
-    const { hanko } = await register(authUrl, isLocalhost() ? undefined : {
-        cookieDomain: "." + appHost()
-    });
-    auth = hanko;
-    auth.validatedSession = auth.validateSession();
-    auth.validatedSession.then(session => {
-        if (session.is_valid) {
-            console.log("valid session for user", session.claims.username);
-        }
-    });
-    return auth;
+    // const { hanko } = await register(authUrl, isLocalhost() ? undefined : {
+    //     cookieDomain: "." + appHost()
+    // });
+    // auth = hanko;
+    // auth.validatedSession = auth.validateSession();
+    // auth.validatedSession.then(session => {
+    //     if (session.is_valid) {
+    //         console.log("valid session for user", session.claims.username);
+    //     }
+    // });
+    // return auth;
 }
 
 export function getMeta(name) {
