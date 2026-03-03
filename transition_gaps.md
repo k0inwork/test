@@ -48,13 +48,15 @@ The following endpoints are stubbed in `compatibility/main.go` and represent fun
   - `/services/listkeyservice/` (`key_services`)
   - `/services/listdataservice/` (`data_services`)
 **Gap:** Similar to `gws`, the high-level concept of "Key Services" and "Data Services" (connectivity orders) is completely missing from the Go microservices landscape.
+**Note:** Only the endpoint for `key_services` needs to be supported moving forward. `data_services` is currently unused and can be deprioritized or ignored for now.
 
 ### 5. `products` App (Zabbix/Problems)
 **Original Responsibility:** Managing products (PDUs/OUs) and integrating with monitoring systems like Zabbix.
 - **Stubbed Endpoints:**
   - `/products/nodes-problems/` (`nodes_problems`)
   - `/products/zabbix_problems/` (`zabbix_problems`)
-**Gap:** While the basic `/nodes` endpoint is ported to the `product` Go service, the integration for fetching and displaying active problems/alerts (likely from Zabbix or internal tracking) is missing.
+**Gap:** While the basic `/nodes` endpoint is ported to the `product` Go service, the integration for fetching and displaying active problems/alerts is missing.
+**Note:** `nodes-problems` and `zabbix_problems` represent the same underlying logic and should be combined into a single unified endpoint/service in the new Go architecture.
 
 ### 6. `tasks` App (Operations Tracking)
 **Original Responsibility:** Central hub for tracking asynchronous background operations (previously Celery).
@@ -82,8 +84,8 @@ The ultimate goal is to replace the old Django server-side rendered GUI with a n
 1. **Un-Stub Existing Services:** Update `services/compatibility/main.go` to proxy `/tasks/viewtasks/` to the existing `task` service (`/tasks`), and `/data/switch/` to the existing `inventory` service (`/switches`).
 2. **Implement Missing Domains:** Design and implement new Go microservices (or expand existing ones) for:
    - **Gateways & Tunnels (`gws`)**: Needs a dedicated service for VXLAN orchestration.
-   - **Connectivity Services (`services`)**: Needs a service to handle data/key transmission orders.
+   - **Connectivity Services (`services`)**: Needs a service to handle key transmission orders (`key_services`). Handling of data services is not required at this time.
    - **DHCP/DNS Management**: Expand the `network` service to handle these alongside subnets.
    - **Auditing**: Expand the `identity` or create an `audit` service for the `activitylist`.
-3. **Expand External Integrations:** Implement the Zabbix problems logic within the `external-data` or `product` services. Expand `external-modules` to fully support IPMI and PDU specifics beyond the current mocks.
+3. **Expand External Integrations:** Implement a unified Zabbix/nodes problems logic within the `external-data` or `product` services. Expand `external-modules` to fully support IPMI and PDU specifics beyond the current mocks.
 4. **Develop Static GUI Components:** As each domain is ported to Go, build the corresponding view in the new Apptron/static frontend, gradually rendering the legacy Django GUI obsolete.
