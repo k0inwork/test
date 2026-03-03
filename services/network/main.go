@@ -37,6 +37,24 @@ func main() {
 		db.Find(&subnets)
 		c.JSON(200, subnets)
 	})
+
+	// DHCP Mock list
+	r.GET("/dhcp", func(c *gin.Context) {
+		// Mock response simulating RabbitMQ "dhcp host list" RPC result
+		c.JSON(200, []map[string]interface{}{
+			{"ip": "10.10.1.50", "mac": "00:1A:2B:3C:4D:5E", "hostname": "client-pc-1"},
+		})
+	})
+
+	// DNS Mock list
+	r.GET("/dns", func(c *gin.Context) {
+		// Mock response simulating RabbitMQ "dns host list" RPC result
+		c.JSON(200, []map[string]interface{}{
+			{"name": "server.local", "ip": "10.10.1.100", "type": "A"},
+			{"name": "router.local", "ip": "10.10.1.1", "type": "A"},
+		})
+	})
+
 	slog.Info("Network starting", "port", 8084)
 	r.Run(":8084")
 }

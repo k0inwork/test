@@ -26,3 +26,14 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	Groups    []Group        `gorm:"many2many:user_groups;" json:"groups,omitempty"`
 }
+
+// ActivityLog represents an audit log entry previously handled by Django's activity_log
+type ActivityLog struct {
+	ID            uint      `gorm:"primaryKey" json:"id"`
+	UserID        string    `json:"user_id"`
+	Username      string    `json:"username"`
+	RequestMethod string    `json:"request_method"`
+	RequestURL    string    `json:"request_url"`
+	ResponseCode  int       `json:"response_code"`
+	Datetime      time.Time `gorm:"autoCreateTime" json:"datetime"`
+}

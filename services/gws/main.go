@@ -1,0 +1,75 @@
+package main
+
+import (
+	"log/slog"
+	"net/http"
+	"pum-go/pkg/config"
+	"pum-go/pkg/logging"
+	"pum-go/pkg/models"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+)
+
+var db *gorm.DB
+var GlobalConfig *config.Config
+
+func initDB() {
+	var err error
+	db, err = gorm.Open(sqlite.Open("gws.db"), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	db.AutoMigrate(&models.Gw{}, &models.Session{})
+}
+
+func main() {
+	logging.Init("gws")
+	cfg, err := config.LoadConfig("system.yaml")
+	if err == nil {
+		GlobalConfig = cfg
+	}
+
+	initDB()
+
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "gws",
+		Endpoint:     "http://localhost:8091",
+		Capabilities: []string{"gws", "tunnels", "vxlan"},
+		IsCore:       false,
+		OrderID:      6,
+		Menu: []logging.MenuItem{
+			{Label: "Gateways", Path: "/gateways"},
+			{Label: "Sessions", Path: "/sessions"},
+		},
+	})
+
+	r := gin.Default()
+	r.Use(logging.GinMiddleware())
+
+	r.GET("/gateways", func(c *gin.Context) {
+		var gateways []models.Gw
+		db.Find(&gateways)
+		c.JSON(http.StatusOK, gateways)
+	})
+
+	r.POST("/gateways", func(c *gin.Context) {
+		var gateway models.Gw
+		if err := c.ShouldBindJSON(&gateway); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		db.Create(&gateway)
+		c.JSON(http.StatusCreated, gateway)
+	})
+
+	r.GET("/sessions", func(c *gin.Context) {
+		var sessions []models.Session
+		db.Find(&sessions)
+		c.JSON(http.StatusOK, sessions)
+	})
+
+	slog.Info("GWS service starting", "port", 8091)
+	r.Run(":8091")
+}

@@ -47,32 +47,32 @@ func main() {
 		// --- Legacy Service Stubs (Exact paths from original urls.py) ---
 
 		// products app
-		comp.GET("/products/nodes-problems/", stubHandler("nodes_problems"))
-		comp.GET("/products/zabbix_problems/", stubHandler("zabbix_problems"))
+		comp.GET("/products/nodes-problems/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8089/problems", "nodes_problems") })
+		comp.GET("/products/zabbix_problems/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8089/problems", "zabbix_problems") })
 
 		// data app
-		comp.GET("/data/switch/", stubHandler("switch_list"))
-		comp.GET("/data/pdu/list", stubHandler("pdu_list"))
-		comp.GET("/data/ipmi/list", stubHandler("ipmi_list"))
+		comp.GET("/data/switch/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8083/switches", "switch_list") })
+		comp.GET("/data/pdu/list", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8083/pdus", "pdu_list") })
+		comp.GET("/data/ipmi/list", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8083/ipmi", "ipmi_list") })
 
 		// network app
-		comp.GET("/network/dhcp/", stubHandler("dhcp_list"))
-		comp.GET("/network/dns/", stubHandler("dns_list"))
-		comp.GET("/network/subnetwork/", stubHandler("subnetwork_list"))
+		comp.GET("/network/dhcp/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8084/dhcp", "dhcp_list") })
+		comp.GET("/network/dns/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8084/dns", "dns_list") })
+		comp.GET("/network/subnetwork/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8084/subnets", "subnetwork_list") })
 
 		// gws app
-		comp.GET("/gws/gws/", stubHandler("gateways"))
+		comp.GET("/gws/gws/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8091/gateways", "gateways") })
 		comp.GET("/gws/historysession/", stubHandler("session_history"))
 
 		// services app
-		comp.GET("/services/listkeyservice/", stubHandler("key_services"))
+		comp.GET("/services/listkeyservice/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8092/keyservices", "key_services") })
 		comp.GET("/services/listdataservice/", stubHandler("data_services"))
 
 		// tasks app
-		comp.GET("/tasks/viewtasks/", stubHandler("tasks"))
+		comp.GET("/tasks/viewtasks/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8085/tasks", "tasks") })
 
 		// accounts app (extra)
-		comp.GET("/accounts/activitylist/", stubHandler("activity_list"))
+		comp.GET("/accounts/activitylist/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8081/activitylist", "activity_list") })
 		comp.GET("/accounts/group/list", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8081/groups", "groups") })
 	}
 
