@@ -4,37 +4,49 @@ import (
 	"log/slog"
 )
 
-// MessageBroker represents the interface for async communication (e.g. RabbitMQ)
+// MessageBroker defines the mandatory boundary for asynchronous communication (e.g., RabbitMQ).
+// All Go microservices must use this interface when communicating with hardware controllers
+// or background workers, rather than implementing internal, ad-hoc queues.
 type MessageBroker interface {
+	// Publish sends a generic payload to a specified queue or topic.
 	Publish(queue string, payload interface{}) error
+	// Subscribe registers a handler function to be invoked when a message arrives on the queue.
 	Subscribe(queue string, handler func(payload []byte) error) error
 }
 
-// MockBroker is an in-memory mock implementation of MessageBroker
+// MockBroker is an in-memory stub implementation of MessageBroker.
+// It is intended for use in the "mock" configuration mode.
+// It logs calls to Publish and Subscribe but does not perform any actual network I/O,
+// returning immediate success.
 type MockBroker struct{}
 
+// Publish simulates sending a message by logging the payload.
 func (m *MockBroker) Publish(queue string, payload interface{}) error {
 	slog.Info("MockBroker: Published message", "queue", queue, "payload", payload)
 	return nil
 }
 
+// Subscribe simulates registering a handler. The handler is never actively invoked by the MockBroker.
 func (m *MockBroker) Subscribe(queue string, handler func(payload []byte) error) error {
 	slog.Info("MockBroker: Subscribed to queue", "queue", queue)
 	return nil
 }
 
-// EmulatedBroker connects to a local test HTTP or lightweight dummy service
-// representing the external broker bounds without running full RabbitMQ
+// EmulatedBroker connects to a lightweight, standalone dummy service instead of a full message broker.
+// It is intended for use in the "emulated" configuration mode, allowing tests to verify
+// network serialization and timeouts without needing a heavy RabbitMQ container.
 type EmulatedBroker struct {
-	Endpoint string
+	Endpoint string // The URL of the dummy service (e.g., "http://localhost:5000/api")
 }
 
+// Publish sends the payload to the dummy service's endpoint via an HTTP POST (simulated here).
 func (e *EmulatedBroker) Publish(queue string, payload interface{}) error {
 	slog.Info("EmulatedBroker: Connecting to mock server to publish", "queue", queue, "endpoint", e.Endpoint)
-	// Example: would do http.Post(e.Endpoint+"/publish", ...)
+	// Example implementation details would be an HTTP Post to e.Endpoint+"/publish"
 	return nil
 }
 
+// Subscribe polls or connects a websocket to the dummy service's endpoint (simulated here).
 func (e *EmulatedBroker) Subscribe(queue string, handler func(payload []byte) error) error {
 	slog.Info("EmulatedBroker: Connecting to mock server to subscribe", "queue", queue, "endpoint", e.Endpoint)
 	return nil

@@ -1,19 +1,23 @@
 package external
 
-// Factory pattern for resolving the correct mock strategy
-
+// NewMessageBroker acts as a factory, resolving the requested configuration mode
+// ("mock", "emulated", or "real") into the appropriate implementation of the MessageBroker interface.
+// This ensures microservices do not hardcode dependency strategies and can switch seamlessly
+// from local development to production.
 func NewMessageBroker(mode, endpoint string) MessageBroker {
 	switch mode {
 	case "real":
-		// Here we would return the actual RabbitMQ implementation
-		// e.g. return &RealRabbitMQBroker{URL: endpoint}
-		// For now, since we only have mock bounds in Phase 1:
+		// In a production environment, this would instantiate and return a struct
+		// managing an actual AMQP connection (e.g., `&RealRabbitMQBroker{URL: endpoint}`).
+		// Because the current system is in Phase 1 (mock/stub mode), it falls back to a MockBroker.
 		return &MockBroker{}
 	case "emulated":
+		// Returns a broker configured to communicate with a standalone dummy server.
 		return &EmulatedBroker{Endpoint: endpoint}
 	case "mock":
 		fallthrough
 	default:
+		// Returns an in-memory stub that performs no networking.
 		return &MockBroker{}
 	}
 }
