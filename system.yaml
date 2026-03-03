@@ -24,20 +24,24 @@ optional_services:
 # Modes available:
 #   "mock"     - Internal Go code stub. No network calls are made. Logs payload and returns success immediately.
 #   "emulated" - Connects to a standalone dummy service (e.g. a local mock Python server) running at the endpoint.
-#   "real"     - Connects to the actual production or staging external service.
+#   "real"     - Connects to the actual production or staging external service via 'real_endpoint'.
 external_modules:
   ldap:
     mode: "mock"
     endpoint: "ldap://localhost:389"
+    real_endpoint: "ldaps://ad.production.internal:636"
   glpi:
     mode: "mock"
     endpoint: "http://localhost:8080/glpi"
+    real_endpoint: "https://glpi.production.internal/api/"
   zabbix:
     mode: "mock"
     endpoint: "http://localhost:8080/zabbix"
+    real_endpoint: "https://zabbix.production.internal/api_jsonrpc.php"
   rabbitmq:
     mode: "mock"
     endpoint: "amqp://guest:guest@localhost:5672"
+    real_endpoint: "amqps://produser:prodpass@mq.production.internal:5671"
 
 # Service Discovery Settings
 discovery:

@@ -4,11 +4,12 @@ package external
 // ("mock", "emulated", or "real") into the appropriate implementation of the MessageBroker interface.
 // This ensures microservices do not hardcode dependency strategies and can switch seamlessly
 // from local development to production.
-func NewMessageBroker(mode, endpoint string) MessageBroker {
+func NewMessageBroker(mode, endpoint, realEndpoint string) MessageBroker {
 	switch mode {
 	case "real":
 		// In a production environment, this would instantiate and return a struct
-		// managing an actual AMQP connection (e.g., `&RealRabbitMQBroker{URL: endpoint}`).
+		// managing an actual AMQP connection using the production URL.
+		// e.g., `&RealRabbitMQBroker{URL: realEndpoint}`
 		// Because the current system is in Phase 1 (mock/stub mode), it falls back to a MockBroker.
 		return &MockBroker{}
 	case "emulated":

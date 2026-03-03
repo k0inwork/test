@@ -15,8 +15,9 @@ type Config struct {
 	CoreServices     []string `yaml:"core_services"`
 	OptionalServices []string `yaml:"optional_services"`
 	ExternalModules  map[string]struct {
-		Mode     string `yaml:"mode"`
-		Endpoint string `yaml:"endpoint"`
+		Mode         string `yaml:"mode"`
+		Endpoint     string `yaml:"endpoint"`
+		RealEndpoint string `yaml:"real_endpoint"`
 	} `yaml:"external_modules"`
 	Discovery struct {
 		RegistryURL       string `yaml:"registry_url"`

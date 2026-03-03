@@ -129,7 +129,13 @@
                         {{if .ExternalModules}}
                             {{range $name, $config := .ExternalModules}}
                             <tr>
-                                <td><strong>{{$name}}</strong><br><small class="text-muted">{{$config.endpoint}}</small></td>
+                                <td>
+                                    <strong>{{$name}}</strong><br>
+                                    <small class="text-muted" title="Active Endpoint">Active: {{$config.endpoint}}</small><br>
+                                    {{if $config.real_endpoint}}
+                                    <small class="text-secondary" style="font-size: 0.75rem;" title="Real/Production Endpoint">Real: {{$config.real_endpoint}}</small>
+                                    {{end}}
+                                </td>
                                 <td>
                                     {{if eq $config.mode "mock"}}<span class="badge bg-warning text-dark">Mock</span>
                                     {{else if eq $config.mode "emulated"}}<span class="badge bg-info text-dark">Emulated</span>

@@ -205,8 +205,9 @@ func main() {
 		if GlobalConfig != nil && GlobalConfig.ExternalModules != nil {
 			for name, moduleConf := range GlobalConfig.ExternalModules {
 				extModules[name] = map[string]string{
-					"mode":     moduleConf.Mode,
-					"endpoint": moduleConf.Endpoint,
+					"mode":          moduleConf.Mode,
+					"endpoint":      moduleConf.Endpoint,
+					"real_endpoint": moduleConf.RealEndpoint,
 				}
 			}
 		}
