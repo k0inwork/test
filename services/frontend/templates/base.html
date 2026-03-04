@@ -29,7 +29,10 @@
                     {{range .Nav}}
                     <li class="nav-item"><a class="nav-link" href="{{.URL}}">{{.Label}}</a></li>
                     {{end}}
-                    {{if .IsAdmin}}<li class="nav-item"><a class="nav-link text-warning fw-bold" href="/admin">⚙️ Admin</a></li>{{end}}
+                    {{if .IsAdmin}}
+                    <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/admin">⚙️ Admin</a></li>
+                    <li class="nav-item"><a class="nav-link text-info fw-bold" href="/admin/users">👥 User Management</a></li>
+                    {{end}}
                 </ul>
                 <div class="d-flex align-items-center">
                     <span class="text-white-50 me-3">User: <strong>{{.User}}</strong></span>
@@ -41,6 +44,7 @@
     <div class="container mt-4">
         {{if .IsIndex}} {{template "content_index" .}} {{end}}
         {{if .IsAdminPage}} {{template "content_admin" .}} {{end}}
+        {{if .IsAdminUsersPage}} {{template "content_admin_users" .}} {{end}}
         {{if .IsModulePage}} {{template "content_module" .}} {{end}}
     </div>
     {{end}}
@@ -81,6 +85,63 @@
         {{else}}
             <div class="p-4 text-center text-muted">No data available in this module.</div>
         {{end}}
+    </div>
+</div>
+{{end}}
+
+{{define "content_admin_users"}}
+<h1>👥 User Management</h1>
+<div class="row">
+    <div class="col-md-8">
+        <h4 class="mt-4">Users</h4>
+        <div class="card shadow-sm border-0 mt-2">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light"><tr><th>ID</th><th>Username</th><th>Role</th><th>Groups</th></tr></thead>
+                    <tbody>
+                        {{range .Users}}
+                        <tr>
+                            <td>{{.id}}</td>
+                            <td><strong>{{.username}}</strong></td>
+                            <td>{{.role}}</td>
+                            <td>{{.groups}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <h4 class="mt-4">Assign Role (Group)</h4>
+        <div class="card shadow-sm border-0 mt-2">
+            <div class="card-body">
+                <form action="/admin/users/assign-role" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">User</label>
+                        <select name="username" class="form-select" required>
+                            <option value="">Select User...</option>
+                            {{range .Users}}
+                            <option value="{{.username}}">{{.username}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Group / Role</label>
+                        <select name="group" class="form-select" required>
+                            <option value="">Select Group...</option>
+                            {{range .Groups}}
+                            <option value="{{.name}}">{{.name}} ({{.capabilities}})</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Assign Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 {{end}}
