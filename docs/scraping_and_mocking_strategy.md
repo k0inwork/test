@@ -116,7 +116,95 @@ The application uses specific queues and exchanges to communicate with backgroun
 - **Sentry Readiness:** `sentryd-p-factor`
 - **Inter-ARM Exchange:** `amqp.fanout`
 
-## 5. Summary of Execution Steps
+### 4.4. Backend Architecture and Data Models Reference
+By analyzing the legacy Django application (`original_repo/pum/backend`), the following data flow patterns were discovered, which should guide the implementation of Go handlers:
+
+- **`/accounts/currentuser` (User Profile):**
+  Constructed from the `CustomUser` model and the LDAP extension. The returned JSON object always includes a list of `groups` and `permissions`. Example response schema structure:
+  `{"id": 1, "username": "admin", "groups": ["tsumadm", "devadm"], "permissions": [...]}`
+
+- **`/tasks/viewtasks/` (Background Task Polling):**
+  In the legacy system, tasks triggered by background actions (like `/data/switch/{ip}/status1`) return a task ID. The frontend polls `/tasks/viewtasks/` which internally queries a `RedisStore(TaskRecord)` and serializes matching task objects into JSON (`status`, `started`, `id`, `username`, etc). Our Go application needs to replicate this schema, perhaps using an in-memory or SQLite-backed task store instead of Redis.
+
+- **`/data/ipmi/list` (Hardware/IPMI Source):**
+  Instead of hitting a database table, this endpoint queries the `ZabbixAPI` directly (via `host.get` and `hostinterface.get` looking for `ipmi_available`). It aggregates the Zabbix result into an array of objects where each object contains an `interface` nested object containing the IPMI IP. When creating the Go mock for this, the mock data structure must perfectly mimic this Zabbix-aggregated format, not a flat database row.
+
+- **`/data/switch/` (Switch Listing):**
+  Returns a serialized array of `Switch` models filtered by `GlobalSettings` (`MAP_REGION`) and `Gw` nodes. The serialization is done via a custom `jsonify()` function across the entire model structure. Mocking this involves providing a deeply nested JSON object representing the Switch state, Freeports, and interconnected nodes.
+
+## 5. Mock Data for External Sources
+
+To decouple the Go application from the live infrastructure, we need to gather realistic data payloads from external sources. The Go application uses a 3-tier mocking strategy (real, emulated, mock). The "emulated" tier requires running local mock servers that replicate the responses of GLPI and Zabbix APIs.
+
+### 5.1 Zabbix API Emulation Data
+The original application uses `ZabbixAPI` directly to fetch equipment, IPMI, and network maps. An emulated Zabbix API must support JSON-RPC 2.0 requests to the `/api_jsonrpc.php` endpoint with the following methods:
+
+- `apiinfo.version`: Returns the Zabbix API version (e.g., `5.0.x`).
+- `host.get`: Returns an array of host objects. The application checks the `name`, `hostid`, and `ipmi_available` fields.
+- `hostinterface.get`: Returns interface configurations for hosts. Important fields to mock are `type` (`3` for IPMI), `available`, `hostid`, `dns`, `port` (e.g., `623`), and `main` (`1`).
+- `map.get`: Retrieves topological maps (`zabbix_map` from global settings). The emulation must return map objects with `sysmapid`, `name`, `selements` (switches), `links` (connections), `elements` (host relations), and lines.
+
+### 5.2 GLPI API Emulation Data
+The application fetches DataCenter locations from GLPI to render maps. An emulated GLPI REST API must expose the following routes with corresponding JSON data:
+
+- `/search/DataCenter?range=0-0`: Returns pagination data like `{"totalcount": <number>}`.
+- `/DataCenter?range=0-N`: Returns an array of DataCenter objects containing `id`, `name`, and `locations_id`.
+- `/search/Location?range=0-0`: Returns location pagination data.
+- `/Location?range=0-N`: Returns an array of Location objects containing `id`, `completename`, `longitude`, and `latitude`.
+
+### 5.3 RabbitMQ Packet Emulation Data
+Message payloads need to be serialized as JSON. See section 3.2 for exact schemas for `create`, `delete`, and `report` packets used by `asu-iks-queue` and `asu.iks`.
+Additional queues (e.g., `netdevcheker`, `ipmictrl`, `switch-ctrld`) will require capturing live packets during the scraping phase to build out exact Go struct representations.
+
+### 5.4 LDAP Emulation Data
+The original application uses `ldap3` in Python to manage authentication and role-based access. It connects to up to two LDAP servers (`AUTH_LDAP_1_SERVER_URI`, `AUTH_LDAP_2_SERVER_URI`) and searches specific organizational units.
+The Go LDAP emulation must construct a directory tree with the following characteristics:
+- **Users Search Base:** `ou=Users,dc=strela`
+  - Object filter: `(&(objectClass=person)(name=<username>))`
+  - Example user: `cn=admin,ou=Users,dc=strela`
+- **Groups Search Base:** `ou=Groups,dc=strela`
+  - Object filter: `(objectClass=posixGroup)`
+  - Group attributes: `cn` (e.g., `tsumadm`, `devadm`, `trafadm`, `user`), and `memberUid` (a list of usernames belonging to the group). The application checks if the user's name is inside `memberUid` to assign permissions.
+
+## 6. Implementation Strategy for Emulated External Sources
+
+In the Go repository, external API interactions are governed by `pkg/external/factory.go` configured via `system.yaml`.
+
+### 6.1 Creating HTTP API Emulators (Zabbix & GLPI)
+1. **Mock Data Generation:** During the SSH scraping phase (Step 7), run a proxy or script to dump raw JSON responses from the live Zabbix and GLPI APIs into static JSON files (e.g., `zabbix_hosts.json`, `glpi_datacenters.json`).
+2. **Go Emulators:** Within the `apptron/cmd/pum-admin/main.go` local mock environment, set up simple HTTP multiplexers (using standard library `net/http` or `gin`) bound to local ports (e.g., `:8081` for Zabbix, `:8082` for GLPI).
+3. **Zabbix RPC Handler:** Create a single endpoint `/api_jsonrpc.php` that decodes the JSON-RPC request body, inspects the `method` string, and returns the corresponding static JSON file loaded from disk.
+4. **GLPI REST Handler:** Create basic GET route handlers for `/DataCenter` and `/Location` that return static JSON arrays.
+5. **Configuration Update:** Update `system.yaml` to point the `external_modules.zabbix` and `external_modules.glpi` endpoint URLs to `http://localhost:8081` and `http://localhost:8082` respectively, while keeping the `mode` set to `emulated`.
+
+### 6.2 Creating RabbitMQ Emulators (Hardware Control)
+1. **Queue Simulation:** Instead of HTTP endpoints, hardware controllers and BPKGW mock instances communicate over AMQP. Use a local Docker instance of RabbitMQ for development (`docker run -d -p 5672:5672 rabbitmq`).
+2. **Hardware Controller Daemon:** Create a simple Go binary or goroutine inside the `apptron` local test harness that connects to `amqp://localhost:5672`, declares the necessary queues (e.g., `asu-iks-queue`), and consumes requests.
+3. **Response Emulation:** When the mock hardware daemon receives a link `create` request, it waits 1-2 seconds, and publishes a `report` JSON payload to the `asu.iks` exchange with an `"eventId"` and `"alarmState": "CLEARED"`, simulating a successful physical switch configuration.
+
+### 6.3 Creating LDAP Emulators (Identity/Roles)
+1. **Mock LDAP Provider:** In the Go `identity` service, utilize the existing mock LDAP provider (`services/identity/ldap/mock.go`).
+2. **Directory Configuration:** Instantiate an in-memory LDAP directory that defines a root of `dc=strela`.
+3. **Object Seeding:** Seed it with `ou=Users` containing test user entries (e.g. `cn=admin`), and `ou=Groups` containing the `posixGroup` definitions (`tsumadm`, `devadm`). Ensure the `memberUid` attributes correctly map back to the test usernames so the frontend correctly renders role-filtered GUI elements.
+
+## 7. Data Structures: Inferable vs. Live Extraction
+To efficiently build the Go mock models, it is crucial to understand what data can be directly implemented in Go right now based on source code analysis, versus what data must wait for the live scraping script output.
+
+### 7.1 Data Structures Fully Inferable from Source
+The following schemas and structures can be implemented in Go structs and emulators immediately:
+- **RabbitMQ Link Control Packets (`asu-iks-queue`):** The exact schema is known (`idRoute`, `reqtype`, `sw_name1`, `portId1`, `portName1`, etc.).
+- **RabbitMQ Report Packets (`asu.iks`):** The top-level schema is known (`command`, `timestamp`, `data.code`, `data.eventId`, `data.incomingMessage`).
+- **LDAP Directory Structure:** The exact required OUs (`ou=Users`, `ou=Groups`), object classes (`posixGroup`, `person`), and required group `cn` names (`tsumadm`, etc.) are known.
+- **Background Task Records (`/tasks/viewtasks/`):** The schema structure includes `status`, `started`, `id`, and `username`.
+- **Zabbix / GLPI API Contracts:** We know exactly which JSON-RPC methods (`host.get`, `map.get`) and REST paths (`/DataCenter`) the frontend calls, and exactly which specific JSON keys it looks for in the response (e.g. `ipmi_available`, `sysmapid`, `completename`).
+
+### 7.2 Data Structures Requiring Live Extraction
+The following structures are either too dynamic or deeply nested in the legacy Python application to reliably map from source alone. The Go structs for these should only be finalized *after* reviewing the scraped JSON output:
+- **Switch Listing Hierarchy (`/data/switch/`):** The legacy app uses a custom `jsonify()` function that serializes the `Switch` Django model along with its nested `Freeports` and interconnected `Gw` nodes. The exact shape of this tree must be observed from a live `/data/switch/?json=true` response.
+- **Topological Data:** The actual real-world values for Zabbix `map.get` topologies (e.g., how the `links` array maps to `selements`) and GLPI geographic coordinate data.
+- **RabbitMQ Opaque Payloads:** The nested JSON string inside `alarmDetails` on the `asu.iks` queue, and the payloads for untested queues (like `netdevcheker`, `ipmictrl`, `switch-ctrld`).
+
+## 8. Summary of Execution Steps
 1. Provision SSH access to the live VM.
 2. Develop `scrape_legacy.py` based on `common.py` from the legacy test suite.
 3. Execute the script on the live VM and export the resulting `.json` files.
