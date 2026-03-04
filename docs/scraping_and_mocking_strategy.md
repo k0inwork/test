@@ -197,10 +197,10 @@ The following schemas and structures can be implemented in Go structs and emulat
 - **LDAP Directory Structure:** The exact required OUs (`ou=Users`, `ou=Groups`), object classes (`posixGroup`, `person`), and required group `cn` names (`tsumadm`, etc.) are known.
 - **Background Task Records (`/tasks/viewtasks/`):** The schema structure includes `status`, `started`, `id`, and `username`.
 - **Zabbix / GLPI API Contracts:** We know exactly which JSON-RPC methods (`host.get`, `map.get`) and REST paths (`/DataCenter`) the frontend calls, and exactly which specific JSON keys it looks for in the response (e.g. `ipmi_available`, `sysmapid`, `completename`).
+- **Switch Listing Schema (`/data/switch/`):** Because the legacy custom `jsonify()` function converts objects to JSON 1-to-1, the schema maps directly to the Django `Switch` model. We know it contains fields like `id` (UUID), `name`, `glpi_id`, `node_id`, `logical_type`, `ports`, `control_port`, `test_port`, `ip`, `community`, `location`, `up_id`, `up_ip`, `up_port`, and `model`.
 
 ### 7.2 Data Structures Requiring Live Extraction
 The following structures are either too dynamic or deeply nested in the legacy Python application to reliably map from source alone. The Go structs for these should only be finalized *after* reviewing the scraped JSON output:
-- **Switch Listing Hierarchy (`/data/switch/`):** The legacy app uses a custom `jsonify()` function that serializes the `Switch` Django model along with its nested `Freeports` and interconnected `Gw` nodes. The exact shape of this tree must be observed from a live `/data/switch/?json=true` response.
 - **Topological Data:** The actual real-world values for Zabbix `map.get` topologies (e.g., how the `links` array maps to `selements`) and GLPI geographic coordinate data.
 - **RabbitMQ Opaque Payloads:** The nested JSON string inside `alarmDetails` on the `asu.iks` queue, and the payloads for untested queues (like `netdevcheker`, `ipmictrl`, `switch-ctrld`).
 
