@@ -6,6 +6,7 @@ import (
 	"strings"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
+	"pum-go/pkg/tasklib"
 	"pum-go/services/identity/graph"
 	"pum-go/services/identity/ldap"
 
@@ -33,6 +34,8 @@ func main() {
 	logging.Init("identity")
 	initDB()
 	ldapMock = ldap.NewMockLDAPProvider()
+
+	tasklib.Init("http://localhost:8085")
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "identity",
@@ -191,6 +194,23 @@ func main() {
 
 		c.JSON(http.StatusOK, activities)
 	})
+
+	// Register dummy recurring task for integration test
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088",
+		r,
+		"/internal/tasks/dummy-identity",
+		"@every 10s",
+		"http://localhost:8081/internal/tasks/dummy-identity",
+		"system",
+		"dummy_test_identity",
+		"identity-service",
+		"IntegrationTest",
+		func(payload []byte) error {
+			slog.Info("DUMMY_RECURRING_TEST_EXECUTED", "service", "identity")
+			return nil
+		},
+	)
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
 	r.POST("/query", func(c *gin.Context) { srv.ServeHTTP(c.Writer, c.Request) })

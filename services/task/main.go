@@ -333,7 +333,11 @@ func startArchiverJob() {
 // Since tasks can be added dynamically, it runs a sync loop to ensure the cron runner
 // is up to date with the database state.
 func startSchedulerJob() {
-	c := cron.New()
+	// Enable second-level precision to support "@every 10s" for testing
+	// and finer-grained control.
+	c := cron.New(cron.WithParser(cron.NewParser(
+		cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor,
+	)))
 	c.Start()
 
 	// Map to keep track of active jobs so we don't duplicate them

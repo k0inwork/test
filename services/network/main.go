@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
+	"pum-go/pkg/tasklib"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
@@ -22,6 +23,7 @@ func initDB() {
 func main() {
 	logging.Init("network")
 	initDB()
+	tasklib.Init("http://localhost:8085")
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "network",
 		Endpoint:     "http://localhost:8084",
@@ -54,6 +56,23 @@ func main() {
 			{"name": "router.local", "ip": "10.10.1.1", "type": "A"},
 		})
 	})
+
+	// Register dummy recurring task for integration test
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088",
+		r,
+		"/internal/tasks/dummy-network",
+		"@every 10s",
+		"http://localhost:8084/internal/tasks/dummy-network",
+		"system",
+		"dummy_test_network",
+		"network-service",
+		"IntegrationTest",
+		func(payload []byte) error {
+			slog.Info("DUMMY_RECURRING_TEST_EXECUTED", "service", "network")
+			return nil
+		},
+	)
 
 	slog.Info("Network starting", "port", 8084)
 	r.Run(":8084")
