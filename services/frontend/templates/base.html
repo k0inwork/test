@@ -29,7 +29,10 @@
                     {{range .Nav}}
                     <li class="nav-item"><a class="nav-link" href="{{.URL}}">{{.Label}}</a></li>
                     {{end}}
-                    {{if .IsAdmin}}<li class="nav-item"><a class="nav-link text-warning fw-bold" href="/admin">⚙️ Admin</a></li>{{end}}
+                    {{if .IsAdmin}}
+                    <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/admin">⚙️ Admin</a></li>
+                    <li class="nav-item"><a class="nav-link text-info fw-bold" href="/admin/users">👥 User Management</a></li>
+                    {{end}}
                 </ul>
                 <div class="d-flex align-items-center">
                     <span class="text-white-50 me-3">User: <strong>{{.User}}</strong></span>
@@ -41,6 +44,7 @@
     <div class="container mt-4">
         {{if .IsIndex}} {{template "content_index" .}} {{end}}
         {{if .IsAdminPage}} {{template "content_admin" .}} {{end}}
+        {{if .IsAdminUsersPage}} {{template "content_admin_users" .}} {{end}}
         {{if .IsModulePage}} {{template "content_module" .}} {{end}}
     </div>
     {{end}}
@@ -85,6 +89,83 @@
 </div>
 {{end}}
 
+{{define "content_admin_users"}}
+<h1>👥 User Management</h1>
+<div class="row">
+    <div class="col-md-8">
+        <h4 class="mt-4">Users</h4>
+        <div class="card shadow-sm border-0 mt-2">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light"><tr><th>ID</th><th>Username</th><th>Assigned Roles (Groups)</th></tr></thead>
+                    <tbody>
+                        {{range .Users}}
+                        <tr>
+                            <td>{{.id}}</td>
+                            <td><strong>{{.username}}</strong></td>
+                            <td>
+                                {{if .groups}}{{.groups}}{{else}}<span class="text-muted fst-italic">No roles assigned</span>{{end}}
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <h4 class="mt-4">Available Roles (Groups)</h4>
+        <div class="card shadow-sm border-0 mt-2 mb-4">
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light"><tr><th>Role</th><th>Capabilities</th></tr></thead>
+                    <tbody>
+                        {{range .Groups}}
+                        <tr>
+                            <td><strong>{{.name}}</strong></td>
+                            <td>
+                                {{if eq .capabilities "*"}}<span class="badge bg-danger">ALL (*)</span>{{else}}{{.capabilities}}{{end}}
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h4 class="mt-4">Assign Role</h4>
+        <div class="card shadow-sm border-0 mt-2">
+            <div class="card-body">
+                <form action="/admin/users/assign-role" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">User</label>
+                        <select name="username" class="form-select" required>
+                            <option value="">Select User...</option>
+                            {{range .Users}}
+                            <option value="{{.username}}">{{.username}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role (Group)</label>
+                        <select name="group" class="form-select" required>
+                            <option value="">Select Role...</option>
+                            {{range .Groups}}
+                            <option value="{{.name}}">{{.name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Assign Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
 {{define "content_admin"}}
 <h1>⚙️ Admin Dashboard</h1>
 <div class="row">
@@ -93,13 +174,25 @@
         <div class="card shadow-sm border-0 mt-2">
             <div class="card-body p-0">
                 <table class="table table-hover mb-0">
-                    <thead class="table-light"><tr><th>Service</th><th>Status</th><th>Core</th><th>Action</th></tr></thead>
+                    <thead class="table-light"><tr><th>Service</th><th>Capabilities</th><th>Status</th><th>Core</th><th>Action</th></tr></thead>
                     <tbody>
                         {{range .Modules}}
                         <tr>
                             <td>
                                 <strong>{{.Name}}</strong><br>
                                 <small class="text-muted">{{.Endpoint}}</small>
+                            </td>
+                            <td>
+                                {{if .Capabilities}}
+                                    {{range .Capabilities}}
+                                    <div class="mb-1">
+                                        <span class="badge bg-secondary me-1">{{.Name}}</span>
+                                        <small class="text-muted">
+                                            {{range .Endpoints}}[{{.}}] {{end}}
+                                        </small>
+                                    </div>
+                                    {{end}}
+                                {{else}}<span class="text-muted small fst-italic">None</span>{{end}}
                             </td>
                             <td>{{if .Enabled}}<span class="badge bg-success">Active</span>{{else}}<span class="badge bg-secondary">Disabled</span>{{end}}</td>
                             <td>{{if .IsCore}}Yes{{else}}No{{end}}</td>

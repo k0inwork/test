@@ -36,7 +36,11 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "gws",
 		Endpoint:     "http://localhost:8091",
-		Capabilities: []string{"gws", "tunnels", "vxlan"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "gws", Endpoints: []string{"/"}},
+			{Name: "tunnels", Endpoints: []string{"/tunnels"}},
+			{Name: "vxlan", Endpoints: []string{"/vxlan"}},
+		},
 		IsCore:       false,
 		OrderID:      6,
 		Menu: []logging.MenuItem{

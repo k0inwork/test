@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strings"
 	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
@@ -16,13 +17,13 @@ import (
 var GlobalConfig *config.Config
 
 type RegisteredService struct {
-	Name         string             `json:"name"`
-	Endpoint     string             `json:"endpoint"`
-	Capabilities []string           `json:"capabilities"`
-	IsCore       bool               `json:"is_core"`
-	Enabled      bool               `json:"enabled"`
-	OrderID      int                `json:"order_id"`
-	Menu         []logging.MenuItem `json:"menu"`
+	Name         string                           `json:"name"`
+	Endpoint     string                           `json:"endpoint"`
+	Capabilities []logging.CapabilityRegistration `json:"capabilities"`
+	IsCore       bool                             `json:"is_core"`
+	Enabled      bool                             `json:"enabled"`
+	OrderID      int                              `json:"order_id"`
+	Menu         []logging.MenuItem               `json:"menu"`
 }
 
 func main() {
@@ -69,7 +70,7 @@ func main() {
 				} else {
 					for _, reqCap := range s.Capabilities {
 						for _, userCap := range caps {
-							if reqCap == userCap && reqCap != "" {
+							if reqCap.Name == userCap && reqCap.Name != "" {
 								allowed = true
 								break
 							}
@@ -228,6 +229,57 @@ func main() {
 		data, _ := json.Marshal(map[string]bool{"enabled": c.PostForm("enabled") == "true"})
 		http.Post(fmt.Sprintf("http://localhost:8088/admin/services/%s/toggle", c.Param("name")), "application/json", bytes.NewBuffer(data))
 		c.Redirect(http.StatusFound, "/admin")
+	})
+
+	r.GET("/admin/users", func(c *gin.Context) {
+		role, _ := c.Get("pum_role")
+		if role != "admin" {
+			c.Redirect(http.StatusFound, "/")
+			return
+		}
+
+		// Fetch users from identity service
+		respUsers, err := http.Get("http://localhost:8081/users")
+		var users interface{}
+		if err == nil {
+			json.NewDecoder(respUsers.Body).Decode(&users)
+			respUsers.Body.Close()
+		}
+
+		// Fetch groups from identity service
+		respGroups, err := http.Get("http://localhost:8081/groups")
+		var groups interface{}
+		if err == nil {
+			json.NewDecoder(respGroups.Body).Decode(&groups)
+			respGroups.Body.Close()
+		}
+
+		c.HTML(200, "base.html", appendH(getCommonH(c), gin.H{
+			"IsAdminUsersPage": true,
+			"Users":            users,
+			"Groups":           groups,
+		}))
+	})
+
+	r.POST("/admin/users/assign-role", func(c *gin.Context) {
+		role, _ := c.Get("pum_role")
+		if role != "admin" {
+			c.AbortWithStatus(403)
+			return
+		}
+
+		username := c.PostForm("username")
+		group := c.PostForm("group")
+
+		if username != "" && group != "" {
+			data, _ := json.Marshal(map[string]string{"group": group})
+			resp, err := http.Post(fmt.Sprintf("http://localhost:8081/users/%s/groups", url.PathEscape(username)), "application/json", bytes.NewBuffer(data))
+			if err == nil {
+				resp.Body.Close()
+			}
+		}
+
+		c.Redirect(http.StatusFound, "/admin/users")
 	})
 
 	slog.Info("Frontend starting", "port", 8080)

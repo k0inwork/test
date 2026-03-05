@@ -17,7 +17,12 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "external-data",
 		Endpoint:     "http://localhost:8089",
-		Capabilities: []string{"external-data", "glpi", "zabbix", "graphql"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "external-data", Endpoints: []string{"/"}},
+			{Name: "glpi", Endpoints: []string{"/glpi"}},
+			{Name: "zabbix", Endpoints: []string{"/zabbix"}},
+			{Name: "graphql", Endpoints: []string{"/query"}},
+		},
 		IsCore:       false,
 	})
 

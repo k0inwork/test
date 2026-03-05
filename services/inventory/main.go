@@ -32,7 +32,14 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "inventory",
 		Endpoint:     "http://localhost:8083",
-		Capabilities: []string{"inventory", "switches", "ports", "sync", "graphql", "configurable"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "inventory", Endpoints: []string{"/"}},
+			{Name: "switches", Endpoints: []string{"/switches"}},
+			{Name: "ports", Endpoints: []string{"/ports"}},
+			{Name: "sync", Endpoints: []string{"/sync"}},
+			{Name: "graphql", Endpoints: []string{"/query"}},
+			{Name: "configurable", Endpoints: []string{"/configurable"}},
+		},
 		IsCore:       false,
 		OrderID:      2,
 		Menu:         []logging.MenuItem{{Label: "Switches", Path: "/switches"}},

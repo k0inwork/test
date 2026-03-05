@@ -28,7 +28,10 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "product",
 		Endpoint:     "http://localhost:8082",
-		Capabilities: []string{"nodes", "sync"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "nodes", Endpoints: []string{"/nodes"}},
+			{Name: "sync", Endpoints: []string{"/sync"}},
+		},
 		IsCore:       true,
 		OrderID:      1,
 		Menu:         []logging.MenuItem{{Label: "Nodes", Path: "/nodes"}},
