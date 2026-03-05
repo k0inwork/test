@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"pum-go/pkg/logging"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -62,7 +64,13 @@ func TestRegistry(t *testing.T) {
 	router := setupRouter()
 
 	t.Run("Register service", func(t *testing.T) {
-		info := ServiceInfo{Name: "test-svc", Endpoint: "http://test:123", Capabilities: []string{"test"}}
+		info := ServiceInfo{
+			Name: "test-svc",
+			Endpoint: "http://test:123",
+			Capabilities: []logging.CapabilityRegistration{
+				{Name: "test", Endpoints: []string{"/test"}},
+			},
+		}
 		body, _ := json.Marshal(info)
 		req, _ := http.NewRequest("POST", "/register", bytes.NewBuffer(body))
 		resp := httptest.NewRecorder()
