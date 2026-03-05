@@ -16,15 +16,77 @@ if [ ! -f .env.local ]; then
     cp .env.example .env.local
 fi
 
-# Mock auth dynamically in the worker source
-if ! grep -q "MOCK AUTH" worker/src/auth.ts; then
-    echo "Mocking Auth in worker/src/auth.ts..."
-    sed -i.bak '/export async function validateToken(/,/^}/c\
-export async function validateToken(hankoApiUrl: string, token: string): Promise<boolean> {\
-  // MOCK AUTH: Always return true\
-  return true;\
-}' worker/src/auth.ts
+# In Phase 2 mock mode, we want the frontend to skip login as well
+# by matching the `authUrl === "/auth"` condition in apptron.js
+if grep -q "AUTH_URL=https://ad6044b5-53c2-4cb5-8542-9fdaef75f771.hanko.io" .env.local; then
+    echo "Updating .env.local to mock frontend auth..."
+    sed -i.bak 's|AUTH_URL=https://ad6044b5-53c2-4cb5-8542-9fdaef75f771.hanko.io|AUTH_URL=/auth|g' .env.local
 fi
+
+# Ensure clean state to apply latest patches properly
+git restore worker/src/auth.ts assets/lib/apptron.js assets/signin.html worker/src/worker.ts 2>/dev/null || true
+
+# Mock auth dynamically in the worker source
+echo "Mocking Auth in worker/src/auth.ts..."
+
+# Also patch the frontend to skip login
+echo "Patching frontend assets to bypass Hanko login..."
+cat << 'EOF' > patch_auth.js
+const authUrl = getMeta("auth-url");
+if (!authUrl) {
+    throw new Error("auth-url meta tag not found");
+}
+
+if (authUrl === "/auth") {
+    const mockSession = { is_valid: true, claims: { username: "admin" } };
+    window.session = mockSession;
+    auth = {
+        session: { get: () => ({ jwt: "mock-token" }) },
+        getUser: async () => ({ id: "1", username: "admin", email: "admin@example.com" }),
+        validatedSession: Promise.resolve(mockSession),
+        validateSession: async () => mockSession,
+        onUserDeleted: () => {}, onSessionCreated: () => {}, onSessionExpired: () => {},
+        onUserLoggedOut: () => {}, onBeforeStateChange: () => {}, onAfterStateChange: () => {}
+    };
+    auth.validatedSession.then(session => {
+        if (session.is_valid) console.log("valid mock session for user", session.claims.username);
+    });
+    return auth;
+}
+EOF
+# Inject it directly into the getAuth function
+# First, replace the old `if (!getMeta("auth-url")) { ... }` with our patch file
+sed -i.bak -e '/if (!getMeta("auth-url")) {/r patch_auth.js' -e '/if (!getMeta("auth-url")) {/,/    }/d' assets/lib/apptron.js
+# Ensure any stray register calls use authUrl from our patch variable
+sed -i.bak 's|register(getMeta("auth-url")|register(authUrl|g' assets/lib/apptron.js
+rm patch_auth.js
+
+# Also patch signin.html to prevent hanko-auth from mounting and throwing 404s
+sed -i.bak '/<hanko-auth><\/hanko-auth>/c\
+<script>\
+if (document.querySelector("meta[name=\\x27auth-url\\x27]")?.content === "/auth") {\
+    document.write("<p>Bypassing login...</p>");\
+} else {\
+    document.write("<hanko-auth></hanko-auth>");\
+}\
+</script>' assets/signin.html
+
+# Fix the worker unconditional redirect to /signin on the root path
+sed -i.bak '/if (url.pathname === "\/" && req.method === "GET") {/,/    }/c\
+    if (url.pathname === "/" && req.method === "GET") {\
+        await ensureSystemDirs(req, env);\
+        if (await validateToken(env.AUTH_URL, ctx.tokenRaw)) {\
+            url.pathname = "/dashboard";\
+            return Response.redirect(url.toString(), 307);\
+        }\
+        return redirectToSignin(env, url);\
+    }' worker/src/worker.ts
+
+sed -i.bak '/export async function validateToken(/,/^}/c\
+export async function validateToken(hankoApiUrl: string, token: string): Promise<boolean> {\
+// MOCK AUTH: Always return true\
+return true;\
+}' worker/src/auth.ts
 
 # Always start from a clean Makefile to ensure patches apply correctly on multiple runs
 git checkout Makefile 2>/dev/null || true

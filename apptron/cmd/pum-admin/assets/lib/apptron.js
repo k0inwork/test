@@ -57,7 +57,8 @@ export async function getAuth() {
 
     // Bypass Hanko auth in local mock mode to fix duplicate check validation
     // This allows the app to function locally without a real auth server
-    if (authUrl === "/auth" && isLocalhost()) {
+    // (authUrl === "/auth" implies we're in mock mode since it's injected by main.go)
+    if (authUrl === "/auth") {
         const mockSession = {
             is_valid: true,
             claims: {
@@ -73,6 +74,7 @@ export async function getAuth() {
             },
             getUser: async () => ({ id: "1", username: "admin", email: "admin@example.com" }),
             validatedSession: Promise.resolve(mockSession),
+            validateSession: async () => mockSession,
             onUserDeleted: () => {},
             onSessionCreated: () => {},
             onSessionExpired: () => {},
