@@ -25,7 +25,11 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "network",
 		Endpoint:     "http://localhost:8084",
-		Capabilities: []string{"network", "ipam", "routing"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "network", Endpoints: []string{"/"}},
+			{Name: "ipam", Endpoints: []string{"/ipam"}},
+			{Name: "routing", Endpoints: []string{"/routing"}},
+		},
 		IsCore:       false,
 		OrderID:      3,
 		Menu:         []logging.MenuItem{{Label: "Subnets", Path: "/subnets"}},

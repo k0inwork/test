@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
@@ -31,7 +29,10 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "task",
 		Endpoint:     "http://localhost:8085",
-		Capabilities: []string{"tasks", "async-executor"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "tasks", Endpoints: []string{"/tasks"}},
+			{Name: "async-executor", Endpoints: []string{"/async-executor"}},
+		},
 		IsCore:       false,
 		OrderID:      5,
 		Menu: []logging.MenuItem{
@@ -43,9 +44,9 @@ func main() {
 	r.Use(logging.GinMiddleware())
 
 	r.GET("/manifest", func(c *gin.Context) {
-		c.JSON(200, logging.UIManifest{
-			OrderID: 5,
-			Menu: []logging.MenuItem{
+		c.JSON(200, gin.H{
+			"OrderID": 5,
+			"Menu": []logging.MenuItem{
 				{Label: "Tasks", Path: "/tasks"},
 			},
 		})

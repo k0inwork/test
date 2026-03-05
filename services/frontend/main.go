@@ -17,13 +17,13 @@ import (
 var GlobalConfig *config.Config
 
 type RegisteredService struct {
-	Name         string             `json:"name"`
-	Endpoint     string             `json:"endpoint"`
-	Capabilities []string           `json:"capabilities"`
-	IsCore       bool               `json:"is_core"`
-	Enabled      bool               `json:"enabled"`
-	OrderID      int                `json:"order_id"`
-	Menu         []logging.MenuItem `json:"menu"`
+	Name         string                           `json:"name"`
+	Endpoint     string                           `json:"endpoint"`
+	Capabilities []logging.CapabilityRegistration `json:"capabilities"`
+	IsCore       bool                             `json:"is_core"`
+	Enabled      bool                             `json:"enabled"`
+	OrderID      int                              `json:"order_id"`
+	Menu         []logging.MenuItem               `json:"menu"`
 }
 
 func main() {
@@ -70,7 +70,7 @@ func main() {
 				} else {
 					for _, reqCap := range s.Capabilities {
 						for _, userCap := range caps {
-							if reqCap == userCap && reqCap != "" {
+							if reqCap.Name == userCap && reqCap.Name != "" {
 								allowed = true
 								break
 							}

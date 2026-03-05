@@ -22,7 +22,13 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "external-modules",
 		Endpoint:     "http://localhost:8086",
-		Capabilities: []string{"external-modules", "pdu", "ipmi", "network-management", "routing"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "external-modules", Endpoints: []string{"/"}},
+			{Name: "pdu", Endpoints: []string{"/pdu"}},
+			{Name: "ipmi", Endpoints: []string{"/ipmi"}},
+			{Name: "network-management", Endpoints: []string{"/network-management"}},
+			{Name: "routing", Endpoints: []string{"/routing"}},
+		},
 		IsCore:       false,
 	})
 

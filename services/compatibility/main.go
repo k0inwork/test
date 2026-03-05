@@ -23,7 +23,10 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "compatibility",
 		Endpoint:     "http://localhost:8090",
-		Capabilities: []string{"compatibility", "legacy-api"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "compatibility", Endpoints: []string{"/"}},
+			{Name: "legacy-api", Endpoints: []string{"/legacy-api"}},
+		},
 		IsCore:       false,
 		OrderID:      99,
 	})

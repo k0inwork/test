@@ -15,7 +15,10 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "terminal",
 		Endpoint:     "http://localhost:8087",
-		Capabilities: []string{"terminal", "ssh"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "terminal", Endpoints: []string{"/"}},
+			{Name: "ssh", Endpoints: []string{"/ssh"}},
+		},
 		IsCore:       false,
 	})
 
