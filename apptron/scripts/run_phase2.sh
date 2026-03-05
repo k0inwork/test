@@ -59,6 +59,17 @@ EOF
     sed -i.bak 's|register(getMeta("auth-url")|register(authUrl|g' assets/lib/apptron.js
     rm patch_auth.js
 
+    # Fix the worker unconditional redirect to /signin on the root path
+    sed -i.bak '/if (url.pathname === "\/" && req.method === "GET") {/,/    }/c\
+        if (url.pathname === "/" && req.method === "GET") {\
+            await ensureSystemDirs(req, env);\
+            if (await validateToken(env.AUTH_URL, ctx.tokenRaw)) {\
+                url.pathname = "/dashboard";\
+                return Response.redirect(url.toString(), 307);\
+            }\
+            return redirectToSignin(env, url);\
+        }' worker/src/worker.ts
+
     sed -i.bak '/export async function validateToken(/,/^}/c\
 export async function validateToken(hankoApiUrl: string, token: string): Promise<boolean> {\
   // MOCK AUTH: Always return true\
