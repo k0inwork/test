@@ -18,13 +18,18 @@ type MenuItem struct {
 	Path  string `json:"path"`
 }
 
+type CapabilityRegistration struct {
+	Name      string   `json:"name"`
+	Endpoints []string `json:"endpoints"`
+}
+
 type ServiceRegistration struct {
-	Name         string     `json:"name"`
-	Endpoint     string     `json:"endpoint"`
-	Capabilities []string   `json:"capabilities"`
-	IsCore       bool       `json:"is_core"`
-	OrderID      int        `json:"order_id"`
-	Menu         []MenuItem `json:"menu"`
+	Name         string                   `json:"name"`
+	Endpoint     string                   `json:"endpoint"`
+	Capabilities []CapabilityRegistration `json:"capabilities"`
+	IsCore       bool                     `json:"is_core"`
+	OrderID      int                      `json:"order_id"`
+	Menu         []MenuItem               `json:"menu"`
 }
 
 func Init(serviceName string) {

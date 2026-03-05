@@ -36,7 +36,11 @@ func main() {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "keyservice",
 		Endpoint:     "http://localhost:8092",
-		Capabilities: []string{"services", "key_services", "connectivity"},
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "services", Endpoints: []string{"/"}},
+			{Name: "key_services", Endpoints: []string{"/key_services"}},
+			{Name: "connectivity", Endpoints: []string{"/connectivity"}},
+		},
 		IsCore:       false,
 		OrderID:      7,
 		Menu: []logging.MenuItem{
