@@ -59,6 +59,16 @@ EOF
     sed -i.bak 's|register(getMeta("auth-url")|register(authUrl|g' assets/lib/apptron.js
     rm patch_auth.js
 
+    # Also patch signin.html to prevent hanko-auth from mounting and throwing 404s
+    sed -i.bak '/<hanko-auth><\/hanko-auth>/c\
+  <script>\
+    if (document.querySelector("meta[name=\\x27auth-url\\x27]")?.content === "/auth") {\
+      document.write("<p>Bypassing login...</p>");\
+    } else {\
+      document.write("<hanko-auth></hanko-auth>");\
+    }\
+  </script>' assets/signin.html
+
     # Fix the worker unconditional redirect to /signin on the root path
     sed -i.bak '/if (url.pathname === "\/" && req.method === "GET") {/,/    }/c\
         if (url.pathname === "/" && req.method === "GET") {\
