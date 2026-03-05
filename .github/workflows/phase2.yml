@@ -1,0 +1,89 @@
+name: Run Phase 2 Worker & Capture Result
+
+on:
+  push:
+    branches: [ "main", "master", "fix/*", "feat/*" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  run-phase2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Setup Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl make unzip wget
+
+      - name: Prepare Local Host Alias
+        run: echo "127.0.0.1 worker.local" | sudo tee -a /etc/hosts
+
+      - name: Clone Apptron Core
+        run: |
+          # We manually clone this because run_phase2.sh relies on it being downloaded
+          # by run_phase1.sh or manually.
+          git clone --depth 1 https://github.com/tractordev/apptron apptron/apptron
+
+      - name: Run Phase 2 Worker Script
+        run: |
+          # Start the worker process in the background
+          bash apptron/scripts/run_phase2.sh > worker.log 2>&1 &
+
+          echo "Waiting for Cloudflare Worker to start on port 8788..."
+
+          # Wait up to 60 seconds for the server to be ready
+          TIMEOUT=60
+          until curl -s http://localhost:8788 > /dev/null; do
+            sleep 2
+            TIMEOUT=$((TIMEOUT-2))
+            if [ $TIMEOUT -le 0 ]; then
+              echo "Timeout waiting for worker to start."
+              cat worker.log
+              exit 1
+            fi
+            echo "Waiting... ($TIMEOUT seconds left)"
+          done
+
+          echo "Worker is up and running!"
+
+      - name: Capture Resulting Pages
+        run: |
+          mkdir -p output_artifacts
+
+          echo "Fetching root (/) -> should redirect to /dashboard"
+          curl -s -L -D output_artifacts/headers_root.txt http://localhost:8788/ > output_artifacts/index.html
+
+          echo "Fetching /dashboard.html directly"
+          curl -s -L -D output_artifacts/headers_dashboard.txt http://localhost:8788/dashboard.html > output_artifacts/dashboard.html
+
+          echo "Fetching /signin.html directly"
+          curl -s -L -D output_artifacts/headers_signin.txt http://localhost:8788/signin.html > output_artifacts/signin.html
+
+          echo "Capturing worker logs"
+          cp worker.log output_artifacts/worker.log
+
+      - name: Upload Results Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apptron-phase2-results
+          path: output_artifacts/
+          retention-days: 5
