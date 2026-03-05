@@ -1,10 +1,6 @@
 name: Run Phase 2 Worker & Capture Result
 
 on:
-  push:
-    branches: [ "main", "master", "fix/*", "feat/*" ]
-  pull_request:
-    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
