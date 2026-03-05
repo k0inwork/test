@@ -64,6 +64,30 @@ func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
 	}()
 }
 
+// WaitForService blocks the current goroutine until the target service is marked
+// as active and enabled in the registry. It checks every 5 seconds.
+func WaitForService(registryURL, targetServiceName string) {
+	client := &http.Client{Timeout: 5 * time.Second}
+	for {
+		resp, err := client.Get(registryURL + "/services")
+		if err == nil && resp.StatusCode == http.StatusOK {
+			var services []ServiceRegistration
+			if err := json.NewDecoder(resp.Body).Decode(&services); err == nil {
+				for _, s := range services {
+					if s.Name == targetServiceName {
+						resp.Body.Close()
+						slog.Info("Service is now available", "service", targetServiceName)
+						return
+					}
+				}
+			}
+			resp.Body.Close()
+		}
+		slog.Info("Waiting for service to become available...", "service", targetServiceName)
+		time.Sleep(5 * time.Second)
+	}
+}
+
 func GinMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
