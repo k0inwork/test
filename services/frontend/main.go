@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
@@ -34,7 +35,7 @@ func main() {
 	r := gin.Default()
 	r.Use(logging.GinMiddleware())
 
-	r.LoadHTMLGlob("services/frontend/templates/base.html")
+	r.LoadHTMLGlob("services/frontend/templates/*.html")
 
 	getCommonH := func(c *gin.Context) gin.H {
 		services, _ := c.Get("services")
@@ -135,7 +136,23 @@ func main() {
 		un := c.PostForm("username")
 		pw := c.PostForm("password")
 		data, _ := json.Marshal(map[string]string{"username": un, "password": pw})
-		resp, err := http.Post("http://localhost:8081/login", "application/json", bytes.NewBuffer(data))
+
+		// Find identity service endpoint from registry
+		identityEndpoint := "http://localhost:8081" // fallback
+		respReg, err := http.Get("http://localhost:8088/services")
+		if err == nil {
+			var svcs []RegisteredService
+			json.NewDecoder(respReg.Body).Decode(&svcs)
+			respReg.Body.Close()
+			for _, s := range svcs {
+				if s.Name == "identity" {
+					identityEndpoint = s.Endpoint
+					break
+				}
+			}
+		}
+
+		resp, err := http.Post(identityEndpoint+"/login", "application/json", bytes.NewBuffer(data))
 		if err != nil || resp.StatusCode != 200 {
 			c.HTML(http.StatusUnauthorized, "base.html", gin.H{"IsLogin": true, "Error": "Login failed"})
 			return
@@ -183,11 +200,31 @@ func main() {
 		defer resp.Body.Close()
 		var data interface{}
 		json.NewDecoder(resp.Body).Decode(&data)
-		c.HTML(200, "base.html", appendH(getCommonH(c), gin.H{
+		h := appendH(getCommonH(c), gin.H{
 			"IsModulePage": true,
 			"ModuleName":   mod,
 			"ModuleData":   data,
-		}))
+		})
+
+		// Check if a specific template exists for this module+path
+		templateName := fmt.Sprintf("content_%s_%s", mod, strings.Trim(path, "/"))
+
+		// Gin Engine HTMLRender holds references to parsed templates
+		// To safely handle dynamic template rendering, we'll use a hack to check if template exists
+		// But since we know what templates exist, we can hardcode for now or parse the fs
+		// A cleaner approach is to render the base.html and let a helper inside go template handle dynamic include
+		// but Go html/template does not support dynamic {{template $myVar}} natively unless we register a func.
+		// Alternatively, we render a specific root template if it exists:
+
+		importPath := fmt.Sprintf("services/frontend/templates/%s_%s.html", mod, strings.Trim(path, "/"))
+		if _, err := os.Stat(importPath); err == nil {
+			h["HasCustomTemplate"] = true
+			h["CustomTemplateName"] = templateName
+		} else {
+			h["HasCustomTemplate"] = false
+		}
+
+		c.HTML(200, "base.html", h)
 	})
 
 	r.GET("/admin", func(c *gin.Context) {
@@ -238,8 +275,23 @@ func main() {
 			return
 		}
 
+		// Resolve identity endpoint from registry first
+		identityEndpoint := "http://localhost:8081" // fallback
+		respReg, err := http.Get("http://localhost:8088/services")
+		if err == nil {
+			var svcs []RegisteredService
+			json.NewDecoder(respReg.Body).Decode(&svcs)
+			respReg.Body.Close()
+			for _, s := range svcs {
+				if s.Name == "identity" {
+					identityEndpoint = s.Endpoint
+					break
+				}
+			}
+		}
+
 		// Fetch users from identity service
-		respUsers, err := http.Get("http://localhost:8081/users")
+		respUsers, err := http.Get(identityEndpoint + "/users")
 		var users interface{}
 		if err == nil {
 			json.NewDecoder(respUsers.Body).Decode(&users)
@@ -247,11 +299,31 @@ func main() {
 		}
 
 		// Fetch groups from identity service
-		respGroups, err := http.Get("http://localhost:8081/groups")
+		respGroups, err := http.Get(identityEndpoint + "/groups")
 		var groups interface{}
 		if err == nil {
 			json.NewDecoder(respGroups.Body).Decode(&groups)
 			respGroups.Body.Close()
+		}
+
+		// Check if we need to parse groups to an array of objects to render remove buttons correctly.
+		// However, it's better to process the groups string in template or here.
+		// The identity service returns "groups": "group1, group2".
+		// We'll modify it slightly to make array of groups available.
+		var processedUsers []map[string]interface{}
+		if users != nil {
+			if uArr, ok := users.([]interface{}); ok {
+				for _, u := range uArr {
+					if uMap, ok := u.(map[string]interface{}); ok {
+						if gStr, ok := uMap["groups"].(string); ok && gStr != "" {
+							gList := strings.Split(gStr, ", ")
+							uMap["groupList"] = gList
+						}
+						processedUsers = append(processedUsers, uMap)
+					}
+				}
+				users = processedUsers
+			}
 		}
 
 		c.HTML(200, "base.html", appendH(getCommonH(c), gin.H{
@@ -272,10 +344,67 @@ func main() {
 		group := c.PostForm("group")
 
 		if username != "" && group != "" {
-			data, _ := json.Marshal(map[string]string{"group": group})
-			resp, err := http.Post(fmt.Sprintf("http://localhost:8081/users/%s/groups", url.PathEscape(username)), "application/json", bytes.NewBuffer(data))
+			respReg, err := http.Get("http://localhost:8088/services")
 			if err == nil {
-				resp.Body.Close()
+				var svcs []RegisteredService
+				json.NewDecoder(respReg.Body).Decode(&svcs)
+				respReg.Body.Close()
+
+				var identityEndpoint string
+				for _, s := range svcs {
+					if s.Name == "identity" {
+						identityEndpoint = s.Endpoint
+						break
+					}
+				}
+				if identityEndpoint != "" {
+					data, _ := json.Marshal(map[string]string{"group": group})
+					resp, err := http.Post(fmt.Sprintf("%s/users/%s/groups", identityEndpoint, url.PathEscape(username)), "application/json", bytes.NewBuffer(data))
+					if err == nil {
+						resp.Body.Close()
+					}
+				}
+			}
+		}
+
+		c.Redirect(http.StatusFound, "/admin/users")
+	})
+
+	r.POST("/admin/users/remove-role", func(c *gin.Context) {
+		role, _ := c.Get("pum_role")
+		if role != "admin" {
+			c.AbortWithStatus(403)
+			return
+		}
+
+		username := c.PostForm("username")
+		group := c.PostForm("group")
+
+		if username != "" && group != "" {
+			// Find identity service endpoint from registry
+			respReg, err := http.Get("http://localhost:8088/services")
+			if err == nil {
+				var svcs []RegisteredService
+				json.NewDecoder(respReg.Body).Decode(&svcs)
+				respReg.Body.Close()
+
+				var identityEndpoint string
+				for _, s := range svcs {
+					if s.Name == "identity" {
+						identityEndpoint = s.Endpoint
+						break
+					}
+				}
+
+				if identityEndpoint != "" {
+					req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/users/%s/groups/%s", identityEndpoint, url.PathEscape(username), url.PathEscape(group)), nil)
+					if err == nil {
+						resp, err := http.DefaultClient.Do(req)
+						if err == nil {
+							resp.Body.Close()
+						}
+					}
+				}
 			}
 		}
 

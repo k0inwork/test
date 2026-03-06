@@ -45,7 +45,15 @@
         {{if .IsIndex}} {{template "content_index" .}} {{end}}
         {{if .IsAdminPage}} {{template "content_admin" .}} {{end}}
         {{if .IsAdminUsersPage}} {{template "content_admin_users" .}} {{end}}
-        {{if .IsModulePage}} {{template "content_module" .}} {{end}}
+        {{if .IsModulePage}}
+            {{if .HasCustomTemplate}}
+                {{if eq .CustomTemplateName "content_identity_activitylist"}}
+                    {{template "content_identity_activitylist" .}}
+                {{end}}
+            {{else}}
+                {{template "content_module" .}}
+            {{end}}
+        {{end}}
     </div>
     {{end}}
 </body>
@@ -104,7 +112,21 @@
                             <td>{{.id}}</td>
                             <td><strong>{{.username}}</strong></td>
                             <td>
-                                {{if .groups}}{{.groups}}{{else}}<span class="text-muted fst-italic">No roles assigned</span>{{end}}
+                                {{if .groupList}}
+                                    {{$username := .username}}
+                                    {{range .groupList}}
+                                        <span class="badge bg-secondary mb-1">
+                                            {{.}}
+                                            <form action="/admin/users/remove-role" method="POST" class="d-inline">
+                                                <input type="hidden" name="username" value="{{$username}}">
+                                                <input type="hidden" name="group" value="{{.}}">
+                                                <button type="submit" class="btn-close btn-close-white" style="font-size: 0.5rem;" aria-label="Close"></button>
+                                            </form>
+                                        </span>
+                                    {{end}}
+                                {{else}}
+                                    <span class="text-muted fst-italic">No roles assigned</span>
+                                {{end}}
                             </td>
                         </tr>
                         {{end}}
