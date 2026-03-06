@@ -7,8 +7,8 @@ test('Phase 2 mock duplicate project check should work', async ({ page }) => {
   // Verify dashboard loads (the redirect from / happened, auth bypassed)
   await expect(page).toHaveURL(/.*\/dashboard.*/);
 
-  // Click on "New Project"
-  await page.locator('text=New Project').first().click();
+  // Click on "Create Project"
+  await page.locator('#create-btn').click();
 
   // Wait for the modal dialog to appear
   await page.waitForSelector('#project-dialog-title');
