@@ -34,6 +34,7 @@ type ActivityLog struct {
 	Username      string    `json:"username"`
 	RequestMethod string    `json:"request_method"`
 	RequestURL    string    `json:"request_url"`
+	QueryParams   string    `json:"query_params"`
 	ResponseCode  int       `json:"response_code"`
 	Datetime      time.Time `gorm:"autoCreateTime" json:"datetime"`
 }

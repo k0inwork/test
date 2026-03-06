@@ -11,7 +11,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var L *slog.Logger
+import (
+	"sync"
+)
+
+var (
+	L *slog.Logger
+	registryEndpoint string
+	auditEndpoint    string
+	auditMu          sync.RWMutex
+)
 
 type MenuItem struct {
 	Label string `json:"label"`
@@ -42,6 +51,7 @@ func Init(serviceName string) {
 }
 
 func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
+	registryEndpoint = registryURL
 	go func() {
 		for {
 			data, _ := json.Marshal(info)
@@ -64,17 +74,82 @@ func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
 	}()
 }
 
+func getAuditEndpoint() string {
+	auditMu.RLock()
+	ep := auditEndpoint
+	auditMu.RUnlock()
+	if ep != "" {
+		return ep
+	}
+
+	if registryEndpoint == "" {
+		return ""
+	}
+
+	resp, err := http.Get(registryEndpoint + "/capabilities/audit")
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 200 {
+		var res struct{ Endpoint string `json:"endpoint"` }
+		if err := json.NewDecoder(resp.Body).Decode(&res); err == nil && res.Endpoint != "" {
+			auditMu.Lock()
+			auditEndpoint = res.Endpoint
+			auditMu.Unlock()
+			return res.Endpoint
+		}
+	}
+	return ""
+}
+
 func GinMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
+		method := c.Request.Method
+		queryParams := c.Request.URL.RawQuery
+
 		c.Next()
 		latency := time.Since(start)
+
+		status := c.Writer.Status()
+
 		L.InfoContext(c.Request.Context(), "request handled",
-			slog.Int("status", c.Writer.Status()),
-			slog.String("method", c.Request.Method),
+			slog.Int("status", status),
+			slog.String("method", method),
 			slog.String("path", path),
 			slog.Duration("latency", latency),
 		)
+
+		// Send audit log asynchronously
+		go func() {
+			ep := getAuditEndpoint()
+			if ep == "" {
+				return
+			}
+
+			// Don't log requests to the audit endpoint itself to avoid loops
+			if path == "/activitylist" {
+				return
+			}
+
+			username, err := c.Cookie("pum_user")
+			if err != nil || username == "" {
+				username = "system"
+			}
+
+			logEntry := map[string]interface{}{
+				"username":       username,
+				"request_method": method,
+				"request_url":    path,
+				"query_params":   queryParams,
+				"response_code":  status,
+			}
+
+			data, _ := json.Marshal(logEntry)
+			http.Post(ep, "application/json", bytes.NewBuffer(data))
+		}()
 	}
 }

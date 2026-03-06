@@ -192,10 +192,53 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "assigned"})
 	})
 
+	r.DELETE("/users/:username/groups/:group", func(c *gin.Context) {
+		username := c.Param("username")
+		groupName := c.Param("group")
+
+		var user models.User
+		if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+
+		var group models.Group
+		if err := db.Where("name = ?", groupName).First(&group).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "group not found"})
+			return
+		}
+
+		db.Model(&user).Association("Groups").Delete(&group)
+		c.JSON(http.StatusOK, gin.H{"status": "removed"})
+	})
+
 	// Auditing (formerly /accounts/activitylist/)
+	r.POST("/activitylist", func(c *gin.Context) {
+		var log models.ActivityLog
+		if err := c.ShouldBindJSON(&log); err == nil {
+			db.Create(&log)
+		}
+		c.Status(http.StatusOK)
+	})
+
 	r.GET("/activitylist", func(c *gin.Context) {
 		var activities []models.ActivityLog
-		db.Order("datetime desc").Limit(100).Find(&activities)
+		query := db.Order("datetime desc").Limit(100)
+
+		if userFilter := c.Query("username"); userFilter != "" {
+			query = query.Where("username LIKE ?", "%"+userFilter+"%")
+		}
+		if methodFilter := c.Query("request_method"); methodFilter != "" {
+			query = query.Where("request_method = ?", methodFilter)
+		}
+		if pathFilter := c.Query("request_url"); pathFilter != "" {
+			query = query.Where("request_url LIKE ?", "%"+pathFilter+"%")
+		}
+		if paramFilter := c.Query("query_params"); paramFilter != "" {
+			query = query.Where("query_params LIKE ?", "%"+paramFilter+"%")
+		}
+
+		query.Find(&activities)
 
 		// Provide a dummy initial log entry if empty to mimic old behavior
 		if len(activities) == 0 {
