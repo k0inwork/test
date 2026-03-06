@@ -61,6 +61,13 @@ jobs:
 
           echo "Worker is up and running!"
 
+      - name: Run E2E Tests
+        run: |
+          cd e2e_tests
+          npm ci || npm install
+          npx playwright install --with-deps chromium
+          npx playwright test
+
       - name: Capture Resulting Pages
         run: |
           mkdir -p output_artifacts
