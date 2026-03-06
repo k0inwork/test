@@ -154,4 +154,4 @@ make all
 echo "Starting Phase 2 Worker in dev mode..."
 echo "Mock Auth is ENABLED in apptron/worker/src/auth.ts."
 echo "You can access the environment at http://localhost:8788"
-cd worker && npx wrangler dev --port=8788
+cd worker && npx wrangler dev --port=8788 --log-level=none
