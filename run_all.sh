@@ -11,6 +11,16 @@ trap cleanup SIGINT SIGTERM
 
 echo "Starting PUM Microservices (Go Registry-based Architecture)..."
 
+echo "Setting up Prometheus for Monitoring..."
+bash scripts/download_prometheus.sh
+if [ -f "bin/prometheus" ]; then
+    echo "Starting Prometheus on port 9090..."
+    ./bin/prometheus --config.file=prometheus.yml > prometheus_output.log 2>&1 &
+    sleep 2
+else
+    echo "Warning: Prometheus binary not found, monitoring data will not be scraped."
+fi
+
 echo "Setting up Jaeger for Distributed Tracing..."
 bash scripts/download_jaeger.sh
 if [ -f "bin/jaeger-all-in-one" ]; then
