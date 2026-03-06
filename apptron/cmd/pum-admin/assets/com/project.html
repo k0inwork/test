@@ -164,7 +164,7 @@
                     btn.disabled = true;
 
                     try {
-                        const r = await checkDuplicate(name);
+                        const r = await checkDuplicate(name); console.log('CheckDuplicate returned:', r);
                         if (((input.value || "").trim()) !== r.name) return;
 
                         if (r.exists) {
@@ -176,7 +176,7 @@
                         btn.disabled = false;
                     } catch (e) {
                         if (e?.name === "AbortError") return;
-                        showError("Could not verify project name. Try again.");
+                        console.error('CheckDuplicate error:', e); showError("Could not verify project name. Try again.");
                         btn.disabled = true;
                     }
                 }, 250);
