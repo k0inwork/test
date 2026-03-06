@@ -24,6 +24,21 @@ func initDB() {
 	db, err = gorm.Open(sqlite.Open("identity.db"), &gorm.Config{})
 	if err != nil { panic(err) }
 	db.AutoMigrate(&models.User{}, &models.Group{}, &models.ActivityLog{})
+
+	// Seed groups
+	seedGroups := []models.Group{
+		{Name: "tsumadm", Capabilities: "*"},
+		{Name: "netadm", Capabilities: "network,ipam,routing"},
+		{Name: "devadm", Capabilities: "inventory,switches,ports,products"},
+	}
+	for _, g := range seedGroups {
+		var count int64
+		db.Model(&models.Group{}).Where("name = ?", g.Name).Count(&count)
+		if count == 0 {
+			db.Create(&g)
+		}
+	}
+
 	var count int64
 	db.Model(&models.User{}).Count(&count)
 	if count == 0 { db.Create(&models.User{Username: "admin", Role: "admin"}) }
