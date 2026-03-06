@@ -32,7 +32,7 @@ echo "Mocking Auth in worker/src/auth.ts..."
 # Also patch the frontend to skip login
 echo "Patching frontend assets to bypass Hanko login..."
 cat << 'EOF' > patch_auth.py
-import re
+import re, sys
 
 with open("assets/lib/apptron.js", "r") as f:
     content = f.read()
@@ -72,7 +72,7 @@ rm patch_auth.py
 
 # Also patch signin.html, worker.ts, and auth.ts reliably using Python
 cat << 'EOF' > patch_others.py
-import re
+import re, sys
 
 def process_file(filepath, callback):
     try:
@@ -82,7 +82,7 @@ def process_file(filepath, callback):
         with open(filepath, "w") as f:
             f.write(new_content)
     except Exception as e:
-        print(f"Error patching {filepath}: {e}")
+        print(f"Error patching {filepath}: {e}"); sys.exit(1)
 
 # 2. Patch signin.html
 def patch_signin(content):
