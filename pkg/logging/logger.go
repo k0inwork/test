@@ -9,11 +9,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 import (
 	"sync"
 )
+
+var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 var (
 	L *slog.Logger
@@ -55,7 +58,7 @@ func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
 	go func() {
 		for {
 			data, _ := json.Marshal(info)
-			resp, err := http.Post(registryURL+"/register", "application/json", bytes.NewBuffer(data))
+			resp, err := otelClient.Post(registryURL+"/register", "application/json", bytes.NewBuffer(data))
 			if err == nil {
 				resp.Body.Close()
 				slog.Info("Registered with service discovery", "url", registryURL)
@@ -66,7 +69,7 @@ func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
 		}
 		for {
 			time.Sleep(30 * time.Second)
-			resp, err := http.Post(registryURL+"/heartbeat/"+info.Name, "application/json", nil)
+			resp, err := otelClient.Post(registryURL+"/heartbeat/"+info.Name, "application/json", nil)
 			if err == nil {
 				resp.Body.Close()
 			}
@@ -86,7 +89,7 @@ func getAuditEndpoint() string {
 		return ""
 	}
 
-	resp, err := http.Get(registryEndpoint + "/capabilities/audit")
+	resp, err := otelClient.Get(registryEndpoint + "/capabilities/audit")
 	if err != nil {
 		return ""
 	}
@@ -149,7 +152,7 @@ func GinMiddleware() gin.HandlerFunc {
 			}
 
 			data, _ := json.Marshal(logEntry)
-			http.Post(ep, "application/json", bytes.NewBuffer(data))
+			otelClient.Post(ep, "application/json", bytes.NewBuffer(data))
 		}()
 	}
 }

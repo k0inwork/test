@@ -11,6 +11,16 @@ trap cleanup SIGINT SIGTERM
 
 echo "Starting PUM Microservices (Go Registry-based Architecture)..."
 
+echo "Setting up Jaeger for Distributed Tracing..."
+bash scripts/download_jaeger.sh
+if [ -f "bin/jaeger-all-in-one" ]; then
+    echo "Starting Jaeger all-in-one on ports 16686 (UI) and 4318 (OTLP HTTP)..."
+    ./bin/jaeger-all-in-one > jaeger_output.log 2>&1 &
+    sleep 2
+else
+    echo "Warning: Jaeger binary not found, tracing data will be dropped."
+fi
+
 # 1. Start Registry FIRST
 echo "Starting Registry Service on :8088..."
 go run services/registry/main.go &

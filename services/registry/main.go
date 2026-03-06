@@ -1,6 +1,10 @@
 package main
 
 import (
+	"pum-go/pkg/tracing"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"context"
+
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/logging"
@@ -28,9 +32,12 @@ var (
 )
 
 func main() {
+	tp, _ := tracing.InitTracer("registry")
+	defer func() { if err := tp.Shutdown(context.Background()); err != nil { slog.Error("failed to shutdown tracer", "err", err) } }()
 	logging.Init("registry")
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+	r.Use(otelgin.Middleware("registry"))
 	r.Use(gin.Recovery(), logging.GinMiddleware())
 
 	r.POST("/register", func(c *gin.Context) {
