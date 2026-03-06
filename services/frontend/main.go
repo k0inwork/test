@@ -192,7 +192,22 @@ func main() {
 			c.String(404, "Module not found")
 			return
 		}
-		resp, err := http.Get(target.Endpoint + path)
+		targetUrl := target.Endpoint + path
+		if c.Request.URL.RawQuery != "" {
+			targetUrl += "?" + c.Request.URL.RawQuery
+		}
+
+		req, err := http.NewRequest("GET", targetUrl, nil)
+		if err != nil {
+			c.String(500, "Failed to build request")
+			return
+		}
+		// Forward cookies so backend services know the user
+		for _, cookie := range c.Request.Cookies() {
+			req.AddCookie(cookie)
+		}
+
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			c.String(502, "Module unreachable")
 			return
@@ -291,7 +306,9 @@ func main() {
 		}
 
 		// Fetch users from identity service
-		respUsers, err := http.Get(identityEndpoint + "/users")
+		reqU, _ := http.NewRequest("GET", identityEndpoint+"/users", nil)
+		for _, cookie := range c.Request.Cookies() { reqU.AddCookie(cookie) }
+		respUsers, err := http.DefaultClient.Do(reqU)
 		var users interface{}
 		if err == nil {
 			json.NewDecoder(respUsers.Body).Decode(&users)
@@ -299,7 +316,9 @@ func main() {
 		}
 
 		// Fetch groups from identity service
-		respGroups, err := http.Get(identityEndpoint + "/groups")
+		reqG, _ := http.NewRequest("GET", identityEndpoint+"/groups", nil)
+		for _, cookie := range c.Request.Cookies() { reqG.AddCookie(cookie) }
+		respGroups, err := http.DefaultClient.Do(reqG)
 		var groups interface{}
 		if err == nil {
 			json.NewDecoder(respGroups.Body).Decode(&groups)
@@ -359,7 +378,10 @@ func main() {
 				}
 				if identityEndpoint != "" {
 					data, _ := json.Marshal(map[string]string{"group": group})
-					resp, err := http.Post(fmt.Sprintf("%s/users/%s/groups", identityEndpoint, url.PathEscape(username)), "application/json", bytes.NewBuffer(data))
+					reqP, _ := http.NewRequest("POST", fmt.Sprintf("%s/users/%s/groups", identityEndpoint, url.PathEscape(username)), bytes.NewBuffer(data))
+					reqP.Header.Set("Content-Type", "application/json")
+					for _, cookie := range c.Request.Cookies() { reqP.AddCookie(cookie) }
+					resp, err := http.DefaultClient.Do(reqP)
 					if err == nil {
 						resp.Body.Close()
 					}
@@ -397,9 +419,10 @@ func main() {
 				}
 
 				if identityEndpoint != "" {
-					req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/users/%s/groups/%s", identityEndpoint, url.PathEscape(username), url.PathEscape(group)), nil)
+					reqD, err := http.NewRequest("DELETE", fmt.Sprintf("%s/users/%s/groups/%s", identityEndpoint, url.PathEscape(username), url.PathEscape(group)), nil)
 					if err == nil {
-						resp, err := http.DefaultClient.Do(req)
+						for _, cookie := range c.Request.Cookies() { reqD.AddCookie(cookie) }
+						resp, err := http.DefaultClient.Do(reqD)
 						if err == nil {
 							resp.Body.Close()
 						}

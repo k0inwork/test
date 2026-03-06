@@ -108,11 +108,13 @@ func GinMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
+		method := c.Request.Method
+		queryParams := c.Request.URL.RawQuery
+
 		c.Next()
 		latency := time.Since(start)
 
 		status := c.Writer.Status()
-		method := c.Request.Method
 
 		L.InfoContext(c.Request.Context(), "request handled",
 			slog.Int("status", status),
@@ -142,6 +144,7 @@ func GinMiddleware() gin.HandlerFunc {
 				"username":       username,
 				"request_method": method,
 				"request_url":    path,
+				"query_params":   queryParams,
 				"response_code":  status,
 			}
 

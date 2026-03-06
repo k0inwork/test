@@ -223,7 +223,22 @@ func main() {
 
 	r.GET("/activitylist", func(c *gin.Context) {
 		var activities []models.ActivityLog
-		db.Order("datetime desc").Limit(100).Find(&activities)
+		query := db.Order("datetime desc").Limit(100)
+
+		if userFilter := c.Query("username"); userFilter != "" {
+			query = query.Where("username LIKE ?", "%"+userFilter+"%")
+		}
+		if methodFilter := c.Query("request_method"); methodFilter != "" {
+			query = query.Where("request_method = ?", methodFilter)
+		}
+		if pathFilter := c.Query("request_url"); pathFilter != "" {
+			query = query.Where("request_url LIKE ?", "%"+pathFilter+"%")
+		}
+		if paramFilter := c.Query("query_params"); paramFilter != "" {
+			query = query.Where("query_params LIKE ?", "%"+paramFilter+"%")
+		}
+
+		query.Find(&activities)
 
 		// Provide a dummy initial log entry if empty to mimic old behavior
 		if len(activities) == 0 {
