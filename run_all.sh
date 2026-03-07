@@ -38,7 +38,11 @@ if [ -f "bin/jaeger-all-in-one" ]; then
     # We tell Jaeger to listen for OTLP on 14317 instead of default 4317 to avoid conflicting with OTel Collector
     COLLECTOR_OTLP_GRPC_HOST_PORT=:14317 COLLECTOR_OTLP_HTTP_HOST_PORT=:14318 \
     METRICS_STORAGE_TYPE=prometheus \
-    ./bin/jaeger-all-in-one --prometheus.server-url=http://localhost:9090 --query.ui-config=jaeger-ui.json > jaeger_output.log 2>&1 &
+    ./bin/jaeger-all-in-one --prometheus.server-url=http://localhost:9090 \
+        --prometheus.query.normalize-calls=true \
+        --prometheus.query.normalize-duration=true \
+        --prometheus.query.support-spanmetrics-connector=true \
+        --query.ui-config=jaeger-ui.json > jaeger_output.log 2>&1 &
     sleep 2
 else
     echo "Warning: Jaeger binary not found, tracing data will be dropped."

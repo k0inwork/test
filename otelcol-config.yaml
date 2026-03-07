@@ -26,6 +26,8 @@ exporters:
 
   prometheus:
     endpoint: "0.0.0.0:8889" # Exposes metrics for Prometheus to scrape
+    resource_to_telemetry_conversion:
+      enabled: true
 
 service:
   pipelines:
