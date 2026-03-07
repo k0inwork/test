@@ -42,6 +42,12 @@ Instead of writing custom, proprietary Host Functions for every single operation
 *   **Pros:** Extremely low overhead, natively supported by the standard WASI spec (pre-opened FDs), and significantly less architectural boilerplate than a full 9P virtual filesystem. The WASM modules become completely decoupled from the specific host runtime environment.
 *   **Cons:** We have to define our own lightweight framing/RPC protocol over the raw stream (e.g., prefixing messages with a length header so the receiver knows when a full request/response has arrived).
 
+**Addressing Telemetry across the Socket:**
+A major concern with defining a custom RPC protocol over Unix sockets is that internal requests (like an HTTP call made by the WASM module) might become "hidden" from the global distributed tracing (Jaeger).
+*   **The Solution:** OpenTelemetry (OTel) context propagation solves this completely.
+*   The project already uses standard OTel instrumentation. When the WASM module initiates a request over the socket, it must serialize the current OTel span context (specifically the W3C `traceparent` and `tracestate` headers) into the metadata of the custom RPC payload.
+*   When the native Go Host Runner receives the RPC payload from the socket, it extracts these W3C headers, creates a new child span natively, and executes the complex task (like SQLite). This ensures a single, unbroken trace in Jaeger from the initial HTTP entry point, through the WASM boundary, across the Unix socket, and into the native database/network execution.
+
 ### Consequences
 *   **Pros:**
     *   **Ultimate Security Sandbox:** True, strict isolation on both macOS and Linux without any OS-level containers.
