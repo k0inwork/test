@@ -154,42 +154,49 @@ Nix provides absolute environment isolation and reproducible builds without cont
 
 ---
 
-## 6. The Hybrid Approach (Different Dev vs. Prod Environments)
+## 6. The Tri-Environment Approach (Local Dev, CI/CD, Production)
 
-If we relax the constraint that the local development environment must have the exact same isolation mechanisms as production, we unlock the most pragmatic, industry-standard approach. Assuming macOS is primarily for development and Linux is strictly for production:
+By separating our execution strategy into three distinct environments, we can perfectly optimize for developer velocity, automated testing reliability, and strict production security without compromising any single layer.
 
-### Development (macOS / Local Linux): Optimize for Speed and Low Overhead
-*   **Strategy:** **Lightweight Process Manager** (`Goreman` or `Hivemind`).
-*   **How it Works:** Developers run `goreman start`. All Go microservices compile natively and rapidly on the host OS. Jaeger and Prometheus run natively.
-*   **Why it's Best Here:** It completely avoids the macOS Docker VM penalty (high CPU/Memory drain, slow filesystem syncs). Developers get instant compilation feedback, beautiful multiplexed logging, and clean process shutdowns without any complex virtualization or sandboxing layers getting in the way.
+### 1. Local Development (macOS / Linux): Zero Containers
+*   **Goal:** Maximize speed, eliminate VM overhead, and ensure instant feedback loops.
+*   **Strategy:** **Lightweight Process Manager** (`Goreman` or `start.sh` wrapper).
+*   **How it Works:** Absolutely no Docker or LXC. The application is run directly from the raw Git repository structure using dynamic loading (`go run`). The wrapper script automatically downloads the native macOS/Linux binaries for external tools (like Jaeger or Prometheus) and runs them natively alongside the Go services.
+*   **Why:** It completely avoids the notorious macOS Docker VM penalty (high CPU drain and slow filesystem syncs).
 
-### Production (Linux Server): Optimize for Strict Isolation and Standard Deployment
-*   **Strategy:** **Docker / OCI Containers** (or strictly configured `systemd` + `bwrap`).
-*   **How it Works:** CI/CD builds standard Docker images of the natively compiled Go binaries. Production deploys them via `docker-compose` or Kubernetes.
-*   **Why it's Best Here:** Since the production server is Linux, Docker runs natively using kernel `cgroups` and namespaces. There is zero VM overhead. It provides perfect, battle-tested network and filesystem isolation. It trivially handles external dependencies (Jaeger/Prometheus) using official images.
-*   *Alternative:* If Docker is truly banned even in production, use standard native `systemd` service files wrapped in `bwrap` (Bubblewrap) or `firejail` to achieve similar strong OS-level sandboxing on Linux without a daemon.
+### 2. CI/CD (Test Environment): Ephemeral Docker
+*   **Goal:** Provide a clean, repeatable, and easily orchestratable environment for automated integration testing.
+*   **Strategy:** **Docker / Docker Compose**.
+*   **How it Works:** GitHub Actions (or GitLab CI) spins up a standard `docker-compose.test.yml` that builds the Go containers and pulls the official Jaeger/Prometheus images. Tests are run against this isolated network, and then the environment is destroyed.
+*   **Why:** CI/CD runners (which are almost universally Linux-based) excel at running Docker. It guarantees that tests are isolated from the runner's host state without burdening local developers with container management.
+
+### 3. Production (Linux Server): Strict Native Isolation
+*   **Goal:** Maximize security and stability without relying on potentially inaccessible external Docker registries.
+*   **Strategy:** **`systemd` + `bwrap` (Bubblewrap) via Ansible**.
+*   **How it Works:** Ansible handles the complex packaging. It deploys the compiled Go binaries and external tools natively to the server. It writes `systemd` unit files that wrap the `ExecStart` commands in `bwrap`. `bwrap` isolates the network namespaces and mounts specific directories as read-only.
+*   **Why:** We achieve Docker-level kernel security (cgroups/namespaces) directly on the host OS without needing a Docker daemon or access to external image registries, satisfying strict air-gapped or firewall-heavy production requirements.
 
 ---
 
-## 7. Packaging and Execution Tooling (The Selected Path)
+## 7. Execution Tooling (The Selected Path)
 
-Based on the hybrid approach, the tooling to manage these distinct environments should be split between Configuration Management (Ansible) and a Simple Execution Script.
+Based on the tri-environment architecture, the tooling is explicitly split to handle each layer's unique needs:
 
-### Packaging & Deployment: Ansible
-*   **Production (Linux):** We will use **Ansible** playbooks to handle the actual packaging and deployment to the Linux servers. Ansible is perfectly suited to ensure `bwrap` is installed, write the complex `systemd` unit files, copy the natively compiled binaries, and set up the isolated read-only filesystems.
-*   **Development (macOS):** No complex packaging tool is needed. The raw git repository structure combined with dynamic loading (`go run`) is sufficient. Even external tools like **Jaeger** or **Prometheus** will not be containerized on macOS; their native binaries will be automatically fetched and managed purely by the local directory structure.
+### Packaging & Deployment: Ansible (Prod Only)
+*   **Ansible** is exclusively used to package and deploy to the **Production** Linux servers. It handles the heavy lifting of installing `bwrap`, copying native binaries, and configuring the isolated `systemd` services.
 
-### Day-to-Day Execution: Simple Wrapper Script
-We will replace `run_all.sh` with a simple, intelligent wrapper script (e.g., `start.sh`) focused purely on execution.
-*   The script uses `uname -s` to detect the OS.
-*   **If `Darwin` (macOS):** The script (or the Lightweight Process Manager it calls, like `goreman`) automatically downloads/checks for the native macOS binaries of external tools (like the Jaeger all-in-one binary) and runs them directly alongside the local Go services (`go run`). It completely bypasses Docker.
-*   **If `Linux` (Production):** It assumes Ansible has already done the heavy lifting of packaging. The script merely validates the environment and ensures the native `systemd` services (wrapped in `bwrap`) are running for both the Go services and external tools. This gives developers and operators a unified, simple command to start the entire application suite everywhere.
+### Day-to-Day Execution: `start.sh` (Local Dev)
+*   We will replace `run_all.sh` with a simple, intelligent wrapper script (`start.sh`).
+*   When a developer runs `./start.sh` locally, it detects the OS, ensures native dependencies (like Jaeger) are downloaded to a local `.bin/` folder, and launches everything via a process manager. It acts as a single, zero-friction entrypoint that never calls `docker`.
+
+### Automated Testing: Docker Compose (CI/CD Only)
+*   The repository will contain a `docker-compose.test.yml` strictly reserved for the CI pipeline to quickly spin up the full stack for end-to-end integration tests.
 
 ---
 
 ## Final Recommendation Summary
 
-1.  **Architecture:** Adopt the **Hybrid Approach**. Use a **Lightweight Process Manager** (like `Goreman`) for local macOS development. For production Linux servers, use native **`systemd` + `bwrap`** for strict security isolation without Docker.
-2.  **Tooling:** Use **Ansible** exclusively to package and configure the complex Linux production environment. Rely on the raw git repository structure for macOS development.
-3.  **Execution:** Replace `run_all.sh` with a simple **`start.sh`** script that detects the OS and routes to the appropriate local runner or system service.
+1.  **Local Dev:** Zero containers. Use a smart `start.sh` and a process manager to run Go services and native external tools (Jaeger) directly on macOS/Linux.
+2.  **CI/CD Tests:** Use **Docker/Docker Compose** for ephemeral, clean integration testing environments on CI runners.
+3.  **Production:** Zero Docker. Use **Ansible** to deploy native binaries managed by **`systemd` + `bwrap`** for strict security isolation.
 4.  **Long-Term Goal:** Investigate **WASM/WASI** (using the Host Orchestrator Pattern and Unix Socket IPC) for true, cross-platform security sandboxing without VMs or OS-specific wrappers.
