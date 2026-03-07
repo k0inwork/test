@@ -17,7 +17,7 @@ import (
 func InitTracer(serviceName string) (*sdktrace.TracerProvider, error) {
 	ctx := context.Background()
 
-	// Configure the OTLP HTTP exporter to send traces to localhost:4318 (Jaeger OTLP HTTP receiver)
+	// Configure the OTLP HTTP exporter to send traces to localhost:4318 (OpenTelemetry Collector)
 	exporter, err := otlptracehttp.New(ctx,
 		otlptracehttp.WithEndpoint("localhost:4318"),
 		otlptracehttp.WithInsecure(), // no TLS
