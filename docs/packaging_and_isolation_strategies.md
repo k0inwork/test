@@ -31,6 +31,17 @@ Yes, this is highly reasonable and is the standard industry approach for enterpr
 *   **Pros:** It completely solves the CGO/SQLite limitation and bypassing immature WASI networking. The WASM modules remain pure, portable business logic.
 *   **Cons:** It increases architecture complexity. We have to design an RPC interface or use something like `wazero` to define strict Host Functions that bridge the gap between the native OS Go Runner and the internal WASM Go logic.
 
+### Advanced IPC: 9P Protocol over WASI
+Instead of writing custom, proprietary Host Functions for every single operation (e.g., `execute_sqlite_query()`), a powerful architectural alternative is to use a standardized file-system protocol like **9P** (Plan 9 File Protocol) over WASI.
+
+*   **How it Works:** The native Go Host Runner mounts a virtual 9P filesystem and exposes it to the WASM module via standard WASI filesystem capabilities (e.g., passing a file descriptor to the WASM module representing a 9P connection, or mounting a directory that is backed by 9P).
+*   **What it Solves:**
+    *   **Universal IPC:** It turns complex RPC into standard file I/O operations. The WASM module just reads/writes to what it thinks is a local file (e.g., `/mnt/9p/sqlite` or `/mnt/9p/network/port/8080`), and the Host Runner translates those reads/writes into real network packets or database queries.
+    *   **Unix Sockets via WASI:** WASI officially supports streaming file descriptors (pipes/stdin/stdout). By piping a 9P stream over standard WASI descriptors, we achieve high-performance IPC (essentially Unix Sockets) without needing the WASM module to have raw network access.
+    *   **Portability:** The WASM module remains 100% standard `GOOS=wasip1`. It doesn't need to know anything about custom host functions, it just needs to know how to talk the 9P protocol over a file descriptor, which is entirely platform-agnostic.
+*   **Pros:** Extremely elegant separation of concerns. The WASM modules become completely decoupled from the specific host runtime environment.
+*   **Cons:** Implementing a robust 9P server in the Go Host Runner and a 9P client in the WASM modules adds initial boilerplate. 9P is inherently synchronous/request-response, which might require careful goroutine management to avoid blocking the single-threaded WASM execution (though Go's `wasip1` scheduler handles blocking I/O reasonably well).
+
 ### Consequences
 *   **Pros:**
     *   **Ultimate Security Sandbox:** True, strict isolation on both macOS and Linux without any OS-level containers.
