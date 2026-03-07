@@ -31,8 +31,14 @@ echo "Mocking Auth in worker/src/auth.ts..."
 
 # Also patch the frontend to skip login
 echo "Patching frontend assets to bypass Hanko login..."
-cat << 'EOF' > patch_auth.js
-const authUrl = getMeta("auth-url");
+cat << 'EOF' > patch_auth.py
+import re, sys
+
+with open("assets/lib/apptron.js", "r") as f:
+    content = f.read()
+
+pattern = r'(if \(!getMeta\("auth-url"\)\) \{\n\s*throw new Error\("auth-url meta tag not found"\);\n\s*\})'
+replacement = """const authUrl = getMeta("auth-url");
 if (!authUrl) {
     throw new Error("auth-url meta tag not found");
 }
@@ -41,7 +47,8 @@ if (authUrl === "/auth") {
     const mockSession = { is_valid: true, claims: { username: "admin" } };
     window.session = mockSession;
     auth = {
-        session: { get: () => ({ jwt: "mock-token" }) },
+        getSessionToken: () => "header.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiJ9.signature",
+        session: { get: () => ({ jwt: "header.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiJ9.signature" }) },
         getUser: async () => ({ id: "1", username: "admin", email: "admin@example.com" }),
         validatedSession: Promise.resolve(mockSession),
         validateSession: async () => mockSession,
@@ -52,41 +59,71 @@ if (authUrl === "/auth") {
         if (session.is_valid) console.log("valid mock session for user", session.claims.username);
     });
     return auth;
-}
+}"""
+
+content = re.sub(pattern, replacement, content)
+content = content.replace('register(getMeta("auth-url")', 'register(authUrl')
+
+with open("assets/lib/apptron.js", "w") as f:
+    f.write(content)
 EOF
-# Inject it directly into the getAuth function
-# First, replace the old `if (!getMeta("auth-url")) { ... }` with our patch file
-sed -i.bak -e '/if (!getMeta("auth-url")) {/r patch_auth.js' -e '/if (!getMeta("auth-url")) {/,/    }/d' assets/lib/apptron.js
-# Ensure any stray register calls use authUrl from our patch variable
-sed -i.bak 's|register(getMeta("auth-url")|register(authUrl|g' assets/lib/apptron.js
-rm patch_auth.js
+python3 patch_auth.py
+rm patch_auth.py
 
-# Also patch signin.html to prevent hanko-auth from mounting and throwing 404s
-sed -i.bak '/<hanko-auth><\/hanko-auth>/c\
-<script>\
-if (document.querySelector("meta[name=\\x27auth-url\\x27]")?.content === "/auth") {\
-    document.write("<p>Bypassing login...</p>");\
-} else {\
-    document.write("<hanko-auth></hanko-auth>");\
-}\
-</script>' assets/signin.html
 
-# Fix the worker unconditional redirect to /signin on the root path
-sed -i.bak '/if (url.pathname === "\/" && req.method === "GET") {/,/    }/c\
-    if (url.pathname === "/" && req.method === "GET") {\
-        await ensureSystemDirs(req, env);\
-        if (await validateToken(env.AUTH_URL, ctx.tokenRaw)) {\
-            url.pathname = "/dashboard";\
-            return Response.redirect(url.toString(), 307);\
-        }\
-        return redirectToSignin(env, url);\
-    }' worker/src/worker.ts
+# Also patch signin.html, worker.ts, and auth.ts reliably using Python
+cat << 'EOF' > patch_others.py
+import re, sys
 
-sed -i.bak '/export async function validateToken(/,/^}/c\
-export async function validateToken(hankoApiUrl: string, token: string): Promise<boolean> {\
-// MOCK AUTH: Always return true\
-return true;\
-}' worker/src/auth.ts
+def process_file(filepath, callback):
+    try:
+        with open(filepath, "r") as f:
+            content = f.read()
+        new_content = callback(content)
+        with open(filepath, "w") as f:
+            f.write(new_content)
+    except Exception as e:
+        print(f"Error patching {filepath}: {e}"); sys.exit(1)
+
+# 2. Patch signin.html
+def patch_signin(content):
+    return content.replace('<hanko-auth></hanko-auth>', """<script>
+if (document.querySelector("meta[name='auth-url']")?.content === "/auth") {
+    document.write("<p>Bypassing login...</p>");
+} else {
+    document.write("<hanko-auth></hanko-auth>");
+}
+</script>""")
+
+# 3. Patch worker.ts
+def patch_worker(content):
+    pattern = r'(if \(url\.pathname === "/" && req\.method === "GET"\) \{)(.*?)(^\s*\})'
+    replacement = r"""    if (url.pathname === "/" && req.method === "GET") {
+        await ensureSystemDirs(req, env);
+        if (await validateToken(env.AUTH_URL, ctx.tokenRaw)) {
+            url.pathname = "/dashboard";
+            return Response.redirect(url.toString(), 307);
+        }
+        return redirectToSignin(env, url);
+    }"""
+    return re.sub(pattern, replacement, content, flags=re.MULTILINE|re.DOTALL)
+
+# 4. Patch auth.ts
+def patch_auth(content):
+    pattern = r'(export async function validateToken\(.*?\): Promise<boolean> \{)(.*?)(\n\})'
+    replacement = r"""export async function validateToken(hankoApiUrl: string, token: string): Promise<boolean> {
+// MOCK AUTH: Always return true
+return true;
+}"""
+    return re.sub(pattern, replacement, content, flags=re.MULTILINE|re.DOTALL)
+
+# Execute
+process_file("assets/signin.html", patch_signin)
+process_file("worker/src/worker.ts", patch_worker)
+process_file("worker/src/auth.ts", patch_auth)
+EOF
+python3 patch_others.py
+rm patch_others.py
 
 # Always start from a clean Makefile to ensure patches apply correctly on multiple runs
 git checkout Makefile 2>/dev/null || true
@@ -118,4 +155,4 @@ make all
 echo "Starting Phase 2 Worker in dev mode..."
 echo "Mock Auth is ENABLED in apptron/worker/src/auth.ts."
 echo "You can access the environment at http://localhost:8788"
-cd worker && npx wrangler dev --port=8788
+cd worker && npx wrangler dev --port=8788 --log-level=none
