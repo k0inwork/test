@@ -19,6 +19,18 @@ Given the project's existing use of WebAssembly (Apptron/Wanix), compiling the G
 *   **Networking Constraints:** Standard Go `net/http` servers rely on full networking stacks. WASI's networking support is still evolving (WASI Preview 2/3). While basic HTTP servers can work in runtimes like Wasmer/Wasmtime, complex networking, raw sockets, or background goroutines interacting with external services might require significant workarounds or custom host functions.
 *   **External Binaries:** We cannot compile pre-existing binaries like Jaeger or Prometheus to WASM easily. They would still need to run natively on the host OS. The WASM orchestrator would need to manage both WASM modules (for our Go code) and native processes (for Jaeger/Prometheus).
 
+### Using an External Native Module (Host Orchestrator/Capability Provider)
+A very common and reasonable pattern for complex WASM architectures is the **Host Orchestrator Pattern** (using Host Functions).
+Instead of forcing the WASM runtime to handle raw TCP/IP or CGO SQLite calls, we build a single, native "Host Runner" (written in Go) that runs on the OS.
+
+*   **Networking (HTTP/TCP):** The native Host Runner binds to the actual OS ports. When an HTTP request comes in, the Host Runner passes the request payload into the WASM module. The WASM module processes the logic and returns a response payload, which the Host Runner sends back over the real network.
+*   **Database (SQLite):** The Host Runner holds the actual CGO SQLite connection. The WASM module makes RPC-like calls (Host Functions) to the native runner (e.g., `execute_query("SELECT * FROM users")`), and the native runner executes the CGO code and passes the result back into WASM.
+
+**Is this reasonable?**
+Yes, this is highly reasonable and is the standard industry approach for enterprise WASM (used by platforms like Fermyon Spin or Cloudflare Workers).
+*   **Pros:** It completely solves the CGO/SQLite limitation and bypassing immature WASI networking. The WASM modules remain pure, portable business logic.
+*   **Cons:** It increases architecture complexity. We have to design an RPC interface or use something like `wazero` to define strict Host Functions that bridge the gap between the native OS Go Runner and the internal WASM Go logic.
+
 ### Consequences
 *   **Pros:**
     *   **Ultimate Security Sandbox:** True, strict isolation on both macOS and Linux without any OS-level containers.
