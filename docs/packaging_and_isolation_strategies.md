@@ -171,30 +171,25 @@ If we relax the constraint that the local development environment must have the 
 
 ---
 
-## 7. Standardized Execution (Managing Dev vs. Prod Environments)
+## 7. Packaging and Execution Tooling (The Selected Path)
 
-With a hybrid approach (macOS/Lightweight Manager vs. Linux/bwrap), developers and production systems need a unified, standard way to execute the application without needing to manually remember platform-specific commands.
+Based on the hybrid approach, the tooling to manage these distinct environments should be split between Configuration Management (Ansible) and a Simple Execution Script.
 
-### Approach 1: The Intelligent OS-Aware Wrapper Script (Recommended)
-The simplest and most pragmatic way to manage this is to completely replace `run_all.sh` with an intelligent `start.sh` or a `Makefile` target (e.g., `make run`).
+### Packaging & Deployment: Ansible
+*   **Production (Linux):** We will use **Ansible** playbooks to handle the actual packaging and deployment to the Linux servers. Ansible is perfectly suited to ensure `bwrap` is installed, write the complex `systemd` unit files, copy the natively compiled binaries, and set up the isolated read-only filesystems.
+*   **Development (macOS):** No complex packaging tool is needed. The raw git repository structure combined with dynamic loading (`go run`) is sufficient, as building or pulling the repository is a one-time setup step for a developer.
 
-*   **How it Works:** The script uses `uname -s` to detect the host operating system.
-    *   **If `Darwin` (macOS):** The script automatically ensures `goreman` is installed, reads the local `Procfile`, and executes `goreman start` to launch the dev environment.
-    *   **If `Linux`:** The script assumes it is in a production (or staging) environment. It validates that the `bwrap` utility is installed, generates or copies the necessary `systemd` unit files (which wrap the binaries in `bwrap`), and starts the `systemd` services (`systemctl start pum-microservices.target`).
-*   **Pros:** Zero cognitive load for developers; they just run `./start.sh` everywhere. It natively handles the bridge between the loose dev environment and strict prod environment.
-*   **Cons:** The shell script itself can become complex if it tries to manage too many OS edge cases or complex dependency installations (like fetching Jaeger).
-
-### Approach 2: Infrastructure as Code / Configuration Management (Nix or Ansible)
-If the intelligence required to bootstrap the environments becomes too complex for a single shell script, configuration management is the next step.
-
-*   **Nix Flakes:** A unified `flake.nix` file defines both environments. A developer on Mac runs `nix run .#dev` (which internally runs the process manager), while the Linux production server runs `nix run .#prod` (which outputs a systemd service bundle).
-*   **Ansible:** Local developers run a playbook (`ansible-playbook local.yml`) that configures their Mac for process management, while CI/CD runs `ansible-playbook prod.yml` against the Linux servers to configure `bwrap` and `systemd`.
+### Day-to-Day Execution: Simple Wrapper Script
+We will replace `run_all.sh` with a simple, intelligent wrapper script (e.g., `start.sh`) focused purely on execution.
+*   The script uses `uname -s` to detect the OS.
+*   **If `Darwin` (macOS):** It simply executes the Lightweight Process Manager (`goreman start`) against the local repository files.
+*   **If `Linux` (Production):** It assumes Ansible has already done the heavy lifting of packaging. The script merely validates the environment and ensures the `systemd` services (wrapped in `bwrap`) are running. This gives developers and operators a unified, simple command to start the application everywhere.
 
 ---
 
-## Summary Recommendation
+## Final Recommendation Summary
 
-1.  **Immediate & Best Pragmatic Step:** Adopt the **Hybrid Approach**. Use a **Lightweight Process Manager** (like `Goreman`) for local macOS development to replace `run_all.sh` with zero overhead. For production Linux servers, embrace **Docker/OCI** (or `systemd` + `bwrap`) for strict, native security isolation.
-2.  **Long-Term Goal:** Investigate **WASM/WASI**. While the highest effort (due to SQLite and Networking constraints), it aligns perfectly with the Apptron project's ethos and provides the Holy Grail of true, cross-platform security sandboxing without VMs or Docker.
-3.  **Alternative Long-Term:** If WASM proves too restrictive for the backend, adopt **Nix** for perfect environment packaging across macOS/Linux, accepting that security isolation will rely on standard OS user permissions rather than strict sandboxes.
-4.  **Fallback Option:** If native execution constraints on macOS become too complex to manage across developers, fallback to **Docker**, accepting the VM overhead on Apple Silicon in exchange for industry-standard packaging and environment security.
+1.  **Architecture:** Adopt the **Hybrid Approach**. Use a **Lightweight Process Manager** (like `Goreman`) for local macOS development. For production Linux servers, use native **`systemd` + `bwrap`** for strict security isolation without Docker.
+2.  **Tooling:** Use **Ansible** exclusively to package and configure the complex Linux production environment. Rely on the raw git repository structure for macOS development.
+3.  **Execution:** Replace `run_all.sh` with a simple **`start.sh`** script that detects the OS and routes to the appropriate local runner or system service.
+4.  **Long-Term Goal:** Investigate **WASM/WASI** (using the Host Orchestrator Pattern and Unix Socket IPC) for true, cross-platform security sandboxing without VMs or OS-specific wrappers.
