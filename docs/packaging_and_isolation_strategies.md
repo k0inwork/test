@@ -6,7 +6,29 @@ The goal is to move away from a simple `run_all.sh` script to a more robust solu
 
 ---
 
-## 1. WebAssembly (WASM / WASI)
+## 1. Docker / OCI Containers (Baseline Examinable Option)
+
+While the initial constraint was to avoid Docker or heavy virtualization, Docker remains the industry standard baseline against which all other options are measured.
+
+### How it Works
+*   **Packaging:** We write a `Dockerfile` (or `docker-compose.yml`) that defines the entire runtime environment, pulling in Alpine Linux or Distroless images, copying compiled Go binaries, and orchestrating external images (like Jaeger and Prometheus).
+*   **Isolation (Process & Network):** Docker provides native network namespaces. Microservices can communicate on an internal virtual network without exposing ports to the host OS.
+*   **Environment Security:** On Linux, Docker relies on `cgroups` and standard Linux namespaces. It is highly secure, provided the containers do not run as root.
+
+### Effort: Low
+*   Docker compose is trivial to write and maintain. Almost all external dependencies (Jaeger, Prometheus) provide official, optimized Docker images.
+
+### Consequences
+*   **Pros:**
+    *   **Universal Packaging:** Solves the packaging problem completely. A single `docker-compose up` works everywhere.
+    *   **External Binaries:** Seamlessly handles Jaeger and Prometheus without needing custom native orchestrators.
+*   **Cons (The Dealbreakers):**
+    *   **macOS Overhead:** Docker on macOS *must* run a hidden Linux VM (via HyperKit, Lima, or qemu) to utilize `cgroups`/namespaces. This introduces significant CPU/Memory overhead and battery drain, completely violating the lightweight, native execution preference.
+    *   **Filesystem Sync:** Mounting local macOS directories into the Linux VM for live-reload development is notoriously slow.
+
+---
+
+## 2. WebAssembly (WASM / WASI)
 
 Given the project's existing use of WebAssembly (Apptron/Wanix), compiling the Go microservices to WASM and running them in a native WASM runtime (like Wazero, Wasmtime, or Wasmer) is a strong candidate for true cross-platform isolation.
 
@@ -137,3 +159,4 @@ Nix provides absolute environment isolation and reproducible builds without cont
 1.  **Immediate Step:** Adopt a **Lightweight Process Manager** (like `Goreman`) immediately. It replaces `run_all.sh` with almost zero effort, fixes zombie processes, and manages logs for Go services, Jaeger, and Prometheus perfectly.
 2.  **Long-Term Goal:** Investigate **WASM/WASI**. While the highest effort (due to SQLite and Networking constraints), it aligns perfectly with the Apptron project's ethos and provides the Holy Grail of true, cross-platform security sandboxing without VMs or Docker.
 3.  **Alternative Long-Term:** If WASM proves too restrictive for the backend, adopt **Nix** for perfect environment packaging across macOS/Linux, accepting that security isolation will rely on standard OS user permissions rather than strict sandboxes.
+4.  **Fallback Option:** If native execution constraints on macOS become too complex to manage across developers, fallback to **Docker**, accepting the VM overhead on Apple Silicon in exchange for industry-standard packaging and environment security.
