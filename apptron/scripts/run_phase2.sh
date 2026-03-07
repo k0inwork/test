@@ -47,6 +47,7 @@ if (authUrl === "/auth") {
     const mockSession = { is_valid: true, claims: { username: "admin" } };
     window.session = mockSession;
     auth = {
+        getSessionToken: () => "header.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiJ9.signature",
         session: { get: () => ({ jwt: "header.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiJ9.signature" }) },
         getUser: async () => ({ id: "1", username: "admin", email: "admin@example.com" }),
         validatedSession: Promise.resolve(mockSession),
