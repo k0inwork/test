@@ -177,13 +177,13 @@ Based on the hybrid approach, the tooling to manage these distinct environments 
 
 ### Packaging & Deployment: Ansible
 *   **Production (Linux):** We will use **Ansible** playbooks to handle the actual packaging and deployment to the Linux servers. Ansible is perfectly suited to ensure `bwrap` is installed, write the complex `systemd` unit files, copy the natively compiled binaries, and set up the isolated read-only filesystems.
-*   **Development (macOS):** No complex packaging tool is needed. The raw git repository structure combined with dynamic loading (`go run`) is sufficient, as building or pulling the repository is a one-time setup step for a developer.
+*   **Development (macOS):** No complex packaging tool is needed. The raw git repository structure combined with dynamic loading (`go run`) is sufficient. Even external tools like **Jaeger** or **Prometheus** will not be containerized on macOS; their native binaries will be automatically fetched and managed purely by the local directory structure.
 
 ### Day-to-Day Execution: Simple Wrapper Script
 We will replace `run_all.sh` with a simple, intelligent wrapper script (e.g., `start.sh`) focused purely on execution.
 *   The script uses `uname -s` to detect the OS.
-*   **If `Darwin` (macOS):** It simply executes the Lightweight Process Manager (`goreman start`) against the local repository files.
-*   **If `Linux` (Production):** It assumes Ansible has already done the heavy lifting of packaging. The script merely validates the environment and ensures the `systemd` services (wrapped in `bwrap`) are running. This gives developers and operators a unified, simple command to start the application everywhere.
+*   **If `Darwin` (macOS):** The script (or the Lightweight Process Manager it calls, like `goreman`) automatically downloads/checks for the native macOS binaries of external tools (like the Jaeger all-in-one binary) and runs them directly alongside the local Go services (`go run`). It completely bypasses Docker.
+*   **If `Linux` (Production):** It assumes Ansible has already done the heavy lifting of packaging. The script merely validates the environment and ensures the native `systemd` services (wrapped in `bwrap`) are running for both the Go services and external tools. This gives developers and operators a unified, simple command to start the entire application suite everywhere.
 
 ---
 
