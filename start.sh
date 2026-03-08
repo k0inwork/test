@@ -8,7 +8,7 @@ mkdir -p "$BIN_DIR"
 # Install pyyaml if not present
 if ! python3 -c "import yaml" >/dev/null 2>&1; then
     echo "Installing pyyaml for Python generator script..."
-    pip install pyyaml || pip3 install pyyaml
+    python3 -m pip install pyyaml
 fi
 
 # Detect OS and architecture
