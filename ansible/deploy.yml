@@ -1,0 +1,151 @@
+---
+- name: Deploy Go Microservices
+  hosts: all
+  become: yes
+  vars:
+    config_file: "../deploy_config.yaml"
+    install_dir: "/opt/pum"
+    bin_dir: "{{ install_dir }}/bin"
+    # User to run the services as
+    app_user: "pum"
+
+  tasks:
+    - name: Load config from deploy_config.yaml
+      set_fact:
+        deploy_config: "{{ lookup('file', config_file) | from_yaml }}"
+
+    - name: Ensure app group exists
+      group:
+        name: "{{ app_user }}"
+        state: present
+
+    - name: Ensure app user exists
+      user:
+        name: "{{ app_user }}"
+        group: "{{ app_user }}"
+        system: yes
+        home: "{{ install_dir }}"
+        shell: "/sbin/nologin"
+
+    - name: Install required packages (bwrap)
+      apt:
+        name:
+          - bubblewrap
+          - wget
+          - tar
+        state: present
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Ensure directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
+      loop:
+        - "{{ install_dir }}"
+        - "{{ bin_dir }}"
+
+    # Handle external dependencies
+    - name: Download Jaeger
+      unarchive:
+        src: "{{ deploy_config.external_dependencies.jaeger.linux_url }}"
+        dest: "{{ bin_dir }}"
+        remote_src: yes
+        extra_opts:
+          - --strip-components=1
+          - --wildcards
+          - "*/jaeger-all-in-one"
+      when: "'jaeger' in deploy_config.external_dependencies"
+
+    - name: Ensure Jaeger executable
+      file:
+        path: "{{ bin_dir }}/jaeger-all-in-one"
+        mode: '0755'
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+      when: "'jaeger' in deploy_config.external_dependencies"
+
+    - name: Download Prometheus
+      unarchive:
+        src: "{{ deploy_config.external_dependencies.prometheus.linux_url }}"
+        dest: "{{ bin_dir }}"
+        remote_src: yes
+        extra_opts:
+          - --strip-components=1
+          - --wildcards
+          - "*/prometheus"
+      when: "'prometheus' in deploy_config.external_dependencies"
+
+    - name: Ensure Prometheus executable
+      file:
+        path: "{{ bin_dir }}/prometheus"
+        mode: '0755'
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+      when: "'prometheus' in deploy_config.external_dependencies"
+
+    # Assume Go binaries are already compiled and transferred to {{ bin_dir }}
+    # E.g., via a CI step. For this playbook, we just configure systemd + bwrap.
+
+    # Deploy Jaeger service
+    - name: Create systemd service for Jaeger
+      template:
+        src: "systemd-service.j2"
+        dest: "/etc/systemd/system/pum-jaeger.service"
+      vars:
+        service_name: "jaeger"
+        service_command: "{{ bin_dir }}/jaeger-all-in-one"
+      when: "'jaeger' in deploy_config.external_dependencies"
+      notify: Reload systemd
+
+    # Deploy Prometheus service
+    - name: Create systemd service for Prometheus
+      template:
+        src: "systemd-service.j2"
+        dest: "/etc/systemd/system/pum-prometheus.service"
+      vars:
+        service_name: "prometheus"
+        service_command: "{{ bin_dir }}/prometheus"
+      when: "'prometheus' in deploy_config.external_dependencies"
+      notify: Reload systemd
+
+    # Deploy Go microservices
+    - name: Create systemd service for Go Microservices
+      template:
+        src: "systemd-service.j2"
+        dest: "/etc/systemd/system/pum-{{ item.key }}.service"
+      vars:
+        service_name: "{{ item.key }}"
+        # In production, the go files would be compiled to a binary named after the service
+        service_command: "{{ bin_dir }}/{{ item.key }}"
+      loop: "{{ deploy_config.services | dict2items }}"
+      notify: Reload systemd
+
+    - name: Enable and start all services
+      systemd:
+        name: "pum-{{ item.key }}"
+        state: started
+        enabled: yes
+      loop: "{{ deploy_config.services | dict2items }}"
+
+    - name: Enable and start Jaeger
+      systemd:
+        name: pum-jaeger
+        state: started
+        enabled: yes
+      when: "'jaeger' in deploy_config.external_dependencies"
+
+    - name: Enable and start Prometheus
+      systemd:
+        name: pum-prometheus
+        state: started
+        enabled: yes
+      when: "'prometheus' in deploy_config.external_dependencies"
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes

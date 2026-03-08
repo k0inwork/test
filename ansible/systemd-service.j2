@@ -1,0 +1,31 @@
+[Unit]
+Description=PUM Service - {{ service_name }}
+After=network.target
+
+[Service]
+Type=simple
+User={{ app_user }}
+Group={{ app_user }}
+WorkingDirectory={{ install_dir }}
+
+# Run the command with bwrap (bubblewrap)
+# We map / to root read-only, mount /dev /proc, and map an ephemeral tmp
+# Bind necessary directories. For production, tune this to exact requirements.
+ExecStart=/usr/bin/bwrap \
+    --ro-bind / / \
+    --dev /dev \
+    --proc /proc \
+    --tmpfs /tmp \
+    --tmpfs /var \
+    --bind {{ install_dir }} {{ install_dir }} \
+    --unshare-user \
+    --unshare-ipc \
+    --unshare-pid \
+    --unshare-cgroup \
+    {{ service_command }}
+
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

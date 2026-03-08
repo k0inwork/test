@@ -1,0 +1,57 @@
+version: '1'
+external_dependencies:
+  jaeger:
+    version: '1.50.0'
+    bin: 'jaeger-all-in-one'
+    linux_url: 'https://github.com/jaegertracing/jaeger/releases/download/v1.50.0/jaeger-1.50.0-linux-amd64.tar.gz'
+    darwin_arm64_url: 'https://github.com/jaegertracing/jaeger/releases/download/v1.50.0/jaeger-1.50.0-darwin-arm64.tar.gz'
+    darwin_amd64_url: 'https://github.com/jaegertracing/jaeger/releases/download/v1.50.0/jaeger-1.50.0-darwin-amd64.tar.gz'
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "4317:4317"
+      - "4318:4318"
+    command: '.bin/jaeger-all-in-one'
+    docker_image: 'jaegertracing/all-in-one:1.50'
+  prometheus:
+    version: '2.47.1'
+    bin: 'prometheus'
+    linux_url: 'https://github.com/prometheus/prometheus/releases/download/v2.47.1/prometheus-2.47.1.linux-amd64.tar.gz'
+    darwin_arm64_url: 'https://github.com/prometheus/prometheus/releases/download/v2.47.1/prometheus-2.47.1.darwin-arm64.tar.gz'
+    darwin_amd64_url: 'https://github.com/prometheus/prometheus/releases/download/v2.47.1/prometheus-2.47.1.darwin-amd64.tar.gz'
+    ports:
+      - "9090:9090"
+    command: '.bin/prometheus --config.file=prometheus.yml'
+    docker_image: 'prom/prometheus:v2.47.1'
+
+services:
+  registry:
+    port: 8088
+    path: 'services/registry/main.go'
+  identity:
+    port: 8081
+    path: 'services/identity/main.go'
+  product:
+    port: 8082
+    path: 'services/product/main.go'
+  inventory:
+    port: 8083
+    path: 'services/inventory/main.go'
+  network:
+    port: 8084
+    path: 'services/network/main.go'
+  task:
+    port: 8085
+    path: 'services/task/main.go'
+  external-modules:
+    port: 8086
+    path: 'services/external-modules/main.go'
+  terminal:
+    port: 8087
+    path: 'services/terminal/main.go'
+  external-data:
+    port: 8089
+    path: 'services/external-data/main.go'
+  frontend:
+    port: 8080
+    path: 'services/frontend/main.go'
