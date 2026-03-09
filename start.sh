@@ -5,10 +5,18 @@ set -e
 BIN_DIR=".bin"
 mkdir -p "$BIN_DIR"
 
+# Setup Python virtual environment to avoid global pip install issues on macOS
+VENV_DIR=".venv"
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Creating Python virtual environment..."
+    python3 -m venv "$VENV_DIR"
+fi
+source "$VENV_DIR/bin/activate"
+
 # Install pyyaml if not present
 if ! python3 -c "import yaml" >/dev/null 2>&1; then
     echo "Installing pyyaml for Python generator script..."
-    pip install pyyaml || pip3 install pyyaml
+    python3 -m pip install pyyaml
 fi
 
 # Detect OS and architecture

@@ -37,3 +37,4 @@ build/
 apptron/apptron/
 apptron/cmd/pum-admin/assets/vscode/
 node_modules/
+.venv/
