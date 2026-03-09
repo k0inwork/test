@@ -26,4 +26,14 @@ test('Phase 2 mock duplicate project check should work', async ({ page }) => {
   // The Create button should be enabled
   const btn = page.locator('#project-submit');
   await expect(btn).not.toBeDisabled();
+
+  // Create the project
+  await btn.click();
+
+  // Wait for the redirect to the edit page
+  await page.waitForURL(/.*\/edit\/test-new-project-does-not-exist\?user=admin.*/);
+
+  // The page should not be "Not Found"
+  const bodyText = await page.locator('body').innerText();
+  expect(bodyText).not.toContain('Not Found');
 });
