@@ -1,6 +1,10 @@
 package main
 
 import (
+	"pum-go/pkg/tracing"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"context"
+
 	"log/slog"
 	"pum-go/pkg/external"
 	"pum-go/pkg/logging"
@@ -12,6 +16,8 @@ import (
 )
 
 func main() {
+	tp, _ := tracing.InitTracer("external-data")
+	defer func() { if err := tp.Shutdown(context.Background()); err != nil { slog.Error("failed to shutdown tracer", "err", err) } }()
 	logging.Init("external-data")
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
@@ -28,6 +34,7 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+	r.Use(otelgin.Middleware("external-data"))
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
 

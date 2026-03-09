@@ -1,6 +1,11 @@
 package main
 
 import (
+	otelgorm "gorm.io/plugin/opentelemetry/tracing"
+	"pum-go/pkg/tracing"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"context"
+
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/config"
@@ -18,6 +23,11 @@ var GlobalConfig *config.Config
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("gws.db"), &gorm.Config{})
+	if err == nil {
+		if err := db.Use(otelgorm.NewPlugin()); err != nil {
+			slog.Error("failed to install gorm otel plugin", "err", err)
+		}
+	}
 	if err != nil {
 		panic(err)
 	}
@@ -25,6 +35,8 @@ func initDB() {
 }
 
 func main() {
+	tp, _ := tracing.InitTracer("gws")
+	defer func() { if err := tp.Shutdown(context.Background()); err != nil { slog.Error("failed to shutdown tracer", "err", err) } }()
 	logging.Init("gws")
 	cfg, err := config.LoadConfig("system.yaml")
 	if err == nil {
@@ -50,6 +62,7 @@ func main() {
 	})
 
 	r := gin.Default()
+	r.Use(otelgin.Middleware("gws"))
 	r.Use(logging.GinMiddleware())
 
 	r.GET("/gateways", func(c *gin.Context) {

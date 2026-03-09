@@ -1,6 +1,11 @@
 package main
 
 import (
+	otelgorm "gorm.io/plugin/opentelemetry/tracing"
+	"pum-go/pkg/tracing"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"context"
+
 	"log/slog"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
@@ -15,11 +20,18 @@ var db *gorm.DB
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("network.db"), &gorm.Config{})
+	if err == nil {
+		if err := db.Use(otelgorm.NewPlugin()); err != nil {
+			slog.Error("failed to install gorm otel plugin", "err", err)
+		}
+	}
 	if err != nil { panic(err) }
 	db.AutoMigrate(&models.Subnet{}, &models.IPAddress{})
 }
 
 func main() {
+	tp, _ := tracing.InitTracer("network")
+	defer func() { if err := tp.Shutdown(context.Background()); err != nil { slog.Error("failed to shutdown tracer", "err", err) } }()
 	logging.Init("network")
 	initDB()
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
@@ -35,6 +47,7 @@ func main() {
 		Menu:         []logging.MenuItem{{Label: "Subnets", Path: "/subnets"}},
 	})
 	r := gin.Default()
+	r.Use(otelgin.Middleware("network"))
 	r.Use(logging.GinMiddleware())
 	r.GET("/subnets", func(c *gin.Context) {
 		var subnets []models.Subnet

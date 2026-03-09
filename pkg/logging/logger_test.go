@@ -36,7 +36,7 @@ func TestRegisterWithDiscovery(t *testing.T) {
 	RegisterWithDiscovery(srv.URL, ServiceRegistration{
 		Name:         "test-svc",
 		Endpoint:     "http://localhost:1234",
-		Capabilities: []string{"test"},
+		Capabilities: []CapabilityRegistration{{Name: "test", Endpoints: []string{}}},
 	})
 
 	// Wait for background registration

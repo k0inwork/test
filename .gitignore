@@ -36,5 +36,6 @@ apptron/apptron/
 build/
 apptron/apptron/
 apptron/cmd/pum-admin/assets/vscode/
+data/
 node_modules/
 .venv/

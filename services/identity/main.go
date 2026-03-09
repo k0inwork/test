@@ -1,6 +1,11 @@
 package main
 
 import (
+	otelgorm "gorm.io/plugin/opentelemetry/tracing"
+	"pum-go/pkg/tracing"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"context"
+
 	"log/slog"
 	"net/http"
 	"strings"
@@ -22,6 +27,11 @@ var ldapMock *ldap.MockLDAPProvider
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("identity.db"), &gorm.Config{})
+	if err == nil {
+		if err := db.Use(otelgorm.NewPlugin()); err != nil {
+			slog.Error("failed to install gorm otel plugin", "err", err)
+		}
+	}
 	if err != nil { panic(err) }
 	db.AutoMigrate(&models.User{}, &models.Group{}, &models.ActivityLog{})
 
@@ -45,6 +55,8 @@ func initDB() {
 }
 
 func main() {
+	tp, _ := tracing.InitTracer("identity")
+	defer func() { if err := tp.Shutdown(context.Background()); err != nil { slog.Error("failed to shutdown tracer", "err", err) } }()
 	logging.Init("identity")
 	initDB()
 	ldapMock = ldap.NewMockLDAPProvider()
@@ -67,6 +79,7 @@ func main() {
 	})
 
 	r := gin.Default()
+	r.Use(otelgin.Middleware("identity"))
 	r.Use(logging.GinMiddleware())
 
 	r.GET("/users", func(c *gin.Context) {

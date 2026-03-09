@@ -2,6 +2,8 @@ package external
 
 import (
 	"context"
+
+	"go.opentelemetry.io/otel"
 )
 
 // GLPI Models
@@ -58,6 +60,9 @@ type Provider interface {
 type MockProvider struct{}
 
 func (p *MockProvider) GetNetworkEquipment(ctx context.Context) ([]*GNetworkEquipment, error) {
+	_, span := otel.Tracer("MockProvider").Start(ctx, "GetNetworkEquipment")
+	defer span.End()
+
 	return []*GNetworkEquipment{
 		{ID: "sw-1", Name: "MSK-SW-01", Model: "Cisco 9300", IP: "10.10.1.1", Status: "Active", Serial: "SN12345"},
 		{ID: "sw-2", Name: "SPB-SW-02", Model: "Cisco 9200", IP: "10.20.1.1", Status: "Active", Serial: "SN67890"},
@@ -65,6 +70,9 @@ func (p *MockProvider) GetNetworkEquipment(ctx context.Context) ([]*GNetworkEqui
 }
 
 func (p *MockProvider) GetPDUs(ctx context.Context) ([]*Gpdu, error) {
+	_, span := otel.Tracer("MockProvider").Start(ctx, "GetPDUs")
+	defer span.End()
+
 	return []*Gpdu{
 		{ID: "pdu-1", Name: "MSK/1-ПОУ Rack 1", Long: "37.6173", Lat: "55.7558", Address: "Moscow, Red Square", Model: "APC 7921"},
 		{ID: "pdu-2", Name: "SPB/2-ПОУ Rack 2", Long: "30.3351", Lat: "59.9343", Address: "St. Petersburg, Palace Square", Model: "APC 7922"},
@@ -72,12 +80,18 @@ func (p *MockProvider) GetPDUs(ctx context.Context) ([]*Gpdu, error) {
 }
 
 func (p *MockProvider) GetComputers(ctx context.Context) ([]*GComputer, error) {
+	_, span := otel.Tracer("MockProvider").Start(ctx, "GetComputers")
+	defer span.End()
+
 	return []*GComputer{
 		{ID: "srv-1", Name: "Server-01", IP: "10.10.1.100", Status: "Online"},
 	}, nil
 }
 
 func (p *MockProvider) GetHosts(ctx context.Context) ([]*ZHost, error) {
+	_, span := otel.Tracer("MockProvider").Start(ctx, "GetHosts")
+	defer span.End()
+
 	return []*ZHost{
 		{
 			ID: "z-1", Name: "MSK-SW-01", IP: "10.10.1.1", Status: 1,
@@ -95,6 +109,9 @@ type GraphQLClient struct {
 }
 
 func (c *GraphQLClient) GetNetworkEquipment(ctx context.Context) ([]*GNetworkEquipment, error) {
+	ctx, span := otel.Tracer("GraphQLClient").Start(ctx, "GetNetworkEquipment")
+	defer span.End()
+
 	// Placeholder for actual GraphQL query logic
 	// In a real implementation, this would use a GraphQL client (e.g., shurcooL/graphql)
 	// For now, we'll return mock data or call the external-data service
@@ -102,13 +119,22 @@ func (c *GraphQLClient) GetNetworkEquipment(ctx context.Context) ([]*GNetworkEqu
 }
 
 func (c *GraphQLClient) GetPDUs(ctx context.Context) ([]*Gpdu, error) {
+	ctx, span := otel.Tracer("GraphQLClient").Start(ctx, "GetPDUs")
+	defer span.End()
+
 	return (&MockProvider{}).GetPDUs(ctx)
 }
 
 func (c *GraphQLClient) GetComputers(ctx context.Context) ([]*GComputer, error) {
+	ctx, span := otel.Tracer("GraphQLClient").Start(ctx, "GetComputers")
+	defer span.End()
+
 	return (&MockProvider{}).GetComputers(ctx)
 }
 
 func (c *GraphQLClient) GetHosts(ctx context.Context) ([]*ZHost, error) {
+	ctx, span := otel.Tracer("GraphQLClient").Start(ctx, "GetHosts")
+	defer span.End()
+
 	return (&MockProvider{}).GetHosts(ctx)
 }
