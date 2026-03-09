@@ -13,6 +13,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -293,7 +294,7 @@ func createRecurringTask(c *gin.Context) {
 	req.IsActive = true
 	// Upsert based on Name to avoid duplicates when services restart
 	var existing models.RecurringTask
-	if err := db.Where("name = ?", req.Name).First(&existing).Error; err == nil {
+	if err := db.Session(&gorm.Session{Logger: db.Logger.LogMode(logger.Silent)}).Where("name = ?", req.Name).First(&existing).Error; err == nil {
 		existing.Schedule = req.Schedule
 		existing.TargetURL = req.TargetURL
 		existing.Payload = req.Payload

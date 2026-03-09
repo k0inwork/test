@@ -50,9 +50,9 @@ func main() {
 	tasklib.RegisterEndpoint(
 		"http://localhost:8088", // registry URL
 		r,
-		"/internal/tasks/sync", // local webhook path
+		"/product/task/sync", // local webhook path
 		"@every 1m",            // schedule
-		"http://localhost:8082/internal/tasks/sync", // target URL reachable by task service
+		"http://localhost:8082/product/task/sync", // target URL reachable by task service
 		"system",               // username
 		"sync-products",        // operation
 		"product-all",          // object ID
