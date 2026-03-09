@@ -44,6 +44,7 @@ if (!authUrl) {
 }
 
 if (authUrl === "/auth") {
+    document.cookie = "hanko=header.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiJ9.signature; path=/";
     const mockSession = { is_valid: true, claims: { username: "admin" } };
     window.session = mockSession;
     auth = {

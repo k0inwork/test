@@ -153,3 +153,25 @@ func GinMiddleware() gin.HandlerFunc {
 		}()
 	}
 }
+
+func WaitForService(registryURL, targetServiceName string) {
+	client := &http.Client{Timeout: 5 * time.Second}
+	for {
+		resp, err := client.Get(registryURL + "/services")
+		if err == nil && resp.StatusCode == http.StatusOK {
+			var services []ServiceRegistration
+			if err := json.NewDecoder(resp.Body).Decode(&services); err == nil {
+				for _, s := range services {
+					if s.Name == targetServiceName {
+						resp.Body.Close()
+						slog.Info("Service is now available", "service", targetServiceName)
+						return
+					}
+				}
+			}
+			resp.Body.Close()
+		}
+		slog.Info("Waiting for service to become available...", "service", targetServiceName)
+		time.Sleep(5 * time.Second)
+	}
+}

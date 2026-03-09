@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
+	"pum-go/pkg/tasklib"
 	"pum-go/services/product/sync"
 
 	"github.com/gin-gonic/gin"
@@ -16,14 +17,16 @@ var db *gorm.DB
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("product.db"), &gorm.Config{})
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 	db.AutoMigrate(&models.Product{})
 }
 
 func main() {
 	logging.Init("product")
 	initDB()
-	_ = sync.NewSyncEngine(db, nil)
+	engine := sync.NewSyncEngine(db, nil)
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "product",
@@ -32,13 +35,33 @@ func main() {
 			{Name: "nodes", Endpoints: []string{"/nodes"}},
 			{Name: "sync", Endpoints: []string{"/sync"}},
 		},
-		IsCore:       true,
-		OrderID:      1,
-		Menu:         []logging.MenuItem{{Label: "Nodes", Path: "/nodes"}},
+		IsCore:  true,
+		OrderID: 1,
+		Menu:    []logging.MenuItem{{Label: "Nodes", Path: "/nodes"}},
 	})
+
+	// Initialize tasklib to communicate with the central task microservice
+	tasklib.Init("http://localhost:8085")
 
 	r := gin.Default()
 	r.Use(logging.GinMiddleware())
+
+	// Register recurring sync task
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088", // registry URL
+		r,
+		"/internal/tasks/sync", // local webhook path
+		"@every 1m",            // schedule
+		"http://localhost:8082/internal/tasks/sync", // target URL reachable by task service
+		"system",               // username
+		"sync-products",        // operation
+		"product-all",          // object ID
+		"Product",              // class name
+		func(payload []byte) error {
+			slog.Info("Executing recurring product sync")
+			return engine.Run()
+		},
+	)
 
 	r.GET("/nodes", func(c *gin.Context) {
 		var products []models.Product
