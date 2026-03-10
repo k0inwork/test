@@ -5,6 +5,7 @@ import (
 	"pum-go/pkg/external"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
+	"pum-go/pkg/tasklib"
 	"pum-go/services/inventory/graph"
 	"pum-go/services/inventory/sync"
 
@@ -20,7 +21,9 @@ var db *gorm.DB
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("inventory.db"), &gorm.Config{})
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{})
 }
 
@@ -40,13 +43,33 @@ func main() {
 			{Name: "graphql", Endpoints: []string{"/query"}},
 			{Name: "configurable", Endpoints: []string{"/configurable"}},
 		},
-		IsCore:       false,
-		OrderID:      2,
-		Menu:         []logging.MenuItem{{Label: "Switches", Path: "/switches"}},
+		IsCore:  false,
+		OrderID: 2,
+		Menu:    []logging.MenuItem{{Label: "Switches", Path: "/switches"}},
 	})
+
+	// Initialize tasklib to communicate with the central task microservice
+	tasklib.Init("http://localhost:8085")
 
 	r := gin.Default()
 	r.Use(logging.GinMiddleware())
+
+	// Register recurring sync task
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088", // registry URL
+		r,
+		"/inventory/task/sync", // local webhook path
+		"@every 1m",            // schedule
+		"http://localhost:8083/inventory/task/sync", // target URL reachable by task service
+		"system",               // username
+		"sync-switches",        // operation
+		"inventory-all",        // object ID
+		"Switch",               // class name
+		func(payload []byte) error {
+			slog.Info("Executing recurring inventory sync")
+			return engine.Run()
+		},
+	)
 
 	r.GET("/switches", func(c *gin.Context) {
 		var switches []models.Switch
