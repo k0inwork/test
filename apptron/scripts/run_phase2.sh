@@ -107,7 +107,22 @@ def patch_worker(content):
         }
         return redirectToSignin(env, url);
     }"""
-    return re.sub(pattern, replacement, content, flags=re.MULTILINE|re.DOTALL)
+    content = re.sub(pattern, replacement, content, flags=re.MULTILINE|re.DOTALL)
+
+    # Add ctx.userDomain check for /edit/ block and fix missing user["id"] check
+    pattern2 = r'(\/\/ <username>\.apptron\.dev\/<mode>\/<env-name>\s*)(if \(url\.pathname\.startsWith\("/edit/"\)\|\|url\.pathname\.startsWith\("/console/"\)\) \{)'
+    replacement2 = r'\1if (ctx.userDomain && (url.pathname.startsWith("/edit/")||url.pathname.startsWith("/console/"))) {'
+    content = re.sub(pattern2, replacement2, content)
+
+    pattern3 = r'(const user = await req\.json\(\);\s*)(const usrResp = await putdir\(req, env, `/usr/\$\{user\["user_id"\]\}`,\s*\{\s*"username": user\["username"\],\s*\}\);)'
+    replacement3 = r'\1const userId = user["id"] || user["user_id"];\n            const usrResp = await putdir(req, env, `/usr/${userId}`, {\n                "username": user["username"],\n            });'
+    content = re.sub(pattern3, replacement3, content)
+
+    pattern4 = r'("uuid": user\["user_id"\],)'
+    replacement4 = r'"uuid": userId,'
+    content = re.sub(pattern4, replacement4, content)
+
+    return content
 
 # 4. Patch auth.ts
 def patch_auth(content):
