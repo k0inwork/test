@@ -141,6 +141,30 @@ EOF
 python3 patch_others.py
 rm patch_others.py
 
+# Patch boot.go to fix nil OPFS panic
+echo "Patching boot.go to filter nil OPFS..."
+cat << 'EOF' > patch_boot.py
+import re, sys
+
+with open("boot.go", "r") as f:
+    content = f.read()
+
+replacement = """	webMod := web.New(k)
+	for name, subfs := range webMod {
+		if subfs == nil {
+			delete(webMod, name)
+		}
+	}
+	k.AddModule("#web", webMod)"""
+
+content = content.replace('k.AddModule("#web", web.New(k))', replacement)
+
+with open("boot.go", "w") as f:
+    f.write(content)
+EOF
+python3 patch_boot.py
+rm patch_boot.py
+
 # Always start from a clean Makefile to ensure patches apply correctly on multiple runs
 git checkout Makefile 2>/dev/null || true
 
