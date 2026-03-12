@@ -41,6 +41,11 @@ mkdir -p "$FINAL_ASSETS_DIR/bundles"
 # Apptron's boot.go expects the contents to be inside a 'rootfs' directory within the tar
 mkdir -p "$BUILD_DIR/sys-bundle/rootfs"
 cp -r "$BUNDLE_DIR"/* "$BUILD_DIR/sys-bundle/rootfs/"
-tar -C "$BUILD_DIR/sys-bundle" -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" rootfs
+
+echo "Adding kernel and v86 emulator assets to the bundle..."
+cp -r "$APPTRON_DIR/scripts/kernel" "$BUILD_DIR/sys-bundle/"
+cp -r "$APPTRON_DIR/scripts/v86" "$BUILD_DIR/sys-bundle/"
+
+tar -C "$BUILD_DIR/sys-bundle" -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" rootfs kernel v86
 
 echo "Build complete! Custom Apptron assets are ready for embedding in $FINAL_ASSETS_DIR"
