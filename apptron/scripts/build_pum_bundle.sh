@@ -2,7 +2,9 @@
 set -e
 
 # Configuration
-REPO_ROOT=$(git rev-parse --show-toplevel)
+# Find REPO_ROOT relative to this script to avoid git rev-parse submodule issues in CI
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 APPTRON_DIR="$REPO_ROOT/apptron"
 BUILD_DIR="$REPO_ROOT/build/pum_bundle"
 FINAL_ASSETS_DIR="$APPTRON_DIR/cmd/pum-admin/assets"
