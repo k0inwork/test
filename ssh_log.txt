@@ -1,0 +1,42 @@
+OpenSSH_9.6p1 Ubuntu-3ubuntu13.14, OpenSSL 3.0.13 30 Jan 2024
+debug1: Reading configuration data /tmp/.ssh/config
+debug1: /tmp/.ssh/config line 5: Applying options for 10.0.111.182
+debug1: Setting implicit ProxyCommand from ProxyJump: ssh -F /tmp/.ssh/config -v -W '[%h]:%p' bridge
+debug1: Executing proxy command: exec ssh -F /tmp/.ssh/config -v -W '[10.0.111.182]:22' bridge
+debug1: identity file /tmp/.ssh/id_rsa_tablet type 0
+debug1: identity file /tmp/.ssh/id_rsa_tablet-cert type -1
+debug1: Local version string SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
+OpenSSH_9.6p1 Ubuntu-3ubuntu13.14, OpenSSL 3.0.13 30 Jan 2024
+debug1: Reading configuration data /tmp/.ssh/config
+debug1: /tmp/.ssh/config line 1: Applying options for bridge
+debug1: Connecting to 77.234.200.227 [77.234.200.227] port 22.
+debug1: Connection established.
+debug1: identity file /tmp/.ssh/id_rsa_tablet type 0
+debug1: identity file /tmp/.ssh/id_rsa_tablet-cert type -1
+debug1: Local version string SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
+debug1: Remote protocol version 2.0, remote software version OpenSSH_10.2
+debug1: compat_banner: match: OpenSSH_10.2 pat OpenSSH* compat 0x04000000
+debug1: Authenticating to 77.234.200.227:22 as 'root'
+debug1: load_hostkeys: fopen /home/jules/.ssh/known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /home/jules/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+debug1: SSH2_MSG_KEXINIT sent
+debug1: SSH2_MSG_KEXINIT received
+debug1: kex: algorithm: sntrup761x25519-sha512@openssh.com
+debug1: kex: host key algorithm: ssh-ed25519
+debug1: kex: server->client cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug1: kex: client->server cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug1: expecting SSH2_MSG_KEX_ECDH_REPLY
+debug1: SSH2_MSG_KEX_ECDH_REPLY received
+debug1: Server host key: ssh-ed25519 SHA256:LqAm6VtVKvLWA4c4sV2C9OZmQ5QfWKa8IpaWFW7UxfM
+debug1: load_hostkeys: fopen /home/jules/.ssh/known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /home/jules/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+debug1: hostkeys_find_by_key_hostfile: hostkeys file /home/jules/.ssh/known_hosts does not exist
+debug1: hostkeys_find_by_key_hostfile: hostkeys file /home/jules/.ssh/known_hosts2 does not exist
+debug1: hostkeys_find_by_key_hostfile: hostkeys file /etc/ssh/ssh_known_hosts does not exist
+debug1: hostkeys_find_by_key_hostfile: hostkeys file /etc/ssh/ssh_known_hosts2 does not exist
+Connection timed out during banner exchange
+Connection to UNKNOWN port 65535 timed out
