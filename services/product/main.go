@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"pum-go/pkg/external"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 	"pum-go/pkg/tasklib"
@@ -26,7 +27,9 @@ func initDB() {
 func main() {
 	logging.Init("product")
 	initDB()
-	engine := sync.NewSyncEngine(db, nil)
+	// Use the MockProvider for now until the GraphQL endpoint is fully integrated
+	provider := &external.MockProvider{}
+	engine := sync.NewSyncEngine(db, provider)
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:         "product",
