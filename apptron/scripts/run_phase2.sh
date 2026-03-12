@@ -247,7 +247,9 @@ make clean
 echo "Building distributions..."
 # We run build_pum_bundle.sh FIRST so pum.tar.gz is built, but NOT build_distro.sh!
 # We want to keep the original sys.tar.gz from Apptron intact and NOT overwrite it!
-bash "$REPO_ROOT/apptron/scripts/build_pum_bundle.sh"
+cd "$REPO_ROOT"
+bash apptron/scripts/build_pum_bundle.sh
+cd "$APPTRON_DIR"
 
 # Copy the generated custom bundle to the apptron worker build space
 mkdir -p assets/bundles
