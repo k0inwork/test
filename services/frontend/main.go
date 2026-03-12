@@ -9,39 +9,11 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"sync"
-	"time"
-
 	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
-	"pum-go/pkg/tasklib"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 )
-
-var (
-	upgrader = websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool { return true },
-	}
-	clients   = make(map[*websocket.Conn]string) // conn -> username
-	clientsMu sync.Mutex
-)
-
-func broadcastMessage(user string, message string) {
-	clientsMu.Lock()
-	defer clientsMu.Unlock()
-	for conn, u := range clients {
-		if user == "" || user == "all" || u == user {
-			err := conn.WriteMessage(websocket.TextMessage, []byte(message))
-			if err != nil {
-				slog.Error("WebSocket write error", "error", err)
-				conn.Close()
-				delete(clients, conn)
-			}
-		}
-	}
-}
 
 var GlobalConfig *config.Config
 
@@ -59,9 +31,6 @@ func main() {
 	logging.Init("frontend")
 	cfg, _ := config.LoadConfig("system.yaml")
 	GlobalConfig = cfg
-
-	// Initialize tasklib for recurring tasks
-	tasklib.Init("http://localhost:8085")
 
 	r := gin.Default()
 	r.Use(logging.GinMiddleware())
@@ -133,7 +102,7 @@ func main() {
 	}
 
 	r.Use(func(c *gin.Context) {
-		if c.Request.URL.Path == "/login" || c.Request.URL.Path == "/api/notify" || strings.HasPrefix(c.Request.URL.Path, "/frontend/task/") || c.Request.URL.Path == "/ws" {
+		if c.Request.URL.Path == "/login" {
 			c.Next()
 			return
 		}
@@ -196,76 +165,6 @@ func main() {
 		c.SetCookie("pum_caps", res.Capabilities, 3600, "/", "", false, true)
 		c.Redirect(http.StatusFound, "/")
 	})
-
-	// WebSocket endpoint
-	r.GET("/ws", func(c *gin.Context) {
-		user, _ := c.Cookie("pum_user")
-		if user == "" {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-
-		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-		if err != nil {
-			slog.Error("Failed to upgrade websocket", "error", err)
-			return
-		}
-
-		clientsMu.Lock()
-		clients[conn] = user
-		clientsMu.Unlock()
-
-		defer func() {
-			clientsMu.Lock()
-			delete(clients, conn)
-			clientsMu.Unlock()
-			conn.Close()
-		}()
-
-		// Keep connection alive and listen for close
-		for {
-			_, _, err := conn.ReadMessage()
-			if err != nil {
-				break
-			}
-		}
-	})
-
-	// API endpoint for receiving notifications to broadcast
-	r.POST("/api/notify", func(c *gin.Context) {
-		var payload struct {
-			User    string `json:"user"`    // empty or "all" for broadcast
-			Message string `json:"message"`
-		}
-		if err := c.ShouldBindJSON(&payload); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		broadcastMessage(payload.User, payload.Message)
-		c.JSON(http.StatusOK, gin.H{"status": "sent"})
-	})
-
-	// Register recurring notification task
-	tasklib.RegisterEndpoint(
-		"http://localhost:8088", // registry URL
-		r,
-		"/frontend/task/notify", // local webhook path
-		"@every 1m",            // schedule
-		"http://localhost:8080/frontend/task/notify", // target URL reachable by task service
-		"system",               // username
-		"send-timer-notification",        // operation
-		"timer",          // object ID
-		"Notification",              // class name
-		func(payload []byte) error {
-			slog.Info("Executing recurring timer notification")
-
-			// Broadcast message to all users
-			msg := fmt.Sprintf("System Timer Notification: The time is now %s", time.Now().Format(time.RFC3339))
-			broadcastMessage("all", msg)
-			return nil
-		},
-	)
 
 	r.GET("/logout", func(c *gin.Context) {
 		c.SetCookie("pum_user", "", -1, "/", "", false, true)
