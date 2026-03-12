@@ -1,0 +1,3651 @@
+{
+  "switch_list": [
+    {
+      "id": "d00afe19-4ea6-4d08-b860-cd2fa8c22f1f",
+      "name": "asr-rtr-rack1",
+      "glpi_id": "170",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 2,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.9",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco ASR1001-X",
+      "get_connections": [],
+      "get_down": [
+        "afc3db5f-a5de-496b-a9b5-bbeb2459b7b2",
+        "10cb0a6c-e23d-44b8-b8b8-289f5ccfb82b",
+        "5bfb3617-45c2-4f5a-8679-d1fe456b5bf2",
+        "2c538aa2-e249-4155-8565-304748561379",
+        "dc49fb81-83c6-469b-ad66-99273e0ab14a",
+        "07aa5b68-3303-44e5-b7c2-c8507fa0dc3c",
+        "6c9d9612-913d-4fd7-9d28-cdfc96e5bfa5"
+      ],
+      "get_freeports": [
+        {
+          "id": "4cef7188-9146-4800-89d3-6d0d14701e73",
+          "switch_id": {},
+          "port": "Te0/0/0",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "d55ab5bc-9f8e-4684-b3fd-0ead919b5a62",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "ed47b7e4-e5cc-4c83-b3e7-87a697d6a17d",
+      "name": "asr-rtr-rack2",
+      "glpi_id": "171",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 2,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.27",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco ASR1001-X",
+      "get_connections": [],
+      "get_down": [
+        "cfed1cf6-24b6-4a02-829a-6e6fb0ca2e0e",
+        "fe9772ff-ed5a-4ab0-92bc-d6d4bcb3fced",
+        "8b5be7cd-6e0c-49c4-b862-429df94f342b",
+        "62286c06-afed-4bcd-839e-2b6111f69125"
+      ],
+      "get_freeports": [
+        {
+          "id": "deac0fed-9e99-4ff7-8d0e-267f7315315a",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "8450ed04-d666-4baf-88e9-2f3078432c72",
+          "switch_id": {},
+          "port": "Te0/0/0",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "164d450f-6d7d-4945-b542-c2d330cf1c92",
+      "name": "csc-rack1",
+      "glpi_id": "1",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.11",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco C9200L-24T-4X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "099c2a5d-0e30-4bbe-a774-3fd94cbff0f8",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "0cc31ec6-8545-4232-84c1-7c0697403eec",
+      "name": "csc-rack2",
+      "glpi_id": "163",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.12",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco C9200L-24T-4X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "bc2c7a42-1a9a-4855-9df8-e476fd28e5d2",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "407ca324-31a4-4f7d-a4c4-a858cf4f0b75",
+      "name": "csc-rack3",
+      "glpi_id": "164",
+      "node_id": {
+        "id": 7,
+        "name": "3-ОУ1 Биржевая-3",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.13",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 3 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco C9200L-24T-4X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "909bfee3-e549-43ce-b677-638eb5916baf",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "bdfa5ecc-fa13-4763-9a31-7f0c3ca0e374",
+      "name": "csc-test",
+      "glpi_id": "161",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.201",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco C9200L-24T-4X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "27f13f9f-c1a8-4b32-ae09-f9908ea854a0",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "c4ba9fd0-83c6-4a92-a8e9-6eb41d87ea56",
+      "name": "fpsu-rack1",
+      "glpi_id": "167",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "sh",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.103.11",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "АМИКОН FPSUIP-ULT5-2U",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "7a5632d2-2200-40d2-a404-d19375761f92",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "АМИКОН"
+    },
+    {
+      "id": "654861cf-beb5-42aa-a898-25c747a41f5d",
+      "name": "mkt-rack1",
+      "glpi_id": "4",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "co",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.101.2",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Mikrotik CRS328-24P-4S+",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "54a39e34-d952-481d-9399-6a0eefbd4c82",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Mikrotik"
+    },
+    {
+      "id": "69fd368e-4ea0-431f-aa49-312b13dffd3e",
+      "name": "mkt-rack2",
+      "glpi_id": "165",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "co",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.101.3",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Mikrotik CRS328-4C-20S-4S+",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "8d9e294c-fa2c-4287-8e5a-3da9a50c1a22",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Mikrotik"
+    },
+    {
+      "id": "132c75f0-7346-4110-8088-e2372e06b57b",
+      "name": "mkt-rack3",
+      "glpi_id": "166",
+      "node_id": {
+        "id": 7,
+        "name": "3-ОУ1 Биржевая-3",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "co",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.101.13",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 3 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Mikrotik CRS328-24P-4S+",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "22701db2-4be8-47d6-8996-37bffce659a7",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Mikrotik"
+    },
+    {
+      "id": "267267b5-1324-43d7-82b5-5e4f54400094",
+      "name": "mkt-test",
+      "glpi_id": "162",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "co",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.101.201",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Mikrotik CRS328-24P-4S+",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "3376a95f-7f49-4261-a685-fefede603b16",
+          "switch_id": {},
+          "port": "",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Mikrotik"
+    },
+    {
+      "id": "afc3db5f-a5de-496b-a9b5-bbeb2459b7b2",
+      "name": "test-client-rack1",
+      "glpi_id": "172",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": {
+        "id": "d00afe19-4ea6-4d08-b860-cd2fa8c22f1f",
+        "name": "asr-rtr-rack1",
+        "glpi_id": "170",
+        "node_id": {
+          "id": 3,
+          "name": "1-ОУ1 Биржевая-1",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.9",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 1 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "afc3db5f-a5de-496b-a9b5-bbeb2459b7b2",
+          "10cb0a6c-e23d-44b8-b8b8-289f5ccfb82b",
+          "5bfb3617-45c2-4f5a-8679-d1fe456b5bf2",
+          "2c538aa2-e249-4155-8565-304748561379",
+          "dc49fb81-83c6-469b-ad66-99273e0ab14a",
+          "07aa5b68-3303-44e5-b7c2-c8507fa0dc3c",
+          "6c9d9612-913d-4fd7-9d28-cdfc96e5bfa5"
+        ],
+        "get_freeports": [
+          {
+            "id": "4cef7188-9146-4800-89d3-6d0d14701e73",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "d55ab5bc-9f8e-4684-b3fd-0ead919b5a62",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.9",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [
+        {
+          "id": "cab3ff8b-3001-4ca4-9b4e-fa19bfb95160",
+          "port_id": {
+            "id": "304cdee1-5b27-4456-914a-84c5e8720d4f",
+            "switch_id": {},
+            "port": "14",
+            "description": "",
+            "vlan": 214,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "e35b1322-4d1e-4122-b2d1-5a9a258b45bc",
+          "booked": false,
+          "description": "",
+          "ip": "10.77.12.198",
+          "session_id": "7a829cc9-e6e0-4554-8f20-538c67fcfefd"
+        },
+        {
+          "id": "a3b5c9d2-c69f-470a-a89a-4c2479b4b5ce",
+          "port_id": {
+            "id": "36d4ec48-53f3-411a-9617-f07ff01afd9f",
+            "switch_id": {},
+            "port": "06",
+            "description": "",
+            "vlan": 206,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "24",
+          "customer_id": "19e1bc2d-cf14-40d2-9781-b2038fe830d9",
+          "booked": false,
+          "description": "32",
+          "ip": "0.0.0.0",
+          "session_id": "False"
+        },
+        {
+          "id": "63ccabac-3db1-4e2a-b3d0-e81bbda60ed3",
+          "port_id": {
+            "id": "5cfe53df-0b5d-436b-9a55-657e88aeb1ed",
+            "switch_id": {},
+            "port": "11",
+            "description": "",
+            "vlan": 211,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "49270b13-4214-48b5-b012-a38cf0f2b196",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": ""
+        },
+        {
+          "id": "e84522db-0078-456a-953b-ecbf4cf05ef8",
+          "port_id": {
+            "id": "5d4dafc1-0708-4bba-a179-d500ae721be2",
+            "switch_id": {},
+            "port": "08",
+            "description": "",
+            "vlan": 208,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "ad410ae3-8f55-4f1e-b22b-5568b6007740",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": "False"
+        },
+        {
+          "id": "35bcd6f2-d57f-4c94-8bef-12e3f58d493c",
+          "port_id": {
+            "id": "655c24f1-3948-4e1c-8c7c-952fe8b9c3e9",
+            "switch_id": {},
+            "port": "18",
+            "description": "",
+            "vlan": 218,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "96c83658-9ba1-4b5d-9e48-99b830a11290",
+          "booked": false,
+          "description": "",
+          "ip": "10.77.12.214",
+          "session_id": "b88567aa-80c0-4849-85d9-77241e588469"
+        },
+        {
+          "id": "d0687fe0-ef54-4248-9cf9-ebc503d27917",
+          "port_id": {
+            "id": "9b46a3e5-b3d2-45a7-ab2f-2f55d441db60",
+            "switch_id": {},
+            "port": "03",
+            "description": "",
+            "vlan": 203,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "sefsefse",
+          "customer_id": "0f91a929-44ec-4964-b772-d4232ce4407c",
+          "booked": false,
+          "description": "sefefsefe",
+          "ip": "0.0.0.0",
+          "session_id": "False"
+        },
+        {
+          "id": "b4dbe2e5-25f7-4420-95f9-bf772470708e",
+          "port_id": {
+            "id": "a5bcfa25-925e-4434-a3a4-5d619ff6202d",
+            "switch_id": {},
+            "port": "13",
+            "description": "",
+            "vlan": 213,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "4f33fbf4-1023-4acc-96de-45e78709f88d",
+          "booked": false,
+          "description": "",
+          "ip": "10.77.12.194",
+          "session_id": "02c99b0a-eebd-4309-99a1-ad8d68f7791b"
+        },
+        {
+          "id": "466402c2-0f35-469e-b64d-e600dd22e8fb",
+          "port_id": {
+            "id": "af3824ad-72ec-409d-91ba-bbece98b2a66",
+            "switch_id": {},
+            "port": "15",
+            "description": "",
+            "vlan": 215,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "95241cc2-e4f3-4dc3-9139-15918f293f3c",
+          "booked": false,
+          "description": "",
+          "ip": "10.77.12.202",
+          "session_id": "699428e3-6a62-4ba2-905c-55451497927f"
+        },
+        {
+          "id": "bb41a2f9-a4d8-41c7-a007-6ba1af1aeaf0",
+          "port_id": {
+            "id": "e0aca0d4-68b9-4a57-811b-e777cbd597d5",
+            "switch_id": {},
+            "port": "01",
+            "description": "",
+            "vlan": 201,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "4fd1a5d1-31d3-42cc-ac53-6fd3cd7e6196",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": ""
+        },
+        {
+          "id": "ea907804-2a76-45f0-8c12-995dd47572bb",
+          "port_id": {
+            "id": "e8f38331-ea01-4e91-9105-1f1f3ad8dfe8",
+            "switch_id": {},
+            "port": "12",
+            "description": "",
+            "vlan": 212,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "dd062385-ada3-4734-94b1-1ef75e6aca23",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": ""
+        },
+        {
+          "id": "5f32da20-63fc-4683-a972-5512a920b138",
+          "port_id": {
+            "id": "fbb62809-bd15-40a3-b747-1246d848f690",
+            "switch_id": {},
+            "port": "10",
+            "description": "",
+            "vlan": 210,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "251405c0-1a4f-46fd-b550-afd14389525f",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": ""
+        }
+      ],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "5e6542d1-8dab-4134-938c-f29fdf041acb",
+          "switch_id": {},
+          "port": "05",
+          "description": "",
+          "vlan": 205,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "2fe1f7bd-2cdd-42d1-aa3b-43f87b483bf0",
+          "switch_id": {},
+          "port": "20",
+          "description": "",
+          "vlan": 220,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "ea7009b6-22df-460b-be66-8994b58a6415",
+          "switch_id": {},
+          "port": "17",
+          "description": "",
+          "vlan": 217,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "76b7f486-3380-497c-b669-be9ec630988e",
+          "switch_id": {},
+          "port": "19",
+          "description": "",
+          "vlan": 219,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "9a6fe299-1ac1-4e76-8e4a-9a1d19b6dd16",
+          "switch_id": {},
+          "port": "09",
+          "description": "",
+          "vlan": 209,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "e1d6d740-8f2a-4926-9286-acca12575306",
+          "switch_id": {},
+          "port": "07",
+          "description": "",
+          "vlan": 207,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "b2eb2e7c-a878-4cb2-a8a9-a0752fadad94",
+          "switch_id": {},
+          "port": "04",
+          "description": "",
+          "vlan": 204,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "3b9ae189-25b6-4939-b143-8ea508aa1080",
+          "switch_id": {},
+          "port": "16",
+          "description": "",
+          "vlan": 216,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "32c19c1c-f60b-4898-af49-8a459c8204cb",
+          "switch_id": {},
+          "port": "02",
+          "description": "",
+          "vlan": 202,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "10cb0a6c-e23d-44b8-b8b8-289f5ccfb82b",
+      "name": "test-client-rack1-1",
+      "glpi_id": "175",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": {
+        "id": "d00afe19-4ea6-4d08-b860-cd2fa8c22f1f",
+        "name": "asr-rtr-rack1",
+        "glpi_id": "170",
+        "node_id": {
+          "id": 3,
+          "name": "1-ОУ1 Биржевая-1",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.9",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 1 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "afc3db5f-a5de-496b-a9b5-bbeb2459b7b2",
+          "10cb0a6c-e23d-44b8-b8b8-289f5ccfb82b",
+          "5bfb3617-45c2-4f5a-8679-d1fe456b5bf2",
+          "2c538aa2-e249-4155-8565-304748561379",
+          "dc49fb81-83c6-469b-ad66-99273e0ab14a",
+          "07aa5b68-3303-44e5-b7c2-c8507fa0dc3c",
+          "6c9d9612-913d-4fd7-9d28-cdfc96e5bfa5"
+        ],
+        "get_freeports": [
+          {
+            "id": "4cef7188-9146-4800-89d3-6d0d14701e73",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "d55ab5bc-9f8e-4684-b3fd-0ead919b5a62",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.9",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [
+        {
+          "id": "953bf35b-1013-4e33-94eb-cc26b9a94bd4",
+          "port_id": {
+            "id": "d3c8b6d2-0a5c-47e0-9840-ffb055508f0b",
+            "switch_id": {},
+            "port": "06",
+            "description": "",
+            "vlan": 226,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "test205",
+          "customer_id": "874857b8-f6a8-4b98-a9e5-8c907409aedb",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": ""
+        }
+      ],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "5f51fa6c-0491-4804-89f8-1b946630888a",
+          "switch_id": {},
+          "port": "17",
+          "description": "",
+          "vlan": 237,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "7b5f47be-e348-4d09-b582-601b6916e113",
+          "switch_id": {},
+          "port": "15",
+          "description": "",
+          "vlan": 235,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "a3f13d65-22e9-4211-ad66-49eb1166a416",
+          "switch_id": {},
+          "port": "20",
+          "description": "",
+          "vlan": 240,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "b65b55de-e50d-47b3-8f5f-4a3441de6a44",
+          "switch_id": {},
+          "port": "14",
+          "description": "",
+          "vlan": 234,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "0240df8c-8aa1-484a-9307-0a931ebe7939",
+          "switch_id": {},
+          "port": "19",
+          "description": "",
+          "vlan": 239,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "b690c405-c42f-4455-9d26-610d3b20c977",
+          "switch_id": {},
+          "port": "16",
+          "description": "",
+          "vlan": 236,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "b2a86ad7-6542-46ce-8c78-312de607aa77",
+          "switch_id": {},
+          "port": "09",
+          "description": "",
+          "vlan": 229,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "686bf04d-abd3-4280-9666-7f02c94140c2",
+          "switch_id": {},
+          "port": "07",
+          "description": "",
+          "vlan": 227,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "28f59911-225a-4726-961f-f6a444a06e64",
+          "switch_id": {},
+          "port": "01",
+          "description": "",
+          "vlan": 221,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "21c6fd7b-e28f-402f-8382-a473191aa264",
+          "switch_id": {},
+          "port": "11",
+          "description": "",
+          "vlan": 231,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "4a88f8ca-2932-4774-891c-2dea179496b5",
+          "switch_id": {},
+          "port": "10",
+          "description": "",
+          "vlan": 230,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "226fc250-6226-4ef1-9a3a-59cbdbed5f57",
+          "switch_id": {},
+          "port": "03",
+          "description": "",
+          "vlan": 223,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "3bb26259-f8ed-417f-b93d-25b04a201f64",
+          "switch_id": {},
+          "port": "12",
+          "description": "",
+          "vlan": 232,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "be36e5e2-420a-458c-a424-254afd76cd64",
+          "switch_id": {},
+          "port": "02",
+          "description": "",
+          "vlan": 222,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "c9113b5a-06d3-4f73-8d92-28bf24f56a6c",
+          "switch_id": {},
+          "port": "18",
+          "description": "",
+          "vlan": 238,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "b167cd42-8873-42e9-ad54-0d0e7d0d6383",
+          "switch_id": {},
+          "port": "04",
+          "description": "",
+          "vlan": 224,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "bffea0ef-34c9-4252-993e-04b9d2753ff9",
+          "switch_id": {},
+          "port": "05",
+          "description": "",
+          "vlan": 225,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "f82121d5-ec8b-4142-a109-8d0f448d96ab",
+          "switch_id": {},
+          "port": "08",
+          "description": "",
+          "vlan": 228,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "82a5b328-28d4-45f3-b6df-d6c4c3bf6d01",
+          "switch_id": {},
+          "port": "13",
+          "description": "",
+          "vlan": 233,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "5bfb3617-45c2-4f5a-8679-d1fe456b5bf2",
+      "name": "test-client-rack1-2",
+      "glpi_id": "173",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": {
+        "id": "d00afe19-4ea6-4d08-b860-cd2fa8c22f1f",
+        "name": "asr-rtr-rack1",
+        "glpi_id": "170",
+        "node_id": {
+          "id": 3,
+          "name": "1-ОУ1 Биржевая-1",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.9",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 1 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "afc3db5f-a5de-496b-a9b5-bbeb2459b7b2",
+          "10cb0a6c-e23d-44b8-b8b8-289f5ccfb82b",
+          "5bfb3617-45c2-4f5a-8679-d1fe456b5bf2",
+          "2c538aa2-e249-4155-8565-304748561379",
+          "dc49fb81-83c6-469b-ad66-99273e0ab14a",
+          "07aa5b68-3303-44e5-b7c2-c8507fa0dc3c",
+          "6c9d9612-913d-4fd7-9d28-cdfc96e5bfa5"
+        ],
+        "get_freeports": [
+          {
+            "id": "4cef7188-9146-4800-89d3-6d0d14701e73",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "d55ab5bc-9f8e-4684-b3fd-0ead919b5a62",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.9",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "fac97422-119c-4dac-a1e9-31bb9c81b0dd",
+          "switch_id": {},
+          "port": "08",
+          "description": "",
+          "vlan": 248,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "5bfb5be6-5438-49f1-b86b-a11a66b7dee0",
+          "switch_id": {},
+          "port": "07",
+          "description": "",
+          "vlan": 247,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "9b552f03-0533-41e2-9ad1-c72f7b570189",
+          "switch_id": {},
+          "port": "12",
+          "description": "",
+          "vlan": 252,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "203ddbc7-d8be-492a-83a8-713cc0cdda9f",
+          "switch_id": {},
+          "port": "11",
+          "description": "",
+          "vlan": 251,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "b251d543-5366-4acc-8f09-4f7785866577",
+          "switch_id": {},
+          "port": "14",
+          "description": "",
+          "vlan": 254,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "f9592a80-4b24-438e-83d0-f993b08d89d8",
+          "switch_id": {},
+          "port": "18",
+          "description": "",
+          "vlan": 258,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "07f8b913-9b12-44a6-a0e0-d94c1ed2501d",
+          "switch_id": {},
+          "port": "10",
+          "description": "",
+          "vlan": 250,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "28dcfb29-c7ab-4f52-88c2-3ee8827b0bf9",
+          "switch_id": {},
+          "port": "09",
+          "description": "",
+          "vlan": 249,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "db5d1461-2c8b-401a-bcd4-2fc9dfbca54e",
+          "switch_id": {},
+          "port": "02",
+          "description": "",
+          "vlan": 242,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "5cceed49-0786-42c2-8e27-b99a1f0ad9f0",
+          "switch_id": {},
+          "port": "01",
+          "description": "",
+          "vlan": 241,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "f947bf5a-c2cc-4df6-a388-62b76a84446d",
+          "switch_id": {},
+          "port": "20",
+          "description": "",
+          "vlan": 260,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "73b6f0b0-94ab-4154-8c4d-44b6f8e35362",
+          "switch_id": {},
+          "port": "16",
+          "description": "",
+          "vlan": 256,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "931959d7-4c5b-493c-9740-c1e3d8c5269b",
+          "switch_id": {},
+          "port": "17",
+          "description": "",
+          "vlan": 257,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "c26954e9-f993-422c-9555-368bbda39862",
+          "switch_id": {},
+          "port": "06",
+          "description": "",
+          "vlan": 246,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "4ab3a260-1195-4f09-a3d0-5d6c794f7fc8",
+          "switch_id": {},
+          "port": "19",
+          "description": "",
+          "vlan": 259,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "651ad529-76e5-4aed-bf59-aa0c127e51a8",
+          "switch_id": {},
+          "port": "15",
+          "description": "",
+          "vlan": 255,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "87c68d0e-34c1-466c-acb2-2aacebeb1b68",
+          "switch_id": {},
+          "port": "04",
+          "description": "",
+          "vlan": 244,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "529bd03e-ad62-41ec-b8bf-7e8d7d6fc975",
+          "switch_id": {},
+          "port": "13",
+          "description": "",
+          "vlan": 253,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "3eaadf9e-cc34-4bba-99b3-72483a85fa53",
+          "switch_id": {},
+          "port": "03",
+          "description": "",
+          "vlan": 243,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "3e4819eb-545e-4351-8d6f-6056c3db6260",
+          "switch_id": {},
+          "port": "05",
+          "description": "",
+          "vlan": 245,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "cfed1cf6-24b6-4a02-829a-6e6fb0ca2e0e",
+      "name": "test-client-rack2",
+      "glpi_id": "168",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": {
+        "id": "ed47b7e4-e5cc-4c83-b3e7-87a697d6a17d",
+        "name": "asr-rtr-rack2",
+        "glpi_id": "171",
+        "node_id": {
+          "id": 4,
+          "name": "2-ОУ1 Биржевая-2",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.27",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 2 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "cfed1cf6-24b6-4a02-829a-6e6fb0ca2e0e",
+          "fe9772ff-ed5a-4ab0-92bc-d6d4bcb3fced",
+          "8b5be7cd-6e0c-49c4-b862-429df94f342b",
+          "62286c06-afed-4bcd-839e-2b6111f69125"
+        ],
+        "get_freeports": [
+          {
+            "id": "deac0fed-9e99-4ff7-8d0e-267f7315315a",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "8450ed04-d666-4baf-88e9-2f3078432c72",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.27",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [
+        {
+          "id": "7553e249-4a05-4b87-92e8-8a20cbde5bd7",
+          "port_id": {
+            "id": "0ed526dd-9440-4803-bfe4-03b448993731",
+            "switch_id": {},
+            "port": "01",
+            "description": "",
+            "vlan": 261,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "7b0eee4a-60e6-4fac-aacc-0c21cad829f5",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": ""
+        },
+        {
+          "id": "f98cde45-ccbe-4d57-a2c1-841341e125d0",
+          "port_id": {
+            "id": "134ee802-b8a1-4d83-a6c8-0c21d48a9757",
+            "switch_id": {},
+            "port": "12",
+            "description": "",
+            "vlan": 272,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "e0a642a1-5e19-453c-9d43-82468f1be9ef",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": ""
+        },
+        {
+          "id": "9e029f2d-acca-410d-83e9-2a5965703536",
+          "port_id": {
+            "id": "4395cde7-e195-4d8c-9b3e-d0ad26e8460b",
+            "switch_id": {},
+            "port": "03",
+            "description": "",
+            "vlan": 263,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "2323",
+          "customer_id": "35da5e07-ea26-42ec-8ec4-b5fbc3d64f2c",
+          "booked": false,
+          "description": "32323",
+          "ip": "0.0.0.0",
+          "session_id": "False"
+        },
+        {
+          "id": "a70b60e8-a57b-4856-9ca4-9fde1397ffee",
+          "port_id": {
+            "id": "5835e459-b5de-41ea-9e27-96c6a6264357",
+            "switch_id": {},
+            "port": "13",
+            "description": "",
+            "vlan": 273,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "f47dce18-db87-4461-9a2e-e7c0a475d6c5",
+          "booked": false,
+          "description": "",
+          "ip": "10.78.13.178",
+          "session_id": "f2c835f4-b848-407b-8450-bd965e39e526"
+        },
+        {
+          "id": "1ebfabcb-6241-403a-b2cd-ca88473bf74f",
+          "port_id": {
+            "id": "7b51631c-06e2-4e10-8988-362b6ed92259",
+            "switch_id": {},
+            "port": "09",
+            "description": "",
+            "vlan": 269,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "c4300459-c9ae-47f5-abe5-d576a0870626",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": "False"
+        },
+        {
+          "id": "dac0c5f9-1bc7-4bc3-8834-0b674cb997ab",
+          "port_id": {
+            "id": "859c9320-1fab-4d85-9d0a-bd7ceb42ae02",
+            "switch_id": {},
+            "port": "15",
+            "description": "",
+            "vlan": 275,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "af0a4674-e43a-4e75-94e6-8717583a83e2",
+          "booked": false,
+          "description": "",
+          "ip": "10.78.13.186",
+          "session_id": "d85eaa7f-7cca-4eff-a4f7-40f32e2f43fa"
+        },
+        {
+          "id": "2c84f2d2-dddc-43c9-a433-57f495953403",
+          "port_id": {
+            "id": "90091139-2fdb-42cf-9037-371b52fed0a4",
+            "switch_id": {},
+            "port": "16",
+            "description": "",
+            "vlan": 276,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "c46bf85d-62ba-48ff-8d69-44338df144b4",
+          "booked": false,
+          "description": "",
+          "ip": "10.78.13.190",
+          "session_id": "699428e3-6a62-4ba2-905c-55451497927f"
+        },
+        {
+          "id": "829371ee-7e91-40be-884a-daf1aebc5327",
+          "port_id": {
+            "id": "b7235375-d27d-41d9-ab5d-faddd87418b8",
+            "switch_id": {},
+            "port": "14",
+            "description": "",
+            "vlan": 274,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "d8b4e9b6-122b-4ac3-ba31-f212fe5c6da0",
+          "booked": false,
+          "description": "",
+          "ip": "10.78.13.182",
+          "session_id": "02c99b0a-eebd-4309-99a1-ad8d68f7791b"
+        },
+        {
+          "id": "1637e702-62bc-4e9d-b437-7dadaf4a1c4e",
+          "port_id": {
+            "id": "b9b64c45-81f8-4bab-9054-1c95cefb7d61",
+            "switch_id": {},
+            "port": "10",
+            "description": "",
+            "vlan": 270,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "220e8ff6-e671-4b36-9679-d0021ece4219",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": ""
+        },
+        {
+          "id": "376b00f9-76fc-4b58-874c-eaacd1fa3f82",
+          "port_id": {
+            "id": "d528ab7c-e741-4f97-b950-42bf9b2d631e",
+            "switch_id": {},
+            "port": "11",
+            "description": "",
+            "vlan": 271,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "99b83bc3-33d4-4b1b-931d-c0b95a035514",
+          "booked": false,
+          "description": "",
+          "ip": "0.0.0.0",
+          "session_id": ""
+        },
+        {
+          "id": "679c15af-3833-4bb6-bd7a-ab32e7fac3c5",
+          "port_id": {
+            "id": "d72fd85b-e792-4bee-8d24-931e493941bd",
+            "switch_id": {},
+            "port": "19",
+            "description": "",
+            "vlan": 279,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          "customer": "created",
+          "customer_id": "f762b5f5-e31d-47d6-8462-f25d929b23f4",
+          "booked": false,
+          "description": "",
+          "ip": "10.78.13.202",
+          "session_id": "b88567aa-80c0-4849-85d9-77241e588469"
+        }
+      ],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "3852d0a7-ab7b-4dac-a227-bbf6e426848e",
+          "switch_id": {},
+          "port": "18",
+          "description": "",
+          "vlan": 278,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "22307ce4-527d-4c91-acfc-139cd4a1516e",
+          "switch_id": {},
+          "port": "02",
+          "description": "",
+          "vlan": 262,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "e27797bb-fbaf-41db-b661-0cc1289cdead",
+          "switch_id": {},
+          "port": "20",
+          "description": "",
+          "vlan": 280,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "d1444748-154a-4fe5-96bb-ab7939759363",
+          "switch_id": {},
+          "port": "07",
+          "description": "",
+          "vlan": 267,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "40ee65f6-bcc4-48b4-8b87-a518101607d9",
+          "switch_id": {},
+          "port": "04",
+          "description": "",
+          "vlan": 264,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "6e9d5134-4d30-4305-a627-e98ae562f267",
+          "switch_id": {},
+          "port": "06",
+          "description": "",
+          "vlan": 266,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "1556e711-772c-49b0-93a7-911a8531feec",
+          "switch_id": {},
+          "port": "17",
+          "description": "",
+          "vlan": 277,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "f2d7511c-d159-4720-ba94-f47fbc628096",
+          "switch_id": {},
+          "port": "05",
+          "description": "",
+          "vlan": 265,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "98c4fec8-b432-49f2-a282-c7e301b441a0",
+          "switch_id": {},
+          "port": "08",
+          "description": "",
+          "vlan": 268,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "fe9772ff-ed5a-4ab0-92bc-d6d4bcb3fced",
+      "name": "test-client-rack2-c",
+      "glpi_id": "176",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": {
+        "id": "ed47b7e4-e5cc-4c83-b3e7-87a697d6a17d",
+        "name": "asr-rtr-rack2",
+        "glpi_id": "171",
+        "node_id": {
+          "id": 4,
+          "name": "2-ОУ1 Биржевая-2",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.27",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 2 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "cfed1cf6-24b6-4a02-829a-6e6fb0ca2e0e",
+          "fe9772ff-ed5a-4ab0-92bc-d6d4bcb3fced",
+          "8b5be7cd-6e0c-49c4-b862-429df94f342b",
+          "62286c06-afed-4bcd-839e-2b6111f69125"
+        ],
+        "get_freeports": [
+          {
+            "id": "deac0fed-9e99-4ff7-8d0e-267f7315315a",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "8450ed04-d666-4baf-88e9-2f3078432c72",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.27",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "8da944b1-33e7-4ca3-8214-3b68178b8c42",
+          "switch_id": {},
+          "port": "11",
+          "description": "",
+          "vlan": 291,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "da5f3fc4-1482-4d9a-ad3e-5629c1eb8b3b",
+          "switch_id": {},
+          "port": "08",
+          "description": "",
+          "vlan": 288,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "6dfde519-fddf-4379-9e04-71d418452597",
+          "switch_id": {},
+          "port": "19",
+          "description": "",
+          "vlan": 299,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "eb5c266a-c849-4483-ba94-0be7805c6fb2",
+          "switch_id": {},
+          "port": "18",
+          "description": "",
+          "vlan": 298,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "dd297154-13a9-4452-a3f6-058a8534ea03",
+          "switch_id": {},
+          "port": "16",
+          "description": "",
+          "vlan": 296,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "7666e695-d229-4807-a6f2-7b975ed12cb7",
+          "switch_id": {},
+          "port": "04",
+          "description": "",
+          "vlan": 284,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "cd9daa74-0066-4667-ab25-6000be60f3a4",
+          "switch_id": {},
+          "port": "14",
+          "description": "",
+          "vlan": 294,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "9a7ebed7-a2b4-415f-a996-96b873d644f1",
+          "switch_id": {},
+          "port": "15",
+          "description": "",
+          "vlan": 295,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "91e22235-7233-40a0-93e1-7d117d2b51ac",
+          "switch_id": {},
+          "port": "07",
+          "description": "",
+          "vlan": 287,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "ceec21ba-841c-4c29-a690-a943a3140f61",
+          "switch_id": {},
+          "port": "09",
+          "description": "",
+          "vlan": 289,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "6b68ab51-e010-45cf-b684-8e7d9fdd61ce",
+          "switch_id": {},
+          "port": "12",
+          "description": "",
+          "vlan": 292,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "e158493a-dab4-4898-b221-949f0898a8ea",
+          "switch_id": {},
+          "port": "03",
+          "description": "",
+          "vlan": 283,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "2296e769-97cb-4a6e-8c21-76d4b925dd2e",
+          "switch_id": {},
+          "port": "06",
+          "description": "",
+          "vlan": 286,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "e984d5fc-a5ed-4520-a617-99555042f1ec",
+          "switch_id": {},
+          "port": "17",
+          "description": "",
+          "vlan": 297,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "7d2b2c65-9ab3-4590-a84c-e894c3402d4e",
+          "switch_id": {},
+          "port": "01",
+          "description": "",
+          "vlan": 281,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "d75bb901-0a40-4f32-b083-aa00a44ea12a",
+          "switch_id": {},
+          "port": "02",
+          "description": "",
+          "vlan": 282,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "9c80311f-00e1-43fa-aaf5-2c83b910f7bb",
+          "switch_id": {},
+          "port": "10",
+          "description": "",
+          "vlan": 290,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "f8b596e4-e047-49af-a332-b3edfb6f683f",
+          "switch_id": {},
+          "port": "13",
+          "description": "",
+          "vlan": 293,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "b790dd50-824e-4718-b2fd-f8a9993b2649",
+          "switch_id": {},
+          "port": "05",
+          "description": "",
+          "vlan": 285,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "d17b27cc-a9a1-4589-a814-c26b84d510be",
+          "switch_id": {},
+          "port": "20 ",
+          "description": "",
+          "vlan": 300,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "2c538aa2-e249-4155-8565-304748561379",
+      "name": "test-client-rack1-1copy",
+      "glpi_id": "177",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": {
+        "id": "d00afe19-4ea6-4d08-b860-cd2fa8c22f1f",
+        "name": "asr-rtr-rack1",
+        "glpi_id": "170",
+        "node_id": {
+          "id": 3,
+          "name": "1-ОУ1 Биржевая-1",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.9",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 1 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "afc3db5f-a5de-496b-a9b5-bbeb2459b7b2",
+          "10cb0a6c-e23d-44b8-b8b8-289f5ccfb82b",
+          "5bfb3617-45c2-4f5a-8679-d1fe456b5bf2",
+          "2c538aa2-e249-4155-8565-304748561379",
+          "dc49fb81-83c6-469b-ad66-99273e0ab14a",
+          "07aa5b68-3303-44e5-b7c2-c8507fa0dc3c",
+          "6c9d9612-913d-4fd7-9d28-cdfc96e5bfa5"
+        ],
+        "get_freeports": [
+          {
+            "id": "4cef7188-9146-4800-89d3-6d0d14701e73",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "d55ab5bc-9f8e-4684-b3fd-0ead919b5a62",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.9",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "8abdf416-b4d4-421b-b12d-749d97a56b85",
+          "switch_id": {},
+          "port": "18 (копия)",
+          "description": "",
+          "vlan": 358,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "3f991857-434f-4c9d-ac29-8cd2a6ea96c8",
+          "switch_id": {},
+          "port": "03 (копия)",
+          "description": "",
+          "vlan": 343,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "e03735fe-0821-4711-9813-54e488c79702",
+          "switch_id": {},
+          "port": "14 (копия)",
+          "description": "",
+          "vlan": 354,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "ca1259ab-251f-4a9f-8d3f-bd05812ad45a",
+          "switch_id": {},
+          "port": "20 (копия)",
+          "description": "",
+          "vlan": 360,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "3a3206b6-06a6-466d-9f77-e8cd9a824b91",
+          "switch_id": {},
+          "port": "01 (копия)",
+          "description": "",
+          "vlan": 341,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "be6250c8-e0e5-44a3-a866-002ab6f06501",
+          "switch_id": {},
+          "port": "16 (копия)",
+          "description": "",
+          "vlan": 356,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "7ea8b7b2-6d6f-4dad-a79c-0657362aee42",
+          "switch_id": {},
+          "port": "11 (копия)",
+          "description": "",
+          "vlan": 351,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "c0a2c0cd-a7a4-4d22-a58b-c2b83a07ac0b",
+          "switch_id": {},
+          "port": "02 (копия)",
+          "description": "",
+          "vlan": 342,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "6b76ddfc-2e33-4b86-a8f4-b8e3b0e1e5c3",
+          "switch_id": {},
+          "port": "10 (копия)",
+          "description": "",
+          "vlan": 350,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "6012223b-fc7a-47bf-add9-3a0cf6770dc1",
+          "switch_id": {},
+          "port": "05 (копия)",
+          "description": "",
+          "vlan": 345,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "f4039f35-68c5-4818-af64-8acb585aa35a",
+          "switch_id": {},
+          "port": "19 (копия)",
+          "description": "",
+          "vlan": 359,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "bbc2fe7b-800e-452e-a51e-b29c40a36739",
+          "switch_id": {},
+          "port": "08 (копия)",
+          "description": "",
+          "vlan": 348,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "7b567ed5-07b0-47d0-b445-d31e4f06093d",
+          "switch_id": {},
+          "port": "06 (копия)",
+          "description": "",
+          "vlan": 346,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "3ffaa68c-dd92-4b32-8624-31e490e95047",
+          "switch_id": {},
+          "port": "12 (копия)",
+          "description": "",
+          "vlan": 352,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "c973feb3-d10d-4801-9ba6-ad73f5aec6f4",
+          "switch_id": {},
+          "port": "15 (копия)",
+          "description": "",
+          "vlan": 355,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "a111072e-1bbe-454e-92f5-b281b66e3418",
+          "switch_id": {},
+          "port": "13 (копия)",
+          "description": "",
+          "vlan": 353,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "28bd02a6-bb9a-4e29-898d-db606a5cad60",
+          "switch_id": {},
+          "port": "09 (копия)",
+          "description": "",
+          "vlan": 349,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "0bef0e99-3f9d-4137-b353-0535f94d03b8",
+          "switch_id": {},
+          "port": "04 (копия)",
+          "description": "",
+          "vlan": 344,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "9005c39f-4368-4c98-aa47-6c5f6f60d2d3",
+          "switch_id": {},
+          "port": "17 (копия)",
+          "description": "",
+          "vlan": 357,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "cfe34477-653a-4e06-a8f2-593b36ca8315",
+          "switch_id": {},
+          "port": "07 (копия)",
+          "description": "",
+          "vlan": 347,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "9f8d0854-353c-0da9-1c33-2cc054b0669c",
+      "name": "asr-rtr-rack1",
+      "glpi_id": "170",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 2,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.9",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco ASR1001-X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "c46ca4d2-3adf-40f2-87dc-9fbf390b17d1",
+          "switch_id": {},
+          "port": "Te0/0/0",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "7f58e46c-8cdd-4271-94cc-f8f2906d1f2b",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "1cb026a9-3f36-3ff5-8619-fed19b9a76f4",
+      "name": "asr-rtr-rack2",
+      "glpi_id": "171",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 2,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.27",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco ASR1001-X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "07ff6895-a415-48e9-8a12-de0ccad18274",
+          "switch_id": {},
+          "port": "Te0/0/0",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "6615c89b-b795-4468-a794-4ebbb1d274de",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "b74fbba8-b049-6511-b4ba-1870f1bfe654",
+      "name": "csc-rack1",
+      "glpi_id": "1",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.11",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco C9200L-24T-4X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "0d7e4555-9093-4a93-8f38-670884e0d0c0",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "668f650d-fab9-46e1-b3a1-dfba97397501",
+      "name": "fpsu-rack2",
+      "glpi_id": "1096",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "sh",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.103.12",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "АМИКОН FPSUIP-ULT5-2U",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "89da2565-562b-4011-99cc-7e6784345d20",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "АМИКОН"
+    },
+    {
+      "id": "b8fe36fe-2101-ad4e-df52-821600d15be0",
+      "name": "csc-rack2",
+      "glpi_id": "163",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.12",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco C9200L-24T-4X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "16e0080c-25f0-4ea5-9741-0430cc943a9e",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "9b636b75-e496-760e-31ed-9883ba0de72d",
+      "name": "fpsu-rack1",
+      "glpi_id": "1097",
+      "node_id": {
+        "id": 7,
+        "name": "3-ОУ1 Биржевая-3",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "sh",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.103.13",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 3 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "АМИКОН FPSUIP-ULT5-2U",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "ac7ba9d6-786d-428b-bda2-b99ea20241f1",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "АМИКОН"
+    },
+    {
+      "id": "9f44f338-5cc4-ddc4-04bf-1b239826e19c",
+      "name": "csc-rack3",
+      "glpi_id": "164",
+      "node_id": {
+        "id": 7,
+        "name": "3-ОУ1 Биржевая-3",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.13",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 3 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco C9200L-24T-4X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "208a9c7c-b8ad-41b7-b619-d719d5189423",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "d24f2015-e2ef-8dbd-a388-a476606f5ecb",
+      "name": "csc-test",
+      "glpi_id": "161",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "tr",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.102.201",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Cisco C9200L-24T-4X",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "2782b532-def4-43ae-a420-290d89f7e781",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Cisco"
+    },
+    {
+      "id": "6d1090df-5b5b-49c7-a92a-3df8eab7ec4d",
+      "name": "fpsu-rack3",
+      "glpi_id": "1097",
+      "node_id": {
+        "id": 7,
+        "name": "3-ОУ1 Биржевая-3",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "sh",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.103.13",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 3 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "АМИКОН FPSUIP-ULT5-2U",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "c6972675-484f-4ad8-8a71-de0dab0b7a1d",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "АМИКОН"
+    },
+    {
+      "id": "224a60ae-e5c0-4acb-5ef1-b5424b4856f6",
+      "name": "mkt-rack1",
+      "glpi_id": "4",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "co",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.101.2",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Mikrotik CRS328-24P-4S+",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "b5598f43-d23e-4882-9e6b-58e0630a8950",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Mikrotik"
+    },
+    {
+      "id": "82e760df-b656-80e4-1cc6-179ebbcc8a02",
+      "name": "mkt-rack2",
+      "glpi_id": "165",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "co",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.101.3",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Mikrotik CRS328-4C-20S-4S+",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "61a4295f-cf17-481b-93c3-2b11e414f894",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Mikrotik"
+    },
+    {
+      "id": "f02c615c-68b6-9e44-5b02-0732c086a362",
+      "name": "mkt-rack3",
+      "glpi_id": "166",
+      "node_id": {
+        "id": 7,
+        "name": "3-ОУ1 Биржевая-3",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "co",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.101.13",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 3 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Mikrotik CRS328-24P-4S+",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "610b3761-560f-4aab-9dd9-bde11844c2ea",
+          "switch_id": {},
+          "port": "management",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Mikrotik"
+    },
+    {
+      "id": "41ba6664-278b-05e1-c821-068e1c882bc2",
+      "name": "mkt-test",
+      "glpi_id": "162",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "co",
+      "ports": 1,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "10.0.101.201",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": "None",
+      "up_ip": "0.0.0.0",
+      "up_port": "",
+      "model": "Mikrotik CRS328-24P-4S+",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "c7af6319-b764-4b3c-a007-adc709cb0b11",
+          "switch_id": {},
+          "port": "",
+          "description": "",
+          "vlan": 0,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "Mikrotik"
+    },
+    {
+      "id": "dc49fb81-83c6-469b-ad66-99273e0ab14a",
+      "name": "test-client-rack1",
+      "glpi_id": "172",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": {
+        "id": "d00afe19-4ea6-4d08-b860-cd2fa8c22f1f",
+        "name": "asr-rtr-rack1",
+        "glpi_id": "170",
+        "node_id": {
+          "id": 3,
+          "name": "1-ОУ1 Биржевая-1",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.9",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 1 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "afc3db5f-a5de-496b-a9b5-bbeb2459b7b2",
+          "10cb0a6c-e23d-44b8-b8b8-289f5ccfb82b",
+          "5bfb3617-45c2-4f5a-8679-d1fe456b5bf2",
+          "2c538aa2-e249-4155-8565-304748561379",
+          "dc49fb81-83c6-469b-ad66-99273e0ab14a",
+          "07aa5b68-3303-44e5-b7c2-c8507fa0dc3c",
+          "6c9d9612-913d-4fd7-9d28-cdfc96e5bfa5"
+        ],
+        "get_freeports": [
+          {
+            "id": "4cef7188-9146-4800-89d3-6d0d14701e73",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "d55ab5bc-9f8e-4684-b3fd-0ead919b5a62",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.9",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "1ca117e5-0839-4632-8b9c-c137eba73227",
+          "switch_id": {},
+          "port": "18",
+          "description": "",
+          "vlan": 318,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "a0a01444-50eb-40a5-88ba-2b946a282370",
+          "switch_id": {},
+          "port": "12",
+          "description": "",
+          "vlan": 312,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "5204a3ce-341e-4aa8-9ae0-fd16b931f66c",
+          "switch_id": {},
+          "port": "15",
+          "description": "",
+          "vlan": 315,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "7b4dcfe7-30b8-4466-a6ce-3656d3d37f72",
+          "switch_id": {},
+          "port": "20",
+          "description": "",
+          "vlan": 320,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "544634f0-f67b-478d-898a-b9855d19864f",
+          "switch_id": {},
+          "port": "13",
+          "description": "",
+          "vlan": 313,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "b1e681dc-0b68-4817-89de-e1c598f3646e",
+          "switch_id": {},
+          "port": "01",
+          "description": "",
+          "vlan": 301,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "0062cc11-2e79-4c4c-b90e-d39ae2cb4df6",
+          "switch_id": {},
+          "port": "08",
+          "description": "",
+          "vlan": 308,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "c0ac0374-346a-4f29-a413-0d962bc8f69f",
+          "switch_id": {},
+          "port": "16",
+          "description": "",
+          "vlan": 316,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "1fc75ec3-d040-4eee-a3cf-32a1e0cb9c21",
+          "switch_id": {},
+          "port": "17",
+          "description": "",
+          "vlan": 317,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "5b26ee93-a15d-4779-a297-bbce2e4aa1bc",
+          "switch_id": {},
+          "port": "10",
+          "description": "",
+          "vlan": 310,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "357be51c-1608-44aa-abaa-ec03780e32fc",
+          "switch_id": {},
+          "port": "04",
+          "description": "",
+          "vlan": 304,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "10623495-4485-4bfa-9476-0f3ebc2ae5cc",
+          "switch_id": {},
+          "port": "02",
+          "description": "",
+          "vlan": 302,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "a0722151-7624-456d-9886-46fbbd839510",
+          "switch_id": {},
+          "port": "06",
+          "description": "",
+          "vlan": 306,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "d7b35cb2-fca6-43bf-be2e-eef77894adb1",
+          "switch_id": {},
+          "port": "11",
+          "description": "",
+          "vlan": 311,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "543f1bdb-5f68-4e06-b558-2e32e4a97d1a",
+          "switch_id": {},
+          "port": "19",
+          "description": "",
+          "vlan": 319,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "2c8c06d5-f86d-43cf-b8b4-d2877f729721",
+          "switch_id": {},
+          "port": "14",
+          "description": "",
+          "vlan": 314,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "60ac5c53-382b-4569-8c93-020d392d2c47",
+          "switch_id": {},
+          "port": "09",
+          "description": "",
+          "vlan": 309,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "5c885101-71d6-48fb-b270-c689049eb73d",
+          "switch_id": {},
+          "port": "07",
+          "description": "",
+          "vlan": 307,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "180167a3-d1ce-433b-bf05-819665b43c10",
+          "switch_id": {},
+          "port": "05",
+          "description": "",
+          "vlan": 305,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "b2df5298-b0e4-43fe-81d1-76cdeb4ff556",
+          "switch_id": {},
+          "port": "03",
+          "description": "",
+          "vlan": 303,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "07aa5b68-3303-44e5-b7c2-c8507fa0dc3c",
+      "name": "test-client-rack1-1",
+      "glpi_id": "175",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": {
+        "id": "d00afe19-4ea6-4d08-b860-cd2fa8c22f1f",
+        "name": "asr-rtr-rack1",
+        "glpi_id": "170",
+        "node_id": {
+          "id": 3,
+          "name": "1-ОУ1 Биржевая-1",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.9",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 1 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "afc3db5f-a5de-496b-a9b5-bbeb2459b7b2",
+          "10cb0a6c-e23d-44b8-b8b8-289f5ccfb82b",
+          "5bfb3617-45c2-4f5a-8679-d1fe456b5bf2",
+          "2c538aa2-e249-4155-8565-304748561379",
+          "dc49fb81-83c6-469b-ad66-99273e0ab14a",
+          "07aa5b68-3303-44e5-b7c2-c8507fa0dc3c",
+          "6c9d9612-913d-4fd7-9d28-cdfc96e5bfa5"
+        ],
+        "get_freeports": [
+          {
+            "id": "4cef7188-9146-4800-89d3-6d0d14701e73",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "d55ab5bc-9f8e-4684-b3fd-0ead919b5a62",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.9",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [
+        {
+          "id": "e7c768c9-db6c-43bb-8906-a98f803f996b",
+          "switch_id": {},
+          "port": "03",
+          "description": "",
+          "vlan": 323,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "54b750fe-b5f5-4896-87ea-05bdfc94837e",
+          "switch_id": {},
+          "port": "20",
+          "description": "",
+          "vlan": 340,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "3f8a8936-62cc-4024-9966-9e88b21c6f96",
+          "switch_id": {},
+          "port": "07",
+          "description": "",
+          "vlan": 327,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "cc041ade-0117-4a5f-bf7f-21d8b58a2820",
+          "switch_id": {},
+          "port": "01",
+          "description": "",
+          "vlan": 321,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "3936628b-fcd5-438d-9084-673216c7c2db",
+          "switch_id": {},
+          "port": "09",
+          "description": "",
+          "vlan": 329,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "55808ed8-9b60-4941-adb5-48b4873dfd33",
+          "switch_id": {},
+          "port": "14",
+          "description": "",
+          "vlan": 334,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "13866ea8-3a6c-4f0d-b419-2004f035336a",
+          "switch_id": {},
+          "port": "12",
+          "description": "",
+          "vlan": 332,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "33f0131c-518c-4fd6-99f7-c2c82506371d",
+          "switch_id": {},
+          "port": "05",
+          "description": "",
+          "vlan": 325,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "0ff65ea3-518d-4420-b7d1-da7a6671d216",
+          "switch_id": {},
+          "port": "19",
+          "description": "",
+          "vlan": 339,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "d6069175-b823-428e-ba4b-86a58c714af8",
+          "switch_id": {},
+          "port": "02",
+          "description": "",
+          "vlan": 322,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "243748a1-c499-40aa-a995-eac4077c8685",
+          "switch_id": {},
+          "port": "11",
+          "description": "",
+          "vlan": 331,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "284fcf23-90c2-41e2-83b4-0c4a00bce089",
+          "switch_id": {},
+          "port": "08",
+          "description": "",
+          "vlan": 328,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "459d398d-f2a1-4341-a6af-0e3ba018ce0a",
+          "switch_id": {},
+          "port": "06",
+          "description": "",
+          "vlan": 326,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "ca827f5c-508a-4e0d-9980-f2fbd9ceda88",
+          "switch_id": {},
+          "port": "15",
+          "description": "",
+          "vlan": 335,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "eb39e9d3-b27d-4a1f-ae5d-a74214575431",
+          "switch_id": {},
+          "port": "10",
+          "description": "",
+          "vlan": 330,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "9a49777e-3f2d-4517-bbef-b2ce68417f85",
+          "switch_id": {},
+          "port": "16",
+          "description": "",
+          "vlan": 336,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "1a7d4fe7-71ad-427f-8bd9-8bfa5e2cd633",
+          "switch_id": {},
+          "port": "04",
+          "description": "",
+          "vlan": 324,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "8c06bb74-a6fe-408c-9f6a-9576e5cf19b5",
+          "switch_id": {},
+          "port": "13",
+          "description": "",
+          "vlan": 333,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "fc2ea64b-1a09-47cf-a5f8-8b080dfd3382",
+          "switch_id": {},
+          "port": "17",
+          "description": "",
+          "vlan": 337,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        },
+        {
+          "id": "9d5cc3a6-6050-4fec-9638-ad9392750873",
+          "switch_id": {},
+          "port": "18",
+          "description": "",
+          "vlan": 338,
+          "dscp": "0",
+          "opt82": "%PORTMAC%"
+        }
+      ],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "6c9d9612-913d-4fd7-9d28-cdfc96e5bfa5",
+      "name": "test-client-rack1-2",
+      "glpi_id": "173",
+      "node_id": {
+        "id": 3,
+        "name": "1-ОУ1 Биржевая-1",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 1 стойка",
+      "up_id": {
+        "id": "d00afe19-4ea6-4d08-b860-cd2fa8c22f1f",
+        "name": "asr-rtr-rack1",
+        "glpi_id": "170",
+        "node_id": {
+          "id": 3,
+          "name": "1-ОУ1 Биржевая-1",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.9",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 1 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "afc3db5f-a5de-496b-a9b5-bbeb2459b7b2",
+          "10cb0a6c-e23d-44b8-b8b8-289f5ccfb82b",
+          "5bfb3617-45c2-4f5a-8679-d1fe456b5bf2",
+          "2c538aa2-e249-4155-8565-304748561379",
+          "dc49fb81-83c6-469b-ad66-99273e0ab14a",
+          "07aa5b68-3303-44e5-b7c2-c8507fa0dc3c",
+          "6c9d9612-913d-4fd7-9d28-cdfc96e5bfa5"
+        ],
+        "get_freeports": [
+          {
+            "id": "4cef7188-9146-4800-89d3-6d0d14701e73",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "d55ab5bc-9f8e-4684-b3fd-0ead919b5a62",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.9",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "8b5be7cd-6e0c-49c4-b862-429df94f342b",
+      "name": "test-client-rack2",
+      "glpi_id": "168",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": {
+        "id": "ed47b7e4-e5cc-4c83-b3e7-87a697d6a17d",
+        "name": "asr-rtr-rack2",
+        "glpi_id": "171",
+        "node_id": {
+          "id": 4,
+          "name": "2-ОУ1 Биржевая-2",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.27",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 2 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "cfed1cf6-24b6-4a02-829a-6e6fb0ca2e0e",
+          "fe9772ff-ed5a-4ab0-92bc-d6d4bcb3fced",
+          "8b5be7cd-6e0c-49c4-b862-429df94f342b",
+          "62286c06-afed-4bcd-839e-2b6111f69125"
+        ],
+        "get_freeports": [
+          {
+            "id": "deac0fed-9e99-4ff7-8d0e-267f7315315a",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "8450ed04-d666-4baf-88e9-2f3078432c72",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.27",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [],
+      "get_manufacturer": "unknown"
+    },
+    {
+      "id": "62286c06-afed-4bcd-839e-2b6111f69125",
+      "name": "test-client-rack2-c",
+      "glpi_id": "176",
+      "node_id": {
+        "id": 4,
+        "name": "2-ОУ1 Биржевая-2",
+        "description": "",
+        "address": "",
+        "state": "",
+        "log": "",
+        "region": "Стенд"
+      },
+      "logical_type": "cl",
+      "ports": 20,
+      "control_port": "",
+      "test_port": "",
+      "description": "",
+      "operate": true,
+      "ip": "0.0.0.0",
+      "community": "",
+      "location": "Биржевая, 14, каб. 108, 2 стойка",
+      "up_id": {
+        "id": "ed47b7e4-e5cc-4c83-b3e7-87a697d6a17d",
+        "name": "asr-rtr-rack2",
+        "glpi_id": "171",
+        "node_id": {
+          "id": 4,
+          "name": "2-ОУ1 Биржевая-2",
+          "description": "",
+          "address": "",
+          "state": "",
+          "log": "",
+          "region": "Стенд"
+        },
+        "logical_type": "tr",
+        "ports": 2,
+        "control_port": "",
+        "test_port": "",
+        "description": "",
+        "operate": true,
+        "ip": "10.0.102.27",
+        "community": "",
+        "location": "Биржевая, 14, каб. 108, 2 стойка",
+        "up_id": "None",
+        "up_ip": "0.0.0.0",
+        "up_port": "",
+        "model": "Cisco ASR1001-X",
+        "get_connections": [],
+        "get_down": [
+          "cfed1cf6-24b6-4a02-829a-6e6fb0ca2e0e",
+          "fe9772ff-ed5a-4ab0-92bc-d6d4bcb3fced",
+          "8b5be7cd-6e0c-49c4-b862-429df94f342b",
+          "62286c06-afed-4bcd-839e-2b6111f69125"
+        ],
+        "get_freeports": [
+          {
+            "id": "deac0fed-9e99-4ff7-8d0e-267f7315315a",
+            "switch_id": {},
+            "port": "management",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          },
+          {
+            "id": "8450ed04-d666-4baf-88e9-2f3078432c72",
+            "switch_id": {},
+            "port": "Te0/0/0",
+            "description": "",
+            "vlan": 0,
+            "dscp": "0",
+            "opt82": "%PORTMAC%"
+          }
+        ],
+        "get_manufacturer": "Cisco"
+      },
+      "up_ip": "10.0.102.27",
+      "up_port": "Te0/0/0",
+      "model": "unknown",
+      "get_connections": [],
+      "get_down": [],
+      "get_freeports": [],
+      "get_manufacturer": "unknown"
+    }
+  ]
+}

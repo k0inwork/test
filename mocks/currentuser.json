@@ -1,0 +1,3210 @@
+{
+  "id": 1,
+  "password": "pbkdf2_sha256$870000$ZCLO6XHqSRr6MZpvBhgZWV$GdptCz/ctEEAgAmTQzj9TcdLVdVXnLCAhXflqHBEMJg=",
+  "last_login": 1773275714.144438,
+  "is_superuser": true,
+  "first_name": "",
+  "last_name": "",
+  "email": "admin@mail.ru",
+  "is_staff": true,
+  "is_active": true,
+  "date_joined": 1709808625.577236,
+  "username": "admin",
+  "container": false,
+  "key": "",
+  "settings": "{\"window_style\": \"Horizontal\", \"window_color\": \"White\"}",
+  "groups": [
+    "tsumadm",
+    "trafadm",
+    "devadm",
+    "user"
+  ],
+  "permissions": [
+    {
+      "id": 95,
+      "name": "Can delete switch connection",
+      "content_type_id": {
+        "id": 22,
+        "app_label": "data",
+        "model": "switchconnection"
+      },
+      "codename": "delete_switchconnection"
+    },
+    {
+      "id": 48,
+      "name": "Can change activity log",
+      "content_type_id": {
+        "id": 12,
+        "app_label": "activity_log",
+        "model": "activitylog"
+      },
+      "codename": "change_activitylog"
+    },
+    {
+      "id": 150,
+      "name": "Can change data service",
+      "content_type_id": {
+        "id": 36,
+        "app_label": "services",
+        "model": "dataservice"
+      },
+      "codename": "change_dataservice"
+    },
+    {
+      "id": 36,
+      "name": "Can change session",
+      "content_type_id": {
+        "id": 9,
+        "app_label": "sessions",
+        "model": "session"
+      },
+      "codename": "change_session"
+    },
+    {
+      "id": 167,
+      "name": "Can delete historical access view right",
+      "content_type_id": {
+        "id": 39,
+        "app_label": "accounts",
+        "model": "historicalaccessviewright"
+      },
+      "codename": "delete_historicalaccessviewright"
+    },
+    {
+      "id": 79,
+      "name": "Can delete session",
+      "content_type_id": {
+        "id": 18,
+        "app_label": "gws",
+        "model": "session"
+      },
+      "codename": "delete_session"
+    },
+    {
+      "id": 57,
+      "name": "Can delete access log",
+      "content_type_id": {
+        "id": 14,
+        "app_label": "axes",
+        "model": "accesslog"
+      },
+      "codename": "delete_accesslog"
+    },
+    {
+      "id": 124,
+      "name": "Can view object key",
+      "content_type_id": {
+        "id": 29,
+        "app_label": "integrity",
+        "model": "objectkey"
+      },
+      "codename": "view_objectkey"
+    },
+    {
+      "id": 43,
+      "name": "Can add historical global settings",
+      "content_type_id": {
+        "id": 11,
+        "app_label": "core",
+        "model": "historicalglobalsettings"
+      },
+      "codename": "add_historicalglobalsettings"
+    },
+    {
+      "id": 156,
+      "name": "Can view user",
+      "content_type_id": {
+        "id": 1,
+        "app_label": "accounts",
+        "model": "customuser"
+      },
+      "codename": "view_customuser"
+    },
+    {
+      "id": 81,
+      "name": "Can add historical session",
+      "content_type_id": {
+        "id": 19,
+        "app_label": "gws",
+        "model": "historicalsession"
+      },
+      "codename": "add_historicalsession"
+    },
+    {
+      "id": 49,
+      "name": "Can delete activity log",
+      "content_type_id": {
+        "id": 12,
+        "app_label": "activity_log",
+        "model": "activitylog"
+      },
+      "codename": "delete_activitylog"
+    },
+    {
+      "id": 147,
+      "name": "Can delete historical data service",
+      "content_type_id": {
+        "id": 35,
+        "app_label": "services",
+        "model": "historicaldataservice"
+      },
+      "codename": "delete_historicaldataservice"
+    },
+    {
+      "id": 138,
+      "name": "Can change historical service session",
+      "content_type_id": {
+        "id": 33,
+        "app_label": "services",
+        "model": "historicalservicesession"
+      },
+      "codename": "change_historicalservicesession"
+    },
+    {
+      "id": 139,
+      "name": "Can delete historical service session",
+      "content_type_id": {
+        "id": 33,
+        "app_label": "services",
+        "model": "historicalservicesession"
+      },
+      "codename": "delete_historicalservicesession"
+    },
+    {
+      "id": 115,
+      "name": "Can delete object type",
+      "content_type_id": {
+        "id": 27,
+        "app_label": "integrity",
+        "model": "objecttype"
+      },
+      "codename": "delete_objecttype"
+    },
+    {
+      "id": 165,
+      "name": "Can add historical access view right",
+      "content_type_id": {
+        "id": 39,
+        "app_label": "accounts",
+        "model": "historicalaccessviewright"
+      },
+      "codename": "add_historicalaccessviewright"
+    },
+    {
+      "id": 23,
+      "name": "Can add permission",
+      "content_type_id": {
+        "id": 6,
+        "app_label": "auth",
+        "model": "permission"
+      },
+      "codename": "add_permission"
+    },
+    {
+      "id": 37,
+      "name": "Can delete session",
+      "content_type_id": {
+        "id": 9,
+        "app_label": "sessions",
+        "model": "session"
+      },
+      "codename": "delete_session"
+    },
+    {
+      "id": 135,
+      "name": "Can delete key service",
+      "content_type_id": {
+        "id": 32,
+        "app_label": "services",
+        "model": "keyservice"
+      },
+      "codename": "delete_keyservice"
+    },
+    {
+      "id": 20,
+      "name": "Can change log entry",
+      "content_type_id": {
+        "id": 5,
+        "app_label": "admin",
+        "model": "logentry"
+      },
+      "codename": "change_logentry"
+    },
+    {
+      "id": 72,
+      "name": "Can view requests",
+      "content_type_id": {
+        "id": 17,
+        "app_label": "products",
+        "model": "requests"
+      },
+      "codename": "view_requests"
+    },
+    {
+      "id": 175,
+      "name": "Can delete access view",
+      "content_type_id": {
+        "id": 41,
+        "app_label": "accounts",
+        "model": "accessview"
+      },
+      "codename": "delete_accessview"
+    },
+    {
+      "id": 46,
+      "name": "Can view historical global settings",
+      "content_type_id": {
+        "id": 11,
+        "app_label": "core",
+        "model": "historicalglobalsettings"
+      },
+      "codename": "view_historicalglobalsettings"
+    },
+    {
+      "id": 66,
+      "name": "Can change historical product",
+      "content_type_id": {
+        "id": 16,
+        "app_label": "products",
+        "model": "historicalproduct"
+      },
+      "codename": "change_historicalproduct"
+    },
+    {
+      "id": 194,
+      "name": "Can change access failure",
+      "content_type_id": {
+        "id": 46,
+        "app_label": "axes",
+        "model": "accessfailurelog"
+      },
+      "codename": "change_accessfailurelog"
+    },
+    {
+      "id": 31,
+      "name": "Can add content type",
+      "content_type_id": {
+        "id": 8,
+        "app_label": "contenttypes",
+        "model": "contenttype"
+      },
+      "codename": "add_contenttype"
+    },
+    {
+      "id": 70,
+      "name": "Can change requests",
+      "content_type_id": {
+        "id": 17,
+        "app_label": "products",
+        "model": "requests"
+      },
+      "codename": "change_requests"
+    },
+    {
+      "id": 173,
+      "name": "Can add access view",
+      "content_type_id": {
+        "id": 41,
+        "app_label": "accounts",
+        "model": "accessview"
+      },
+      "codename": "add_accessview"
+    },
+    {
+      "id": 114,
+      "name": "Can change object type",
+      "content_type_id": {
+        "id": 27,
+        "app_label": "integrity",
+        "model": "objecttype"
+      },
+      "codename": "change_objecttype"
+    },
+    {
+      "id": 132,
+      "name": "Can view service session",
+      "content_type_id": {
+        "id": 31,
+        "app_label": "services",
+        "model": "servicesession"
+      },
+      "codename": "view_servicesession"
+    },
+    {
+      "id": 13,
+      "name": "Видит сессию",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "view_session_gw"
+    },
+    {
+      "id": 120,
+      "name": "Can view source object",
+      "content_type_id": {
+        "id": 28,
+        "app_label": "integrity",
+        "model": "sourceobject"
+      },
+      "codename": "view_sourceobject"
+    },
+    {
+      "id": 17,
+      "name": "Видит логи сессии",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "log_view"
+    },
+    {
+      "id": 16,
+      "name": "Выбирает пользователя для сессии",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "select_user_session_gw"
+    },
+    {
+      "id": 58,
+      "name": "Can view access log",
+      "content_type_id": {
+        "id": 14,
+        "app_label": "axes",
+        "model": "accesslog"
+      },
+      "codename": "view_accesslog"
+    },
+    {
+      "id": 21,
+      "name": "Can delete log entry",
+      "content_type_id": {
+        "id": 5,
+        "app_label": "admin",
+        "model": "logentry"
+      },
+      "codename": "delete_logentry"
+    },
+    {
+      "id": 30,
+      "name": "Can view group",
+      "content_type_id": {
+        "id": 7,
+        "app_label": "auth",
+        "model": "group"
+      },
+      "codename": "view_group"
+    },
+    {
+      "id": 82,
+      "name": "Can change historical session",
+      "content_type_id": {
+        "id": 19,
+        "app_label": "gws",
+        "model": "historicalsession"
+      },
+      "codename": "change_historicalsession"
+    },
+    {
+      "id": 29,
+      "name": "Can delete group",
+      "content_type_id": {
+        "id": 7,
+        "app_label": "auth",
+        "model": "group"
+      },
+      "codename": "delete_group"
+    },
+    {
+      "id": 160,
+      "name": "Can view Registration application",
+      "content_type_id": {
+        "id": 37,
+        "app_label": "accounts",
+        "model": "registrationapplication"
+      },
+      "codename": "view_registrationapplication"
+    },
+    {
+      "id": 148,
+      "name": "Can view historical data service",
+      "content_type_id": {
+        "id": 35,
+        "app_label": "services",
+        "model": "historicaldataservice"
+      },
+      "codename": "view_historicaldataservice"
+    },
+    {
+      "id": 182,
+      "name": "Can change proxy-granting ticket",
+      "content_type_id": {
+        "id": 43,
+        "app_label": "mama_cas",
+        "model": "proxygrantingticket"
+      },
+      "codename": "change_proxygrantingticket"
+    },
+    {
+      "id": 125,
+      "name": "Can add identity rule",
+      "content_type_id": {
+        "id": 30,
+        "app_label": "integrity",
+        "model": "identityrule"
+      },
+      "codename": "add_identityrule"
+    },
+    {
+      "id": 151,
+      "name": "Can delete data service",
+      "content_type_id": {
+        "id": 36,
+        "app_label": "services",
+        "model": "dataservice"
+      },
+      "codename": "delete_dataservice"
+    },
+    {
+      "id": 50,
+      "name": "Can view activity log",
+      "content_type_id": {
+        "id": 12,
+        "app_label": "activity_log",
+        "model": "activitylog"
+      },
+      "codename": "view_activitylog"
+    },
+    {
+      "id": 122,
+      "name": "Can change object key",
+      "content_type_id": {
+        "id": 29,
+        "app_label": "integrity",
+        "model": "objectkey"
+      },
+      "codename": "change_objectkey"
+    },
+    {
+      "id": 8,
+      "name": "Может остановить ЛСУ",
+      "content_type_id": {
+        "id": 2,
+        "app_label": "products",
+        "model": "product"
+      },
+      "codename": "stop_product"
+    },
+    {
+      "id": 34,
+      "name": "Can view content type",
+      "content_type_id": {
+        "id": 8,
+        "app_label": "contenttypes",
+        "model": "contenttype"
+      },
+      "codename": "view_contenttype"
+    },
+    {
+      "id": 137,
+      "name": "Can add historical service session",
+      "content_type_id": {
+        "id": 33,
+        "app_label": "services",
+        "model": "historicalservicesession"
+      },
+      "codename": "add_historicalservicesession"
+    },
+    {
+      "id": 89,
+      "name": "Can add switch",
+      "content_type_id": {
+        "id": 21,
+        "app_label": "data",
+        "model": "switch"
+      },
+      "codename": "add_switch"
+    },
+    {
+      "id": 85,
+      "name": "Can add historical gw",
+      "content_type_id": {
+        "id": 20,
+        "app_label": "gws",
+        "model": "historicalgw"
+      },
+      "codename": "add_historicalgw"
+    },
+    {
+      "id": 94,
+      "name": "Can change switch connection",
+      "content_type_id": {
+        "id": 22,
+        "app_label": "data",
+        "model": "switchconnection"
+      },
+      "codename": "change_switchconnection"
+    },
+    {
+      "id": 54,
+      "name": "Can view access attempt",
+      "content_type_id": {
+        "id": 13,
+        "app_label": "axes",
+        "model": "accessattempt"
+      },
+      "codename": "view_accessattempt"
+    },
+    {
+      "id": 26,
+      "name": "Can view permission",
+      "content_type_id": {
+        "id": 6,
+        "app_label": "auth",
+        "model": "permission"
+      },
+      "codename": "view_permission"
+    },
+    {
+      "id": 4,
+      "name": "Видит список ЛСУ",
+      "content_type_id": {
+        "id": 2,
+        "app_label": "products",
+        "model": "product"
+      },
+      "codename": "list_product"
+    },
+    {
+      "id": 166,
+      "name": "Can change historical access view right",
+      "content_type_id": {
+        "id": 39,
+        "app_label": "accounts",
+        "model": "historicalaccessviewright"
+      },
+      "codename": "change_historicalaccessviewright"
+    },
+    {
+      "id": 117,
+      "name": "Can add source object",
+      "content_type_id": {
+        "id": 28,
+        "app_label": "integrity",
+        "model": "sourceobject"
+      },
+      "codename": "add_sourceobject"
+    },
+    {
+      "id": 178,
+      "name": "Can change captcha store",
+      "content_type_id": {
+        "id": 42,
+        "app_label": "captcha",
+        "model": "captchastore"
+      },
+      "codename": "change_captchastore"
+    },
+    {
+      "id": 99,
+      "name": "Can delete historical switch connection",
+      "content_type_id": {
+        "id": 23,
+        "app_label": "data",
+        "model": "historicalswitchconnection"
+      },
+      "codename": "delete_historicalswitchconnection"
+    },
+    {
+      "id": 60,
+      "name": "Can create a PDU",
+      "content_type_id": {
+        "id": 2,
+        "app_label": "products",
+        "model": "product"
+      },
+      "codename": "create_product"
+    },
+    {
+      "id": 64,
+      "name": "Can view logs",
+      "content_type_id": {
+        "id": 15,
+        "app_label": "products",
+        "model": "logs"
+      },
+      "codename": "view_logs"
+    },
+    {
+      "id": 171,
+      "name": "Can delete access view right",
+      "content_type_id": {
+        "id": 40,
+        "app_label": "accounts",
+        "model": "accessviewright"
+      },
+      "codename": "delete_accessviewright"
+    },
+    {
+      "id": 196,
+      "name": "Can view access failure",
+      "content_type_id": {
+        "id": 46,
+        "app_label": "axes",
+        "model": "accessfailurelog"
+      },
+      "codename": "view_accessfailurelog"
+    },
+    {
+      "id": 75,
+      "name": "Can delete gw",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "delete_gw"
+    },
+    {
+      "id": 149,
+      "name": "Can add data service",
+      "content_type_id": {
+        "id": 36,
+        "app_label": "services",
+        "model": "dataservice"
+      },
+      "codename": "add_dataservice"
+    },
+    {
+      "id": 9,
+      "name": "Может запустить ЛСУ",
+      "content_type_id": {
+        "id": 2,
+        "app_label": "products",
+        "model": "product"
+      },
+      "codename": "start_product"
+    },
+    {
+      "id": 51,
+      "name": "Can add access attempt",
+      "content_type_id": {
+        "id": 13,
+        "app_label": "axes",
+        "model": "accessattempt"
+      },
+      "codename": "add_accessattempt"
+    },
+    {
+      "id": 63,
+      "name": "Can delete logs",
+      "content_type_id": {
+        "id": 15,
+        "app_label": "products",
+        "model": "logs"
+      },
+      "codename": "delete_logs"
+    },
+    {
+      "id": 181,
+      "name": "Can add proxy-granting ticket",
+      "content_type_id": {
+        "id": 43,
+        "app_label": "mama_cas",
+        "model": "proxygrantingticket"
+      },
+      "codename": "add_proxygrantingticket"
+    },
+    {
+      "id": 108,
+      "name": "Can view switch customer connection",
+      "content_type_id": {
+        "id": 25,
+        "app_label": "data",
+        "model": "switchcustomerconnection"
+      },
+      "codename": "view_switchcustomerconnection"
+    },
+    {
+      "id": 7,
+      "name": "Может удалить ЛСУ",
+      "content_type_id": {
+        "id": 2,
+        "app_label": "products",
+        "model": "product"
+      },
+      "codename": "delete_product"
+    },
+    {
+      "id": 62,
+      "name": "Can change logs",
+      "content_type_id": {
+        "id": 15,
+        "app_label": "products",
+        "model": "logs"
+      },
+      "codename": "change_logs"
+    },
+    {
+      "id": 68,
+      "name": "Can view historical product",
+      "content_type_id": {
+        "id": 16,
+        "app_label": "products",
+        "model": "historicalproduct"
+      },
+      "codename": "view_historicalproduct"
+    },
+    {
+      "id": 105,
+      "name": "Can add switch customer connection",
+      "content_type_id": {
+        "id": 25,
+        "app_label": "data",
+        "model": "switchcustomerconnection"
+      },
+      "codename": "add_switchcustomerconnection"
+    },
+    {
+      "id": 74,
+      "name": "Can change gw",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "change_gw"
+    },
+    {
+      "id": 142,
+      "name": "Can change historical key service",
+      "content_type_id": {
+        "id": 34,
+        "app_label": "services",
+        "model": "historicalkeyservice"
+      },
+      "codename": "change_historicalkeyservice"
+    },
+    {
+      "id": 134,
+      "name": "Can change key service",
+      "content_type_id": {
+        "id": 32,
+        "app_label": "services",
+        "model": "keyservice"
+      },
+      "codename": "change_keyservice"
+    },
+    {
+      "id": 11,
+      "name": "Видит список ОУ",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "list_gw"
+    },
+    {
+      "id": 3,
+      "name": "Может удалить пользователя",
+      "content_type_id": {
+        "id": 1,
+        "app_label": "accounts",
+        "model": "customuser"
+      },
+      "codename": "delete_user"
+    },
+    {
+      "id": 107,
+      "name": "Can delete switch customer connection",
+      "content_type_id": {
+        "id": 25,
+        "app_label": "data",
+        "model": "switchcustomerconnection"
+      },
+      "codename": "delete_switchcustomerconnection"
+    },
+    {
+      "id": 76,
+      "name": "Can view gw",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "view_gw"
+    },
+    {
+      "id": 27,
+      "name": "Can add group",
+      "content_type_id": {
+        "id": 7,
+        "app_label": "auth",
+        "model": "group"
+      },
+      "codename": "add_group"
+    },
+    {
+      "id": 65,
+      "name": "Can add historical product",
+      "content_type_id": {
+        "id": 16,
+        "app_label": "products",
+        "model": "historicalproduct"
+      },
+      "codename": "add_historicalproduct"
+    },
+    {
+      "id": 192,
+      "name": "Can view service ticket",
+      "content_type_id": {
+        "id": 45,
+        "app_label": "mama_cas",
+        "model": "serviceticket"
+      },
+      "codename": "view_serviceticket"
+    },
+    {
+      "id": 69,
+      "name": "Can add requests",
+      "content_type_id": {
+        "id": 17,
+        "app_label": "products",
+        "model": "requests"
+      },
+      "codename": "add_requests"
+    },
+    {
+      "id": 44,
+      "name": "Can change historical global settings",
+      "content_type_id": {
+        "id": 11,
+        "app_label": "core",
+        "model": "historicalglobalsettings"
+      },
+      "codename": "change_historicalglobalsettings"
+    },
+    {
+      "id": 143,
+      "name": "Can delete historical key service",
+      "content_type_id": {
+        "id": 34,
+        "app_label": "services",
+        "model": "historicalkeyservice"
+      },
+      "codename": "delete_historicalkeyservice"
+    },
+    {
+      "id": 80,
+      "name": "Can view session",
+      "content_type_id": {
+        "id": 18,
+        "app_label": "gws",
+        "model": "session"
+      },
+      "codename": "view_session"
+    },
+    {
+      "id": 141,
+      "name": "Can add historical key service",
+      "content_type_id": {
+        "id": 34,
+        "app_label": "services",
+        "model": "historicalkeyservice"
+      },
+      "codename": "add_historicalkeyservice"
+    },
+    {
+      "id": 155,
+      "name": "Can delete user",
+      "content_type_id": {
+        "id": 1,
+        "app_label": "accounts",
+        "model": "customuser"
+      },
+      "codename": "delete_customuser"
+    },
+    {
+      "id": 73,
+      "name": "Can add gw",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "add_gw"
+    },
+    {
+      "id": 110,
+      "name": "Can change switch port",
+      "content_type_id": {
+        "id": 26,
+        "app_label": "data",
+        "model": "switchport"
+      },
+      "codename": "change_switchport"
+    },
+    {
+      "id": 172,
+      "name": "Can view access view right",
+      "content_type_id": {
+        "id": 40,
+        "app_label": "accounts",
+        "model": "accessviewright"
+      },
+      "codename": "view_accessviewright"
+    },
+    {
+      "id": 47,
+      "name": "Can add activity log",
+      "content_type_id": {
+        "id": 12,
+        "app_label": "activity_log",
+        "model": "activitylog"
+      },
+      "codename": "add_activitylog"
+    },
+    {
+      "id": 170,
+      "name": "Can change access view right",
+      "content_type_id": {
+        "id": 40,
+        "app_label": "accounts",
+        "model": "accessviewright"
+      },
+      "codename": "change_accessviewright"
+    },
+    {
+      "id": 88,
+      "name": "Can view historical gw",
+      "content_type_id": {
+        "id": 20,
+        "app_label": "gws",
+        "model": "historicalgw"
+      },
+      "codename": "view_historicalgw"
+    },
+    {
+      "id": 100,
+      "name": "Can view historical switch connection",
+      "content_type_id": {
+        "id": 23,
+        "app_label": "data",
+        "model": "historicalswitchconnection"
+      },
+      "codename": "view_historicalswitchconnection"
+    },
+    {
+      "id": 2,
+      "name": "Может создать пользователя",
+      "content_type_id": {
+        "id": 1,
+        "app_label": "accounts",
+        "model": "customuser"
+      },
+      "codename": "create_user"
+    },
+    {
+      "id": 130,
+      "name": "Can change service session",
+      "content_type_id": {
+        "id": 31,
+        "app_label": "services",
+        "model": "servicesession"
+      },
+      "codename": "change_servicesession"
+    },
+    {
+      "id": 40,
+      "name": "Can change global settings",
+      "content_type_id": {
+        "id": 10,
+        "app_label": "core",
+        "model": "globalsettings"
+      },
+      "codename": "change_globalsettings"
+    },
+    {
+      "id": 109,
+      "name": "Can add switch port",
+      "content_type_id": {
+        "id": 26,
+        "app_label": "data",
+        "model": "switchport"
+      },
+      "codename": "add_switchport"
+    },
+    {
+      "id": 129,
+      "name": "Can add service session",
+      "content_type_id": {
+        "id": 31,
+        "app_label": "services",
+        "model": "servicesession"
+      },
+      "codename": "add_servicesession"
+    },
+    {
+      "id": 145,
+      "name": "Can add historical data service",
+      "content_type_id": {
+        "id": 35,
+        "app_label": "services",
+        "model": "historicaldataservice"
+      },
+      "codename": "add_historicaldataservice"
+    },
+    {
+      "id": 186,
+      "name": "Can change proxy ticket",
+      "content_type_id": {
+        "id": 44,
+        "app_label": "mama_cas",
+        "model": "proxyticket"
+      },
+      "codename": "change_proxyticket"
+    },
+    {
+      "id": 39,
+      "name": "Can add global settings",
+      "content_type_id": {
+        "id": 10,
+        "app_label": "core",
+        "model": "globalsettings"
+      },
+      "codename": "add_globalsettings"
+    },
+    {
+      "id": 97,
+      "name": "Can add historical switch connection",
+      "content_type_id": {
+        "id": 23,
+        "app_label": "data",
+        "model": "historicalswitchconnection"
+      },
+      "codename": "add_historicalswitchconnection"
+    },
+    {
+      "id": 133,
+      "name": "Can add key service",
+      "content_type_id": {
+        "id": 32,
+        "app_label": "services",
+        "model": "keyservice"
+      },
+      "codename": "add_keyservice"
+    },
+    {
+      "id": 28,
+      "name": "Can change group",
+      "content_type_id": {
+        "id": 7,
+        "app_label": "auth",
+        "model": "group"
+      },
+      "codename": "change_group"
+    },
+    {
+      "id": 52,
+      "name": "Can change access attempt",
+      "content_type_id": {
+        "id": 13,
+        "app_label": "axes",
+        "model": "accessattempt"
+      },
+      "codename": "change_accessattempt"
+    },
+    {
+      "id": 190,
+      "name": "Can change service ticket",
+      "content_type_id": {
+        "id": 45,
+        "app_label": "mama_cas",
+        "model": "serviceticket"
+      },
+      "codename": "change_serviceticket"
+    },
+    {
+      "id": 180,
+      "name": "Can view captcha store",
+      "content_type_id": {
+        "id": 42,
+        "app_label": "captcha",
+        "model": "captchastore"
+      },
+      "codename": "view_captchastore"
+    },
+    {
+      "id": 126,
+      "name": "Can change identity rule",
+      "content_type_id": {
+        "id": 30,
+        "app_label": "integrity",
+        "model": "identityrule"
+      },
+      "codename": "change_identityrule"
+    },
+    {
+      "id": 169,
+      "name": "Can add access view right",
+      "content_type_id": {
+        "id": 40,
+        "app_label": "accounts",
+        "model": "accessviewright"
+      },
+      "codename": "add_accessviewright"
+    },
+    {
+      "id": 121,
+      "name": "Can add object key",
+      "content_type_id": {
+        "id": 29,
+        "app_label": "integrity",
+        "model": "objectkey"
+      },
+      "codename": "add_objectkey"
+    },
+    {
+      "id": 96,
+      "name": "Can view switch connection",
+      "content_type_id": {
+        "id": 22,
+        "app_label": "data",
+        "model": "switchconnection"
+      },
+      "codename": "view_switchconnection"
+    },
+    {
+      "id": 87,
+      "name": "Can delete historical gw",
+      "content_type_id": {
+        "id": 20,
+        "app_label": "gws",
+        "model": "historicalgw"
+      },
+      "codename": "delete_historicalgw"
+    },
+    {
+      "id": 159,
+      "name": "Can delete Registration application",
+      "content_type_id": {
+        "id": 37,
+        "app_label": "accounts",
+        "model": "registrationapplication"
+      },
+      "codename": "delete_registrationapplication"
+    },
+    {
+      "id": 187,
+      "name": "Can delete proxy ticket",
+      "content_type_id": {
+        "id": 44,
+        "app_label": "mama_cas",
+        "model": "proxyticket"
+      },
+      "codename": "delete_proxyticket"
+    },
+    {
+      "id": 83,
+      "name": "Can delete historical session",
+      "content_type_id": {
+        "id": 19,
+        "app_label": "gws",
+        "model": "historicalsession"
+      },
+      "codename": "delete_historicalsession"
+    },
+    {
+      "id": 84,
+      "name": "Can view historical session",
+      "content_type_id": {
+        "id": 19,
+        "app_label": "gws",
+        "model": "historicalsession"
+      },
+      "codename": "view_historicalsession"
+    },
+    {
+      "id": 111,
+      "name": "Can delete switch port",
+      "content_type_id": {
+        "id": 26,
+        "app_label": "data",
+        "model": "switchport"
+      },
+      "codename": "delete_switchport"
+    },
+    {
+      "id": 179,
+      "name": "Can delete captcha store",
+      "content_type_id": {
+        "id": 42,
+        "app_label": "captcha",
+        "model": "captchastore"
+      },
+      "codename": "delete_captchastore"
+    },
+    {
+      "id": 144,
+      "name": "Can view historical key service",
+      "content_type_id": {
+        "id": 34,
+        "app_label": "services",
+        "model": "historicalkeyservice"
+      },
+      "codename": "view_historicalkeyservice"
+    },
+    {
+      "id": 174,
+      "name": "Can change access view",
+      "content_type_id": {
+        "id": 41,
+        "app_label": "accounts",
+        "model": "accessview"
+      },
+      "codename": "change_accessview"
+    },
+    {
+      "id": 25,
+      "name": "Can delete permission",
+      "content_type_id": {
+        "id": 6,
+        "app_label": "auth",
+        "model": "permission"
+      },
+      "codename": "delete_permission"
+    },
+    {
+      "id": 176,
+      "name": "Can view access view",
+      "content_type_id": {
+        "id": 41,
+        "app_label": "accounts",
+        "model": "accessview"
+      },
+      "codename": "view_accessview"
+    },
+    {
+      "id": 5,
+      "name": "Может создать ЛСУ",
+      "content_type_id": {
+        "id": 2,
+        "app_label": "products",
+        "model": "product"
+      },
+      "codename": "add_product"
+    },
+    {
+      "id": 103,
+      "name": "Can delete historical switch",
+      "content_type_id": {
+        "id": 24,
+        "app_label": "data",
+        "model": "historicalswitch"
+      },
+      "codename": "delete_historicalswitch"
+    },
+    {
+      "id": 112,
+      "name": "Can view switch port",
+      "content_type_id": {
+        "id": 26,
+        "app_label": "data",
+        "model": "switchport"
+      },
+      "codename": "view_switchport"
+    },
+    {
+      "id": 35,
+      "name": "Can add session",
+      "content_type_id": {
+        "id": 9,
+        "app_label": "sessions",
+        "model": "session"
+      },
+      "codename": "add_session"
+    },
+    {
+      "id": 67,
+      "name": "Can delete historical product",
+      "content_type_id": {
+        "id": 16,
+        "app_label": "products",
+        "model": "historicalproduct"
+      },
+      "codename": "delete_historicalproduct"
+    },
+    {
+      "id": 128,
+      "name": "Can view identity rule",
+      "content_type_id": {
+        "id": 30,
+        "app_label": "integrity",
+        "model": "identityrule"
+      },
+      "codename": "view_identityrule"
+    },
+    {
+      "id": 10,
+      "name": "Видит лог ЛСУ",
+      "content_type_id": {
+        "id": 2,
+        "app_label": "products",
+        "model": "product"
+      },
+      "codename": "log_view"
+    },
+    {
+      "id": 90,
+      "name": "Can change switch",
+      "content_type_id": {
+        "id": 21,
+        "app_label": "data",
+        "model": "switch"
+      },
+      "codename": "change_switch"
+    },
+    {
+      "id": 42,
+      "name": "Can view global settings",
+      "content_type_id": {
+        "id": 10,
+        "app_label": "core",
+        "model": "globalsettings"
+      },
+      "codename": "view_globalsettings"
+    },
+    {
+      "id": 1,
+      "name": "Видит список пользователей",
+      "content_type_id": {
+        "id": 1,
+        "app_label": "accounts",
+        "model": "customuser"
+      },
+      "codename": "list_user"
+    },
+    {
+      "id": 32,
+      "name": "Can change content type",
+      "content_type_id": {
+        "id": 8,
+        "app_label": "contenttypes",
+        "model": "contenttype"
+      },
+      "codename": "change_contenttype"
+    },
+    {
+      "id": 55,
+      "name": "Can add access log",
+      "content_type_id": {
+        "id": 14,
+        "app_label": "axes",
+        "model": "accesslog"
+      },
+      "codename": "add_accesslog"
+    },
+    {
+      "id": 24,
+      "name": "Can change permission",
+      "content_type_id": {
+        "id": 6,
+        "app_label": "auth",
+        "model": "permission"
+      },
+      "codename": "change_permission"
+    },
+    {
+      "id": 168,
+      "name": "Can view historical access view right",
+      "content_type_id": {
+        "id": 39,
+        "app_label": "accounts",
+        "model": "historicalaccessviewright"
+      },
+      "codename": "view_historicalaccessviewright"
+    },
+    {
+      "id": 188,
+      "name": "Can view proxy ticket",
+      "content_type_id": {
+        "id": 44,
+        "app_label": "mama_cas",
+        "model": "proxyticket"
+      },
+      "codename": "view_proxyticket"
+    },
+    {
+      "id": 161,
+      "name": "Can add historical user",
+      "content_type_id": {
+        "id": 38,
+        "app_label": "accounts",
+        "model": "historicalcustomuser"
+      },
+      "codename": "add_historicalcustomuser"
+    },
+    {
+      "id": 191,
+      "name": "Can delete service ticket",
+      "content_type_id": {
+        "id": 45,
+        "app_label": "mama_cas",
+        "model": "serviceticket"
+      },
+      "codename": "delete_serviceticket"
+    },
+    {
+      "id": 157,
+      "name": "Can add Registration application",
+      "content_type_id": {
+        "id": 37,
+        "app_label": "accounts",
+        "model": "registrationapplication"
+      },
+      "codename": "add_registrationapplication"
+    },
+    {
+      "id": 184,
+      "name": "Can view proxy-granting ticket",
+      "content_type_id": {
+        "id": 43,
+        "app_label": "mama_cas",
+        "model": "proxygrantingticket"
+      },
+      "codename": "view_proxygrantingticket"
+    },
+    {
+      "id": 91,
+      "name": "Can delete switch",
+      "content_type_id": {
+        "id": 21,
+        "app_label": "data",
+        "model": "switch"
+      },
+      "codename": "delete_switch"
+    },
+    {
+      "id": 71,
+      "name": "Can delete requests",
+      "content_type_id": {
+        "id": 17,
+        "app_label": "products",
+        "model": "requests"
+      },
+      "codename": "delete_requests"
+    },
+    {
+      "id": 131,
+      "name": "Can delete service session",
+      "content_type_id": {
+        "id": 31,
+        "app_label": "services",
+        "model": "servicesession"
+      },
+      "codename": "delete_servicesession"
+    },
+    {
+      "id": 102,
+      "name": "Can change historical switch",
+      "content_type_id": {
+        "id": 24,
+        "app_label": "data",
+        "model": "historicalswitch"
+      },
+      "codename": "change_historicalswitch"
+    },
+    {
+      "id": 104,
+      "name": "Can view historical switch",
+      "content_type_id": {
+        "id": 24,
+        "app_label": "data",
+        "model": "historicalswitch"
+      },
+      "codename": "view_historicalswitch"
+    },
+    {
+      "id": 41,
+      "name": "Can delete global settings",
+      "content_type_id": {
+        "id": 10,
+        "app_label": "core",
+        "model": "globalsettings"
+      },
+      "codename": "delete_globalsettings"
+    },
+    {
+      "id": 127,
+      "name": "Can delete identity rule",
+      "content_type_id": {
+        "id": 30,
+        "app_label": "integrity",
+        "model": "identityrule"
+      },
+      "codename": "delete_identityrule"
+    },
+    {
+      "id": 78,
+      "name": "Can change session",
+      "content_type_id": {
+        "id": 18,
+        "app_label": "gws",
+        "model": "session"
+      },
+      "codename": "change_session"
+    },
+    {
+      "id": 56,
+      "name": "Can change access log",
+      "content_type_id": {
+        "id": 14,
+        "app_label": "axes",
+        "model": "accesslog"
+      },
+      "codename": "change_accesslog"
+    },
+    {
+      "id": 59,
+      "name": "Can view product",
+      "content_type_id": {
+        "id": 2,
+        "app_label": "products",
+        "model": "product"
+      },
+      "codename": "view_product"
+    },
+    {
+      "id": 146,
+      "name": "Can change historical data service",
+      "content_type_id": {
+        "id": 35,
+        "app_label": "services",
+        "model": "historicaldataservice"
+      },
+      "codename": "change_historicaldataservice"
+    },
+    {
+      "id": 101,
+      "name": "Can add historical switch",
+      "content_type_id": {
+        "id": 24,
+        "app_label": "data",
+        "model": "historicalswitch"
+      },
+      "codename": "add_historicalswitch"
+    },
+    {
+      "id": 177,
+      "name": "Can add captcha store",
+      "content_type_id": {
+        "id": 42,
+        "app_label": "captcha",
+        "model": "captchastore"
+      },
+      "codename": "add_captchastore"
+    },
+    {
+      "id": 92,
+      "name": "Can view switch",
+      "content_type_id": {
+        "id": 21,
+        "app_label": "data",
+        "model": "switch"
+      },
+      "codename": "view_switch"
+    },
+    {
+      "id": 98,
+      "name": "Can change historical switch connection",
+      "content_type_id": {
+        "id": 23,
+        "app_label": "data",
+        "model": "historicalswitchconnection"
+      },
+      "codename": "change_historicalswitchconnection"
+    },
+    {
+      "id": 154,
+      "name": "Can change user",
+      "content_type_id": {
+        "id": 1,
+        "app_label": "accounts",
+        "model": "customuser"
+      },
+      "codename": "change_customuser"
+    },
+    {
+      "id": 22,
+      "name": "Can view log entry",
+      "content_type_id": {
+        "id": 5,
+        "app_label": "admin",
+        "model": "logentry"
+      },
+      "codename": "view_logentry"
+    },
+    {
+      "id": 119,
+      "name": "Can delete source object",
+      "content_type_id": {
+        "id": 28,
+        "app_label": "integrity",
+        "model": "sourceobject"
+      },
+      "codename": "delete_sourceobject"
+    },
+    {
+      "id": 116,
+      "name": "Can view object type",
+      "content_type_id": {
+        "id": 27,
+        "app_label": "integrity",
+        "model": "objecttype"
+      },
+      "codename": "view_objecttype"
+    },
+    {
+      "id": 185,
+      "name": "Can add proxy ticket",
+      "content_type_id": {
+        "id": 44,
+        "app_label": "mama_cas",
+        "model": "proxyticket"
+      },
+      "codename": "add_proxyticket"
+    },
+    {
+      "id": 118,
+      "name": "Can change source object",
+      "content_type_id": {
+        "id": 28,
+        "app_label": "integrity",
+        "model": "sourceobject"
+      },
+      "codename": "change_sourceobject"
+    },
+    {
+      "id": 136,
+      "name": "Can view key service",
+      "content_type_id": {
+        "id": 32,
+        "app_label": "services",
+        "model": "keyservice"
+      },
+      "codename": "view_keyservice"
+    },
+    {
+      "id": 162,
+      "name": "Can change historical user",
+      "content_type_id": {
+        "id": 38,
+        "app_label": "accounts",
+        "model": "historicalcustomuser"
+      },
+      "codename": "change_historicalcustomuser"
+    },
+    {
+      "id": 113,
+      "name": "Can add object type",
+      "content_type_id": {
+        "id": 27,
+        "app_label": "integrity",
+        "model": "objecttype"
+      },
+      "codename": "add_objecttype"
+    },
+    {
+      "id": 12,
+      "name": "Может создать сессию",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "create_session_gw"
+    },
+    {
+      "id": 163,
+      "name": "Can delete historical user",
+      "content_type_id": {
+        "id": 38,
+        "app_label": "accounts",
+        "model": "historicalcustomuser"
+      },
+      "codename": "delete_historicalcustomuser"
+    },
+    {
+      "id": 189,
+      "name": "Can add service ticket",
+      "content_type_id": {
+        "id": 45,
+        "app_label": "mama_cas",
+        "model": "serviceticket"
+      },
+      "codename": "add_serviceticket"
+    },
+    {
+      "id": 53,
+      "name": "Can delete access attempt",
+      "content_type_id": {
+        "id": 13,
+        "app_label": "axes",
+        "model": "accessattempt"
+      },
+      "codename": "delete_accessattempt"
+    },
+    {
+      "id": 195,
+      "name": "Can delete access failure",
+      "content_type_id": {
+        "id": 46,
+        "app_label": "axes",
+        "model": "accessfailurelog"
+      },
+      "codename": "delete_accessfailurelog"
+    },
+    {
+      "id": 153,
+      "name": "Can add user",
+      "content_type_id": {
+        "id": 1,
+        "app_label": "accounts",
+        "model": "customuser"
+      },
+      "codename": "add_customuser"
+    },
+    {
+      "id": 106,
+      "name": "Can change switch customer connection",
+      "content_type_id": {
+        "id": 25,
+        "app_label": "data",
+        "model": "switchcustomerconnection"
+      },
+      "codename": "change_switchcustomerconnection"
+    },
+    {
+      "id": 61,
+      "name": "Can add logs",
+      "content_type_id": {
+        "id": 15,
+        "app_label": "products",
+        "model": "logs"
+      },
+      "codename": "add_logs"
+    },
+    {
+      "id": 33,
+      "name": "Can delete content type",
+      "content_type_id": {
+        "id": 8,
+        "app_label": "contenttypes",
+        "model": "contenttype"
+      },
+      "codename": "delete_contenttype"
+    },
+    {
+      "id": 123,
+      "name": "Can delete object key",
+      "content_type_id": {
+        "id": 29,
+        "app_label": "integrity",
+        "model": "objectkey"
+      },
+      "codename": "delete_objectkey"
+    },
+    {
+      "id": 140,
+      "name": "Can view historical service session",
+      "content_type_id": {
+        "id": 33,
+        "app_label": "services",
+        "model": "historicalservicesession"
+      },
+      "codename": "view_historicalservicesession"
+    },
+    {
+      "id": 15,
+      "name": "Может запустить сессию",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "run_session_gw"
+    },
+    {
+      "id": 152,
+      "name": "Can view data service",
+      "content_type_id": {
+        "id": 36,
+        "app_label": "services",
+        "model": "dataservice"
+      },
+      "codename": "view_dataservice"
+    },
+    {
+      "id": 183,
+      "name": "Can delete proxy-granting ticket",
+      "content_type_id": {
+        "id": 43,
+        "app_label": "mama_cas",
+        "model": "proxygrantingticket"
+      },
+      "codename": "delete_proxygrantingticket"
+    },
+    {
+      "id": 18,
+      "name": "Может запустить/остановить свитч",
+      "content_type_id": {
+        "id": 4,
+        "app_label": "data",
+        "model": "Switch"
+      },
+      "codename": "start_stop_switch"
+    },
+    {
+      "id": 158,
+      "name": "Can change Registration application",
+      "content_type_id": {
+        "id": 37,
+        "app_label": "accounts",
+        "model": "registrationapplication"
+      },
+      "codename": "change_registrationapplication"
+    },
+    {
+      "id": 14,
+      "name": "Может удалить сессию",
+      "content_type_id": {
+        "id": 3,
+        "app_label": "gws",
+        "model": "gw"
+      },
+      "codename": "delete_session_gw"
+    },
+    {
+      "id": 38,
+      "name": "Can view session",
+      "content_type_id": {
+        "id": 9,
+        "app_label": "sessions",
+        "model": "session"
+      },
+      "codename": "view_session"
+    },
+    {
+      "id": 86,
+      "name": "Can change historical gw",
+      "content_type_id": {
+        "id": 20,
+        "app_label": "gws",
+        "model": "historicalgw"
+      },
+      "codename": "change_historicalgw"
+    },
+    {
+      "id": 193,
+      "name": "Can add access failure",
+      "content_type_id": {
+        "id": 46,
+        "app_label": "axes",
+        "model": "accessfailurelog"
+      },
+      "codename": "add_accessfailurelog"
+    },
+    {
+      "id": 164,
+      "name": "Can view historical user",
+      "content_type_id": {
+        "id": 38,
+        "app_label": "accounts",
+        "model": "historicalcustomuser"
+      },
+      "codename": "view_historicalcustomuser"
+    },
+    {
+      "id": 6,
+      "name": "Может изменить ЛСУ",
+      "content_type_id": {
+        "id": 2,
+        "app_label": "products",
+        "model": "product"
+      },
+      "codename": "change_product"
+    },
+    {
+      "id": 19,
+      "name": "Can add log entry",
+      "content_type_id": {
+        "id": 5,
+        "app_label": "admin",
+        "model": "logentry"
+      },
+      "codename": "add_logentry"
+    },
+    {
+      "id": 77,
+      "name": "Can add session",
+      "content_type_id": {
+        "id": 18,
+        "app_label": "gws",
+        "model": "session"
+      },
+      "codename": "add_session"
+    },
+    {
+      "id": 45,
+      "name": "Can delete historical global settings",
+      "content_type_id": {
+        "id": 11,
+        "app_label": "core",
+        "model": "historicalglobalsettings"
+      },
+      "codename": "delete_historicalglobalsettings"
+    },
+    {
+      "id": 93,
+      "name": "Can add switch connection",
+      "content_type_id": {
+        "id": 22,
+        "app_label": "data",
+        "model": "switchconnection"
+      },
+      "codename": "add_switchconnection"
+    }
+  ],
+  "atomic_rights": [
+    {
+      "id": "708f6cb4-7afe-4db6-a014-6bd0b3317623",
+      "description": "Список узлов",
+      "name": "products.views.ProductList",
+      "url": "^products/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "16491cb8-ce36-4921-b95f-2c5aa7fcb54e",
+      "description": "Список узлов (endpoint)",
+      "name": "products.views.NodesList",
+      "url": "^products/nodes\\-table/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "01d8aad0-176f-4edd-986f-5e7227942569",
+      "description": "Добавить узел",
+      "name": "products.views.ProductCreate",
+      "url": "^products/create/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "da88a29f-b57b-4bbf-8864-3f7f9ea26045",
+      "description": "Список проблем с заббикс",
+      "name": "products.views.zabbix_problems",
+      "url": "^products/zabbix_problems/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "bfae0c74-7cf6-4c44-aa44-3a3df5c220bc",
+      "description": "Форма запроса к спду",
+      "name": "products.views.create_spdu_request",
+      "url": "^products/spdu_request/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "ef2351be-d966-4daa-ae4c-47b6794ae1d1",
+      "description": "Форма запроса к модулю",
+      "name": "products.views.create_console",
+      "url": "^modules/console\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "e929205f-a13c-4396-b26c-bb30c29fde12",
+      "description": "Редактирование узла",
+      "name": "products.views.ProductUpdate",
+      "url": "^products/(?P<pk>[^/]+)/edit/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "0eb2f5d5-5bb3-4b0c-b815-fb206aa49696",
+      "description": "Удаление узла",
+      "name": "products.views.ProductDelete",
+      "url": "^products/(?P<pk>[^/]+)/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "5c77b34f-4890-480c-bb53-cf8b24128166",
+      "description": "stop product",
+      "name": "products.views.ProductStop",
+      "url": "^products/(?P<pk>[^/]+)/stop/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "03d1cd1c-301a-46ae-8fc2-dff5cbabedf3",
+      "description": " start product",
+      "name": "products.views.ProductStart",
+      "url": "^products/(?P<pk>[^/]+)/start/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "0a6f06fd-14da-41f4-82bc-d973d095d5a5",
+      "description": "Просмотр данных узла",
+      "name": "products.views.ProductView",
+      "url": "^products/(?P<pk>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "0d1e0d17-b96e-42b6-ae68-904ac212194b",
+      "description": "Создание пользователя",
+      "name": "accounts.views.AccountRegistration",
+      "url": "^accounts/create/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "08bb92f0-f845-4e18-b97d-5b0d62e89a19",
+      "description": "Регистрация заявки пользователя",
+      "name": "accounts.views.RegistrationApplicationView",
+      "url": "^accounts/register_application/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "0ed38c95-bedc-4953-9c5d-d20cee9ab9c4",
+      "description": "Список заявок на регистрацию",
+      "name": "accounts.views.RegistrationApplicationList",
+      "url": "^accounts/register_application_list/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "a5e6e951-3088-43d5-875c-43ed232a7b2f",
+      "description": "Удаление заявки на регистрацию",
+      "name": "accounts.views.RegistrationApplicationDelete",
+      "url": "^accounts/register_application/(?P<pk>[^/]+)/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "d2d739ba-afbb-4353-844c-e89388f2f073",
+      "description": "Обновление заявки на регистрацию",
+      "name": "accounts.views.RegistrationApplicationUpdate",
+      "url": "^accounts/register_application/(?P<pk>[^/]+)/update/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "b1d60d1d-aa7a-4423-a3f8-9453369d4763",
+      "description": "Подтверждение заявки на регистрацию",
+      "name": "accounts.views.RegistrationApplicationSignup",
+      "url": "^accounts/register_application/(?P<pk>[^/]+)/signup/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "0e9e5c2a-eda4-4a98-beda-5985aa3c8897",
+      "description": "login",
+      "name": "accounts.views.AccountLogin",
+      "url": "^accounts/login/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "4863927a-965d-4533-b664-db0e036f7218",
+      "description": "Смена пароля",
+      "name": "accounts.views.change_password_view",
+      "url": "^accounts/changepassword/(?P<username>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "28cbf1ec-9c38-4f52-a6e8-0b30d9089a72",
+      "description": "Смена пароля (себе)",
+      "name": "accounts.views.change_password_view",
+      "url": "^accounts/changepassword/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "36957b50-b41e-4788-a372-bac75115b559",
+      "description": "logout",
+      "name": "accounts.views.AccountLogout",
+      "url": "^accounts/logout/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "31dbcf43-dfb0-4e3a-a445-61c0799756f1",
+      "description": "Список пользователей",
+      "name": "accounts.views.AccountList",
+      "url": "^accounts/list/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "f4c8bde6-7a8c-43c2-8d24-1366982be48e",
+      "description": "Аудит действий пользователей",
+      "name": "accounts.views.ActivityList",
+      "url": "^accounts/activitylist/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "052841f4-2d2a-4edc-8ce9-3ac0e105cea7",
+      "description": "Экспорт аудита действий",
+      "name": "accounts.views.activity_list_export",
+      "url": "^accounts/activity_list_export/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "7c6dd662-0715-4eda-b053-059a5e1a3b23",
+      "description": "Блокировка пользователя",
+      "name": "accounts.views.block_user_view",
+      "url": "^accounts/block/(?P<username>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "379ab1f2-a9b1-4e65-9372-af43651e2b2b",
+      "description": "Разблокировка пользователя",
+      "name": "accounts.views.unblock_user_view",
+      "url": "^accounts/unblock/(?P<username>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "061031a4-f40c-4d83-bd87-f3d1321ed180",
+      "description": "Удаление пользователя",
+      "name": "accounts.views.delete_user",
+      "url": "^accounts/delete/(?P<username>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "1b3feb52-ba9b-4145-862c-a13fdbddc621",
+      "description": "Редактирование пользователя",
+      "name": "accounts.views.AccountEdit",
+      "url": "^accounts/edit/(?P<username>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "aff77d8d-f726-4ae9-8541-63d4dcc92719",
+      "description": "Список проблем",
+      "name": "accounts.views.ProblemList",
+      "url": "^accounts/problems/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "7afef32f-ab78-4be4-b705-5ea98f04b17b",
+      "description": "testcontainer",
+      "name": "accounts.views.AccountTestContainer",
+      "url": "^accounts/testcontainer/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "f03f6b44-b1ba-44b9-bed1-c5af5b1649d9",
+      "description": "Cистема учета",
+      "name": "accounts.views.support_view",
+      "url": "^accounts/support/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "a2688d8e-ed31-4884-abe3-27789792b8e0",
+      "description": "Система мониторинга",
+      "name": "accounts.views.monitoring_view",
+      "url": "^accounts/monitoring/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "d00d787e-88ca-49ce-9bf7-bd81df6d8edb",
+      "description": "Система журналирования",
+      "name": "accounts.views.graylog_view",
+      "url": "^accounts/graylog\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "4950c06c-337b-4adc-8c82-e8455324050d",
+      "description": "Поменять стиль меню",
+      "name": "accounts.views.change_settings_style",
+      "url": "^accounts/settings/change_style\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "5d24417c-bd60-4d1b-b154-d3975ecb7836",
+      "description": "Поменять цвет гуи",
+      "name": "accounts.views.change_settings_color",
+      "url": "^accounts/settings/change_color\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "8c86d698-6911-4bc2-b83b-c38afcf9c007",
+      "description": "Изменить главный АРМ",
+      "name": "accounts.views.change_global_settings_control",
+      "url": "^settings/change_control\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "84ab410c-65e6-465b-ad5f-da862c0ba940",
+      "description": "Поиск по сессиям SSH",
+      "name": "accounts.views.ssh_session_search",
+      "url": "^accounts/ssh_session_search\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "91ec1db5-7ff4-4d15-b9f4-ca76070d921f",
+      "description": "Добавление записи в log",
+      "name": "accounts.views.add_log",
+      "url": "^accounts/log/add\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "fc57659c-848f-47d2-97b3-9d2169a64f1c",
+      "description": "Загрузка файл на сервер арм в /tmp/arm",
+      "name": "accounts.views.add_file",
+      "url": "^accounts/file/add\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "79ad050c-7c30-40c6-82f3-5c2fe36be409",
+      "description": "Данные текущего пользователя",
+      "name": "accounts.views.current_user",
+      "url": "^accounts/currentuser\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "01d735ab-9e78-47f1-af1e-b582199ec406",
+      "description": "activity dict",
+      "name": "accounts.views.activity_dict",
+      "url": "^accounts/activitydictionary\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "e6a4f5f0-b100-463a-a54e-44fdee152a57",
+      "description": "Список групп LDAP",
+      "name": "accounts.views.list_group",
+      "url": "^accounts/group/list\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "890892e1-9b25-47fe-9bc8-0d589a0fd501",
+      "description": "Создать группу LDAP",
+      "name": "accounts.views.create_group",
+      "url": "^accounts/group/create\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "180e57a9-a0e9-432c-8990-50b3dbdda6c1",
+      "description": "Удалить группу LDAP {groupname}",
+      "name": "accounts.views.delete_group",
+      "url": "^accounts/group/delete/(?P<groupname>[^/]+)\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "90b2ae29-d37f-4278-b675-2adfa30aabf1",
+      "description": "list gws",
+      "name": "gws.views.GwList",
+      "url": "^gws/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "11fe6eda-d9e8-462c-8680-77a2076a462a",
+      "description": "create gws",
+      "name": "gws.views.GwCreate",
+      "url": "^gws/create/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "52af6c97-a853-4d08-8fee-27357d0e0417",
+      "description": "create session",
+      "name": "gws.views.SessionCreate",
+      "url": "^gws/createsession/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "dd7cd8e3-469f-4376-aeb5-3195263920cb",
+      "description": "История Сеансов",
+      "name": "gws.views.SessionHistoryList",
+      "url": "^gws/historysession/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "fc9c22ae-ff5b-41b5-b2e9-7d33614af945",
+      "description": "history session",
+      "name": "gws.views.SessionHistoryView",
+      "url": "^gws/historysession/(?P<pk>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "115557b9-ec09-4461-8878-897d26822b73",
+      "description": "session",
+      "name": "gws.views.SessionView",
+      "url": "^gws/session/(?P<pk>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "be6f0a8c-d161-4f17-98e7-574f85fc8963",
+      "description": "test session",
+      "name": "gws.views.SessionTest",
+      "url": "^gws/sessiontest/(?P<pk>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "0032ad19-ce06-4757-bad7-8e0cd305fd54",
+      "description": "delete sessoin",
+      "name": "gws.views.SessionDelete",
+      "url": "^gws/session/(?P<pk>[^/]+)/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "ac820121-40d0-4551-b343-72df07a2a7ae",
+      "description": "own session",
+      "name": "gws.views.ownsession",
+      "url": "^gws/ownsession\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "44edbce1-0e9a-4467-87f8-519a668c47cf",
+      "description": "edit session",
+      "name": "gws.views.GwUpdate",
+      "url": "^gws/(?P<pk>[^/]+)/edit/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "82547e46-05a6-4b2a-be6a-8f8831a175cd",
+      "description": "delete session",
+      "name": "gws.views.GwDelete",
+      "url": "^gws/(?P<pk>[^/]+)/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "da739fea-d0cb-4f86-a4b4-b0d025651cda",
+      "description": "view gws",
+      "name": "gws.views.GwView",
+      "url": "^gws/(?P<pk>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "0567f1d4-457f-442b-995e-ee6b87c1f36a",
+      "description": "Список оборудования связи",
+      "name": "data.views.SwitchList",
+      "url": "^data/switch/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "54a0f0e1-4369-47e4-940d-3caeb1850928",
+      "description": "dev switch list",
+      "name": "data.views.SwitchListDev",
+      "url": "^data/switch_dev/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "79b1c5c6-51f2-43ee-9425-f72c84c1b5d4",
+      "description": "add switch",
+      "name": "data.views.SwitchCreate",
+      "url": "^data/switch_create/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "83cd823f-c13d-4d24-abae-21e581fb00a2",
+      "description": "Добавить соединение пользователя",
+      "name": "data.views.SwitchCustomerConnectionCreate",
+      "url": "^data/(?P<pk>[^/]+)/switch_customer_connection_create/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "45795745-450b-469d-beed-c20c70aab066",
+      "description": "Удалить соединение пользователя",
+      "name": "data.views.SwitchCustomerConnectionDelete",
+      "url": "^data/(?P<pk>[^/]+)/switch_customer_connection_delete\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "973d6cf8-4d01-4a87-b089-b7cd77578895",
+      "description": "Удалить оборудования свзяи",
+      "name": "data.views.SwitchDelete",
+      "url": "^data/switch/(?P<pk>[^/]+)/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "877e16b9-2b2b-4301-988f-53ebd6bb5a6f",
+      "description": "Проверка доступности коммутатора",
+      "name": "data.views.SwitchCheck",
+      "url": "^data/(?P<pk>[^/]+)/check\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "842d3703-c36c-4f65-adf1-a17949accfbe",
+      "description": "Проверка доступности всех коммутаторов",
+      "name": "data.views.SwitchCheckAll",
+      "url": "^data/check_all\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "3ef68d00-28f2-4876-b1ce-62b5de552129",
+      "description": "get customer connection by eq:internal",
+      "name": "data.views.get_switch_customer_connections_by_eq",
+      "url": "^data/switch_customer_connections_by_eq\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "95959129-4bd8-4ee5-8620-fc57d9ffc2ba",
+      "description": "Список PDU",
+      "name": "data.views.pdu_list",
+      "url": "^data/pdu/list\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "a4cfaf3b-e58b-41c7-802a-5cad74d44d77",
+      "description": "Статус PDU",
+      "name": "data.views.PDUStatus",
+      "url": "^data/pdu/(?P<ip>[^/]+)/status\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "5a22b8ee-2de0-41c2-8792-ba62ff7887d9",
+      "description": "Перезагрузка пина {rele} розетки {ip}",
+      "name": "data.views.PDURestart",
+      "url": "^data/pdu/(?P<ip>[^/]+)/(?P<rele>[0-9]+)/restart\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "5694462e-7e4f-4553-a367-2acb4bf5c30a",
+      "description": "Список устройств доступных по IPMI",
+      "name": "data.views.ipmi_list",
+      "url": "^data/ipmi/list\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "e8852fe5-c6e5-4682-818a-0de4f9907517",
+      "description": "Статус устройства IPMI",
+      "name": "data.views.SwitchIPMIStatus",
+      "url": "^data/ipmi/(?P<ip>[^/]+)/status\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "ed46f4aa-f951-46f2-9e51-dad9db9704f4",
+      "description": "Холодная перезагрузка по IPMI шасси",
+      "name": "data.views.SwitchIPMIColdReset",
+      "url": "^data/ipmi/(?P<ip>[^/]+)/coldreset\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "d8d4adb2-7821-4b60-9e51-ebacf70f6a4f",
+      "description": "Горячая перезагрузка по IPMI шасси",
+      "name": "data.views.SwitchIPMIWarmReset",
+      "url": "^data/ipmi/(?P<ip>[^/]+)/warmreset\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "f6665d60-79a5-4941-8e0d-289763ddb81b",
+      "description": "Холодная перезагрузка по IPMI ",
+      "name": "data.views.SwitchIPMIColdResetIPMI",
+      "url": "^data/ipmi/(?P<ip>[^/]+)/coldresetipmi\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "ff596cf1-dfc3-4457-8ff6-b2da87100b35",
+      "description": "Горячая перезагрузка по IPMI ",
+      "name": "data.views.SwitchIPMIWarmResetIPMI",
+      "url": "^data/ipmi/(?P<ip>[^/]+)/warmresetipmi\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "9f6268bd-87ff-42f9-800b-9d1e416f4bae",
+      "description": "Включение по IPMI",
+      "name": "data.views.SwitchIPMIPowerOn",
+      "url": "^data/ipmi/(?P<ip>[^/]+)/poweron\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "de830cc5-528c-497c-8039-82c8515f3ac4",
+      "description": "Выaключение по IPMI",
+      "name": "data.views.SwitchIPMIPowerOff",
+      "url": "^data/ipmi/(?P<ip>[^/]+)/poweroff\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "915bfa69-2f6b-4a15-92a1-df260a0b5064",
+      "description": "Горячая перезагрузка по IPMI шасси ",
+      "name": "data.views.SwitchIPMIHardPowerOff",
+      "url": "^data/ipmi/(?P<ip>[^/]+)/hardpoweroff\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "a9316b4f-ee61-4225-9d3d-0f944c45ff13",
+      "description": "Получить статус оборудования",
+      "name": "data.views.SwitchConfigStatus",
+      "url": "^data/switch/(?P<ip>[^/]+)/status\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "38b4eebd-7608-473d-80a0-005e55b6e911",
+      "description": "Добавить оборудование в базу конфигураций",
+      "name": "data.views.SwitchConfigAddSwitch",
+      "url": "^data/switch/(?P<ip>[^/]+)/add_device/(?P<hostname>[^/]+)/(?P<manufacturer>[^/]+)\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "a0b3a7d2-05a7-46a1-8c8d-2993c8f77f20",
+      "description": "Получить конфигурацию оборудования из БД",
+      "name": "data.views.SwitchConfigGet",
+      "url": "^data/switch/(?P<ip>[^/]+)/get_config\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "8b51edde-898b-4cc9-bbdd-5c93b783beef",
+      "description": "Получить конфигурацию из устройства",
+      "name": "data.views.SwitchConfigGetDevice",
+      "url": "^data/switch/(?P<ip>[^/]+)/get_config_device\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "23f0861a-656d-448c-ae34-801b5debfdbd",
+      "description": "Список конфигураций",
+      "name": "data.views.SwitchConfigList",
+      "url": "^data/switch/(?P<ip>[^/]+)/list_config\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "006382aa-2ef4-4312-9288-098ace235f24",
+      "description": "Задать конфигурацию оборудования",
+      "name": "data.views.SwitchConfigSet",
+      "url": "^data/switch/(?P<ip>[^/]+)/set_config/(?P<version>[^/]+)\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "ef8740f7-39ea-4c45-9a49-d4f56e96d854",
+      "description": "Проверка конфигурации",
+      "name": "data.views.SwitchConfigCheck",
+      "url": "^data/switch/(?P<ip>[^/]+)/check_config\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "62a9f7ca-826c-4512-a517-5b516699549a",
+      "description": "Добавить конфигурацию в БД",
+      "name": "data.views.SwitchConfigAddConfig",
+      "url": "^data/switch/(?P<ip>[^/]+)/add_config/(?P<seqid>[^/]+)\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "6eb158e8-115f-47b8-909a-a689cab8ba51",
+      "description": "Удалить оборудование из базы конфигураций",
+      "name": "data.views.SwitchConfigDeleteSwitch",
+      "url": "^data/switch/(?P<ip>[^/]+)/delete_switch\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "f0f9cbbe-81d4-4ee4-bea3-eca13bdb6f31",
+      "description": "Получить статус оборудования1",
+      "name": "data.views.SwitchConfigStatus",
+      "url": "^data/switch/(?P<ip>[^/]+)/status1\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "1fc49a81-74a4-41b3-8235-ac8083ecd292",
+      "description": "Добавить оборудование в базу конфигураций1",
+      "name": "data.views.SwitchConfigAddSwitch",
+      "url": "^data/switch/(?P<ip>[^/]+)/add_device1\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "1bf0afe7-fd84-4687-a910-094ed04b7f28",
+      "description": "Получить конфигурацию оборудования из БД1",
+      "name": "data.views.SwitchConfigGet",
+      "url": "^data/switch/(?P<ip>[^/]+)/get_config1\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "dec8fc1e-d87a-4689-afb2-85859cb5da92",
+      "description": "Получить конфигурацию из устройства1",
+      "name": "data.views.SwitchConfigGetDevice",
+      "url": "^data/switch/(?P<ip>[^/]+)/get_config_device1\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "43a0dd31-8d44-43c6-92c9-ab15b25e2a80",
+      "description": "Список конфигураций1",
+      "name": "data.views.SwitchConfigList",
+      "url": "^data/switch/(?P<ip>[^/]+)/list_config1\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "49a78b4b-2f9e-4a3d-b59e-d01cbd777b69",
+      "description": "Задать конфигурацию оборудования1",
+      "name": "data.views.SwitchConfigSet",
+      "url": "^data/switch/(?P<ip>[^/]+)/set_config1\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "fce72bb3-cf73-465e-beed-56775331db71",
+      "description": "Проверка конфигурации1",
+      "name": "data.views.SwitchConfigCheck",
+      "url": "^data/switch/(?P<ip>[^/]+)/check_config1\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "18e556d6-34d7-40e1-8070-f5cdba5c7cb7",
+      "description": "Добавить конфигурацию в БД1",
+      "name": "data.views.SwitchConfigAddConfig",
+      "url": "^data/switch/(?P<ip>[^/]+)/add_config1\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "9bdde952-0c08-477d-a6d2-54f5605561c7",
+      "description": "Удалить оборудование из базы конфигураций1",
+      "name": "data.views.SwitchConfigDeleteSwitch",
+      "url": "^data/switch/(?P<ip>[^/]+)/delete_switch1\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "6d8ac15c-e720-44d6-b752-7fde4f32d18e",
+      "description": "Пинг модуля свитчей1",
+      "name": "data.views.SwitchConfigPing",
+      "url": "^data/switch/ping\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "34989b37-5dad-49f1-8d3d-f2b478804ef9",
+      "description": "Добавить свитч в АРМ",
+      "name": "data.views.add_new_equipment",
+      "url": "^data/new\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "a2e5abad-b8e2-44e4-b671-d25ba9193c76",
+      "description": "Данные свитча из АРМ",
+      "name": "data.views.get_switch_data",
+      "url": "^data/switch/(?P<id>[^/]+)/get\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "13be707e-29fe-41ec-a522-e2d6576bccd2",
+      "description": "Создать услугу передачи",
+      "name": "services.views.KeyServiceCreate",
+      "url": "^services/createkeyservice/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "f2376ab7-159d-4818-9c2a-8b111e75ff9b",
+      "description": "Список услуг передачи",
+      "name": "services.views.KeyServiceList",
+      "url": "^services/listkeyservice/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "45f1ab19-e716-4751-8bd8-035dfa4b9479",
+      "description": "Просмотр услуги передачи",
+      "name": "services.views.KeyServiceView",
+      "url": "^services/keyservice/(?P<pk>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "b82c9c62-3d9e-4660-8103-73044c9c7547",
+      "description": "Удалить услугу передачи",
+      "name": "services.views.KeyServiceDelete",
+      "url": "^services/keyservice/(?P<pk>[^/]+)/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "e9b889b0-954b-4c97-8dfc-18345664e57f",
+      "description": "create data service",
+      "name": "services.views.DataServiceCreate",
+      "url": "^services/createdataservice/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "412f79f9-8cc5-4ec5-bc8d-5931e5217a38",
+      "description": "list data service",
+      "name": "services.views.DataServiceList",
+      "url": "^services/listdataservice/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "d9a8cb56-87b4-4685-95da-e65ad221ef54",
+      "description": "view data service",
+      "name": "services.views.DataServiceView",
+      "url": "^services/dataservice/(?P<pk>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "4ff700e3-34e7-406c-8f43-04f3fd56581c",
+      "description": "delete data service",
+      "name": "services.views.DataServiceDelete",
+      "url": "^services/dataservice/(?P<pk>[^/]+)/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "b3ac8e5a-b7ab-40fb-84d5-9544dcfc01fc",
+      "description": "Задачть нарезку сети (рутинг)",
+      "name": "services.views.routing",
+      "url": "^services/routing\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "9ad93ecb-639b-400f-aaa1-3fb793ce87fc",
+      "description": "Настройки АРМ",
+      "name": "core.views.SettingsList",
+      "url": "^core/settings\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "d9997ad4-ae35-4200-bbd4-2aef9dc20d93",
+      "description": "Данные редис (системные данные АРМ)",
+      "name": "core.views.internal_list",
+      "url": "^core/internals\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "65e8104b-5eb5-4683-847f-22424ffda930",
+      "description": "Связь с внешними модулями АРМ",
+      "name": "core.views.external_list",
+      "url": "^core/externals\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "dac94eb4-1f99-4fe4-a540-5b6436a9f346",
+      "description": "Добавление настройки АРМ",
+      "name": "core.views.SettingsAdd",
+      "url": "^core/add_setting\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "7623d6d5-93d4-4a29-8260-c26d6fa58b4c",
+      "description": "Изменение настройки АРМ",
+      "name": "core.views.SettingsChange",
+      "url": "^core/change_setting/(?P<pk>[^/]+)\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "7f8ecf33-c210-41eb-b454-81ea22a43cec",
+      "description": "Удаление настройки АРМ",
+      "name": "core.views.SettingsDelete",
+      "url": "^core/delete_setting/(?P<pk>[^/]+)\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "77489f86-545f-4cd1-8ba9-b3c39253f159",
+      "description": "Отправка сообзения на модуль АСУ ИКС",
+      "name": "core.views.external_turnon",
+      "url": "^core/externals/turnon\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "d3b42903-6037-48ab-a1db-0bcfa4ca1d4a",
+      "description": "Отчет от модуля готовности СУМ КС",
+      "name": "core.views.readyness",
+      "url": "^core/readyness\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "8af797a9-9e64-46a8-acb2-f1b705f1971b",
+      "description": "favicon",
+      "name": "core.views.favicon",
+      "url": "^favicon\\.ico\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "e0f0d9a3-c93f-4380-8566-aa0f51ff782f",
+      "description": "Открыта страница SSH",
+      "name": "django_webssh.views.index",
+      "url": "^webssh/index\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "e95678be-8f29-4984-8982-ceec1aa95f9a",
+      "description": "upload_ssh_key",
+      "name": "django_webssh.views.upload_ssh_key",
+      "url": "^webssh/upload_ssh_key/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "54554cb7-170a-4dfb-a61a-ff0e814cee21",
+      "description": "Просмотр записи SSH",
+      "name": "django_webssh.views.index_readonly",
+      "url": "^videos/(?P<filename>[^/]+)/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "8a24daa2-254b-4fa4-a8b3-1f51a345bc0e",
+      "description": "Управление DHCP",
+      "name": "network.views.DHCPList",
+      "url": "^network/dhcp/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "a4498e34-8a6c-49ba-a0d8-ae5118b5de01",
+      "description": "Создать запись DHCP",
+      "name": "network.views.DHCPCreate",
+      "url": "^network/dhcp/create/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "1e735790-18e6-4fa9-9a3c-8de2b98e4a2b",
+      "description": "Редактировать запись DHCP",
+      "name": "network.views.DHCPEdit",
+      "url": "^network/dhcp/edit/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "db1b96a9-668a-4ade-a742-e51d3f287654",
+      "description": "Удалить запись DHCP",
+      "name": "network.views.DHCPDelete",
+      "url": "^network/dhcp/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "9f4f32df-8d67-4e8e-8e9b-41c82e351d8c",
+      "description": "Список lease DHCP",
+      "name": "network.views.DHCPLease",
+      "url": "^network/dhcp/lease/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "4c6c72d9-bef2-4e6e-917f-b8f9a47e1614",
+      "description": "Список записей DNS",
+      "name": "network.views.DNSList",
+      "url": "^network/dns/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "4eb46ca4-f3fa-4492-828d-324a937d1033",
+      "description": "Добавить запись DNS",
+      "name": "network.views.DNSCreate",
+      "url": "^network/dns/create/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "b1541068-431f-4af3-88cc-08db30eafcb0",
+      "description": "Редактировать запись DNS",
+      "name": "network.views.DNSEdit",
+      "url": "^network/dns/edit/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "c0cd7847-f7f1-42c2-b4eb-360c69890471",
+      "description": "Удалить запись DNS",
+      "name": "network.views.DNSDelete",
+      "url": "^network/dns/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "49f4ceec-f804-4c53-afd1-b2a0c891ae8b",
+      "description": "Список подсетей",
+      "name": "network.views.SubnetworkList",
+      "url": "^network/subnetwork/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "df57c580-4831-43c7-8485-d6c156685830",
+      "description": "Добавить подсеть",
+      "name": "network.views.SubnetworkCreate",
+      "url": "^network/subnetwork/create/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "3286d69b-e22f-4f67-bd39-46447735c5bf",
+      "description": "Удаление подсети",
+      "name": "network.views.SubnetworkDelete",
+      "url": "^network/subnetwork/delete/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "5510175f-73f1-48ce-8352-65c6396149dc",
+      "description": "Список именований урл (настройки безопасности)",
+      "name": "accounts.accessrules.views.ViewList",
+      "url": "^accounts/access/views\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "36becc09-a97a-464d-b2be-1ede420c4ea2",
+      "description": "Список прав на урл (настройки безопасности)",
+      "name": "accounts.accessrules.views.AccessList",
+      "url": "^accounts/access/rights\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "d2abc487-a49d-4e0c-87a4-d6cb6bdd5ecf",
+      "description": "Создать право на урл (настройки безопасности)",
+      "name": "accounts.accessrules.views.AccessCreate",
+      "url": "^accounts/access/create\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "1d0b64ad-3dcb-47db-b107-944d2b91198f",
+      "description": "Именовать урл (настройки безопасности)",
+      "name": "accounts.accessrules.views.ViewCreate",
+      "url": "^accounts/access/create_view\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "f3545e50-e36d-47fc-9cd0-8d1d7c44abf6",
+      "description": "Удалить именованный урл (настройки безопасности)",
+      "name": "accounts.accessrules.views.ViewDelete",
+      "url": "^accounts/access/(?P<pk>[^/]+)/delete_view\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "bed017a9-1169-4dad-8c59-4d409f64c864",
+      "description": "Удалить право на настройки безопасности к урл (настройки безопасности)",
+      "name": "accounts.accessrules.views.AccessDelete",
+      "url": "^accounts/access/(?P<pk>[^/]+)/delete_access\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "51488275-5a8a-4601-8170-e8a78e3e57bf",
+      "description": "Проверка целотстности данных разных систем",
+      "name": "integrity.views.integrity",
+      "url": "^integrity\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "993b58fd-fbc6-4fb9-a8ca-af81f72c8c60",
+      "description": "Список прав (права пользователей)",
+      "name": "accessrights.views.list_accessrights",
+      "url": "^accessrights/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "905c8964-2311-4261-b948-2f9bdeeff24e",
+      "description": "Удалить право (права пользователей)",
+      "name": "accessrights.views.del_accessright",
+      "url": "^accessrights/ar/delete/(?P<accessright>[^/]+)\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "b7719f37-6f44-48c7-9fb4-f86eb3af9e57",
+      "description": "Добавить право (права пользователей)",
+      "name": "accessrights.views.add_accessright",
+      "url": "^accessrights/ar/create\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "025ac26a-9b79-4954-8ada-ba21c73ccb5e",
+      "description": "Добавить систему (права пользователей)",
+      "name": "accessrights.views.add_area",
+      "url": "^accessrights/area/create\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "1b42584f-46f4-4d76-b457-358675e7e996",
+      "description": "Добавить сегмент (права пользователей)",
+      "name": "accessrights.views.add_segment",
+      "url": "^accessrights/segment/create\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "1485bc39-773a-4992-99ea-b0c7dfa4299d",
+      "description": "Удалить систему (права пользователей)",
+      "name": "accessrights.views.del_area",
+      "url": "^accessrights/area/delete\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "395ec1de-4a93-456a-96d9-5c378d1a4180",
+      "description": "Удалить сегмент (права пользователей)",
+      "name": "accessrights.views.del_segment",
+      "url": "^accessrights/segment/delete\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "7d30df6c-9e8f-4ea8-a1bb-49dbb561063b",
+      "description": "Список групп пользователей (права пользователей)",
+      "name": "accessrights.views.list_group",
+      "url": "^accessrights/group\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "85bca3d4-22a0-4255-bb26-32b12c32f6c2",
+      "description": "Добавить группу пользователей (права пользователей)",
+      "name": "accessrights.views.add_group",
+      "url": "^accessrights/group/create\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "8b39cd22-9e7a-478b-9ba4-84620fd83969",
+      "description": "Удалить группу пользователей (права пользователей)",
+      "name": "accessrights.views.del_group",
+      "url": "^accessrights/group/delete\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "e0ce6212-cc80-4c30-af5f-7ddf2df0bbcf",
+      "description": "Редактировать группу пользователей (права пользователей)",
+      "name": "accessrights.views.edit_group",
+      "url": "^accessrights/group/edit/(?P<group>[^/]+)\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "d3162336-b33b-45c4-b675-b67f547173bc",
+      "description": "test (права пользователей)",
+      "name": "accessrights.views.test",
+      "url": "^accessrights/test\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "f9863c07-9d3d-4867-88db-bcb309c19d0a",
+      "description": "index",
+      "name": "products_app.views.index",
+      "url": "^\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "882c5690-b4a7-4727-bb5a-ade771de9695",
+      "description": "Список задач",
+      "name": "tasks.views.task_records_view",
+      "url": "^tasks/viewtasks/\\Z",
+      "group": "",
+      "param": ""
+    },
+    {
+      "id": "a2b6fefb-79c7-4526-94fb-1080cc1c46db",
+      "description": "graphql",
+      "name": "strawberry.django.views.GraphQLView",
+      "url": "^graphql\\Z",
+      "group": "",
+      "param": ""
+    }
+  ]
+}
