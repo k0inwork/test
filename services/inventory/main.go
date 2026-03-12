@@ -2,6 +2,8 @@ package main
 
 import (
 	"log/slog"
+	"net/http"
+	"pum-go/pkg/config"
 	"pum-go/pkg/external"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
@@ -53,6 +55,20 @@ func main() {
 
 	r := gin.Default()
 	r.Use(logging.GinMiddleware())
+
+	// Configurable endpoint to receive system configuration
+	r.POST("/configurable", func(c *gin.Context) {
+		var cfg config.Config
+		if err := c.ShouldBindJSON(&cfg); err != nil {
+			slog.Error("Failed to parse configuration push", "error", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid configuration payload"})
+			return
+		}
+
+		slog.Info("Successfully received configuration from registry", "external_modules_count", len(cfg.ExternalModules))
+		// Inventory could use this to configure its graphql provider or sync engine if it depended on external configurations
+		c.JSON(http.StatusOK, gin.H{"status": "configuration applied"})
+	})
 
 	// Register recurring sync task
 	tasklib.RegisterEndpoint(
