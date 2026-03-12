@@ -7454,5 +7454,47 @@
     "record_class_name": "data.tasks.SwitchTaskRecord",
     "ip_list": "10.0.107.13",
     "id": "444"
+  },
+  {
+    "url": "/data/ipmi/list",
+    "username": "admin",
+    "started": 1773358226.101493,
+    "finished": "None",
+    "valid_to": 1773358246.1014707,
+    "result_message": "Нет ответа от модуля",
+    "object_name": "IPMI 10.0.105.110",
+    "object_id": "None",
+    "operation": "ipmi_status",
+    "status": "FAILED",
+    "celery_task_id": "ac18c642-6dfd-4484-abbc-68b6a2744c34",
+    "class_name": "Switch",
+    "record_class_name": "data.tasks.SwitchTaskRecord",
+    "ip": "10.0.105.110",
+    "id": "445",
+    "exception": {
+      "status": "FAILED",
+      "message": "Нет ответа от модуля"
+    }
+  },
+  {
+    "url": "/data/switch/",
+    "username": "admin",
+    "started": 1773358346.123577,
+    "finished": "None",
+    "valid_to": 1773358546.1235552,
+    "result_message": "Нет ответа от модуля",
+    "object_name": "Коммутатор 10.0.102.9",
+    "object_id": "None",
+    "operation": "config_status",
+    "status": "FAILED",
+    "celery_task_id": "7d2a9417-1d9d-42f3-8591-c00ab2501352",
+    "class_name": "Switch",
+    "record_class_name": "data.tasks.SwitchTaskRecord",
+    "ip": "10.0.102.9",
+    "id": "446",
+    "exception": {
+      "status": "FAILED",
+      "message": "Нет ответа от модуля"
+    }
   }
 ]
