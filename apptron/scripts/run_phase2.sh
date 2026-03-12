@@ -238,8 +238,8 @@ sed -i.bak "s|curl -sL \$(VSCODE_URL) -o assets/vscode.zip|if [ -f \"$PUM_ADMIN_
 # 2. Prevent Docker from failing when downloading wanix by simply pulling from github release directly, instead of extracting docker blobs
 sed -i.bak "s|\$(DOCKER_CMD) rm -f apptron-wanix|cp \"$PUM_ADMIN_ASSETS/wanix.min.js\" assets/wanix.min.js|g" Makefile
 sed -i.bak "s|\$(DOCKER_CMD) pull --platform linux/amd64 ghcr.io/tractordev/wanix:runtime|cp \"$PUM_ADMIN_ASSETS/wanix.min.js\" assets/wanix.js|g" Makefile
-sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
-sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
+sed -i.bak '/\$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
+sed -i.bak '/\$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
 
 make clean
 
@@ -257,7 +257,7 @@ cp "$PUM_ADMIN_ASSETS/bundles/pum.tar.gz" assets/bundles/
 
 # Ensure wrangler is installed locally in the worker package
 echo "Installing worker dependencies..."
-cd worker && npm ci && cd ..
+cd worker && npm ci && npm install wrangler@4.72.0 && cd ..
 
 make all
 
@@ -266,4 +266,4 @@ echo "Mock Auth is ENABLED in apptron/worker/src/auth.ts."
 echo "You can access the environment at http://localhost:8788"
 export CI=true
 export WRANGLER_SEND_METRICS=false
-cd worker && npx wrangler dev --port=8788 --log-level=none
+cd worker && npx --yes wrangler dev --port=8788 --log-level=none
