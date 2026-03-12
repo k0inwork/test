@@ -1,0 +1,109 @@
+{
+  "data": [
+    {
+      "name": "test-cmm-ipmi-1",
+      "id": "10664",
+      "interface": {
+        "interfaceid": "120",
+        "hostid": "10664",
+        "main": "1",
+        "type": "3",
+        "useip": "1",
+        "ip": "10.0.105.110",
+        "dns": [
+          "test-cmm-ipmi-1.sbmc"
+        ],
+        "port": "623",
+        "available": "1",
+        "error": "",
+        "errors_from": "0",
+        "disable_until": "0",
+        "details": []
+      }
+    },
+    {
+      "name": "test-lsu-ipmi-1",
+      "id": "10665",
+      "interface": {
+        "interfaceid": "121",
+        "hostid": "10665",
+        "main": "1",
+        "type": "3",
+        "useip": "1",
+        "ip": "10.0.105.111",
+        "dns": [
+          "test-lsu-ipmi-1.sbmc"
+        ],
+        "port": "623",
+        "available": "1",
+        "error": "",
+        "errors_from": "0",
+        "disable_until": "0",
+        "details": []
+      }
+    },
+    {
+      "name": "srvipmi-nms-1",
+      "id": "10856",
+      "interface": {
+        "interfaceid": "297",
+        "hostid": "10856",
+        "main": "1",
+        "type": "3",
+        "useip": "1",
+        "ip": "10.19.3.20",
+        "dns": [
+          ""
+        ],
+        "port": "623",
+        "available": "0",
+        "error": "",
+        "errors_from": "0",
+        "disable_until": "0",
+        "details": []
+      }
+    },
+    {
+      "name": "srvipmi-nms-2",
+      "id": "10857",
+      "interface": {
+        "interfaceid": "298",
+        "hostid": "10857",
+        "main": "1",
+        "type": "3",
+        "useip": "1",
+        "ip": "10.19.3.21",
+        "dns": [
+          ""
+        ],
+        "port": "623",
+        "available": "0",
+        "error": "",
+        "errors_from": "0",
+        "disable_until": "0",
+        "details": []
+      }
+    },
+    {
+      "name": "srvipmi-nms-3",
+      "id": "10858",
+      "interface": {
+        "interfaceid": "299",
+        "hostid": "10858",
+        "main": "1",
+        "type": "3",
+        "useip": "1",
+        "ip": "10.19.3.22",
+        "dns": [
+          ""
+        ],
+        "port": "623",
+        "available": "0",
+        "error": "",
+        "errors_from": "0",
+        "disable_until": "0",
+        "details": []
+      }
+    }
+  ]
+}

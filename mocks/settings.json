@@ -1,0 +1,84 @@
+{
+  "object_list": [
+    {
+      "id": "8dff7cb0-9906-4379-ab7b-3d01c9d6b00c",
+      "key": "ALARM_STATE",
+      "value": "ALARM"
+    },
+    {
+      "id": "adaf8477-c6ce-4732-853f-bce3f2460dc9",
+      "key": "ZABBIX_SEVERITY",
+      "value": "4"
+    },
+    {
+      "id": "dd397276-ee53-47c0-91fd-a1cc56644d96",
+      "key": "graylog_url_setting",
+      "value": "graylog"
+    },
+    {
+      "id": "197f6845-bfe2-49ab-b486-919b2e800ea8",
+      "key": "MAP_SERVER",
+      "value": "/static/map"
+    },
+    {
+      "id": "f08c60d2-d0b7-4fe0-8bac-b335212c9e59",
+      "key": "ZABBIX_TRANSPORT",
+      "value": "Тип/Сетевые устройства/Коммутатор транспортной сети"
+    },
+    {
+      "id": "e909d4d7-d7da-494e-b964-a7f06b6a738c",
+      "key": "ZABBIX_NODEGROUP_PREFIX",
+      "value": "МКС/"
+    },
+    {
+      "id": "8f263b86-a8c1-4c48-952a-6f92f3cc8ee7",
+      "key": "CONTROL",
+      "value": "TSUM-1"
+    },
+    {
+      "id": "4a3efe52-96af-4b09-bc3d-602827a6069c",
+      "key": "TSUM",
+      "value": "TSUM-1"
+    },
+    {
+      "id": "6251e20f-72ec-46ee-99c2-a8420846c64f",
+      "key": "ZABBIX_CONTROL",
+      "value": "Тип/Сетевые устройства/Коммутатор сети управления"
+    },
+    {
+      "id": "4de4492f-acdd-4a02-9a3c-a49c2b1f595c",
+      "key": "MAP_REGION",
+      "value": "Стенд"
+    },
+    {
+      "id": "4a2b87c5-3e98-4b9b-8bfe-2afc4995c941",
+      "key": "ZABBIX_MAP",
+      "value": "fpsu-stend-108"
+    },
+    {
+      "id": "05c9a8ca-ae79-42c8-8dcb-24dc0d788843",
+      "key": "ALARMS",
+      "value": "[\"Module: ipmi-module\", \"Module: switch-module\"]"
+    },
+    {
+      "id": "fc153925-cd05-422a-9545-ff592d01f06b",
+      "key": "STATE",
+      "value": "ALARM"
+    },
+    {
+      "id": "a9b76b66-655a-460e-b717-6477a8917494",
+      "key": "CONTROL_STATE",
+      "value": "ACTIVE"
+    },
+    {
+      "id": "f51c0095-6047-4fee-b0bf-62ef84ff63a6",
+      "key": "ARM ADDRESS",
+      "value": "[\"rteug-77-234-200-226.a.free.pinggy.link\", \"c0783bc74cf80eca-77-234-200-226.serveousercontent.com\", \"10.0.111.187\", \"localhost:8000\", \"localhost\", \"10.0.111.182\", \"arm-dev-2.svm\", \"thydx-77-234-200-226.a.free.pinggy.link\"]"
+    },
+    {
+      "id": "22bbb5b7-9910-4979-9d49-6fd5f02b533a",
+      "key": "FOREIGN ARMs",
+      "value": "{\"Неизвестен\": [null]}"
+    }
+  ]
+}
