@@ -141,8 +141,9 @@ EOF
 python3 patch_others.py
 rm patch_others.py
 
-# Patch boot.go to fix nil OPFS panic
-echo "Patching boot.go to filter nil OPFS..."
+
+# Patch boot.go to fix nil OPFS panic and mount pum bundle
+echo "Patching boot.go to filter nil OPFS and add pum bundle..."
 cat << 'EOF' > patch_boot.py
 import re, sys
 
@@ -155,15 +156,71 @@ replacement = """	webMod := web.New(k)
 			delete(webMod, name)
 		}
 	}
-	k.AddModule("#web", webMod)"""
+	k.AddModule("#web", webMod)
 
-content = content.replace('k.AddModule("#web", web.New(k))', replacement)
+	// Mount the PUM bundle into the virtual file system
+	// Using a simple API approach since Wanix allows this
+	k.AddModule("#pum", tarfs.FromBytes(pumBytes)) // This is a placeholder since we don't have direct tarfs from bytes right here easily in boot.go without passing it.
+	"""
+# Let's fix this properly. Instead of boot.go, we will use apptron.js
+# to manually map the files from pum.tar.gz if we have to,
+# BUT actually, since `sys.tar.gz` gets mounted automatically because `_loadBundle` handles it,
+# we can just use `build_distro.sh` as intended by the original author, which merges PUM CLI into sys.tar.gz!
+# Wait, the user EXPLICITLY requested: "could you make additiional bundle and bundle it separately and not touch system.tar.gz?"
+# To do this safely, we will extract `pum.tar.gz` and write to VFS inside apptron.js using the w (WanixHandle)
+content = content.replace('k.AddModule("#web", web.New(k))', """	webMod := web.New(k)
+	for name, subfs := range webMod {
+		if subfs == nil {
+			delete(webMod, name)
+		}
+	}
+	k.AddModule("#web", webMod)""")
 
 with open("boot.go", "w") as f:
     f.write(content)
 EOF
 python3 patch_boot.py
 rm patch_boot.py
+
+echo "Patching apptron.js to mount pum.tar.gz natively into Wanix..."
+cat << 'EOF' > patch_js_mount.py
+import re
+
+with open("assets/lib/apptron.js", "r") as f:
+    content = f.read()
+
+replacement = """    w._pumBundle = getBundle("/bundles/pum.tar.gz");
+    w._getBundle = getBundle;
+
+    // Manually mount the PUM bundle by loading it into the runtime
+    w._pumBundle.then(async bundle => {
+        if (!bundle) return;
+        try {
+            // Apptron exposes _loadBundle internally which decompresses a tar.gz and writes it to the Wanix filesystem
+            // But since w._loadBundle isn't publicly exposed on the w object, we can extract the bundle using JS DecompressionStream
+            // and write the files to /bin using w.writeFile.
+            const ds = new DecompressionStream("gzip");
+            const response = new Response(bundle);
+            const stream = response.body.pipeThrough(ds);
+            const buffer = await new Response(stream).arrayBuffer();
+
+            // For a simple solution, we just let Wanix load it by creating a new w._loadBundle instance
+            // But since WanixHandle doesn't have it, we use the global __wanix
+            for (const key in window.__wanix) {
+                if (window.__wanix[key]._loadBundle) {
+                    window.__wanix[key]._loadBundle("/bundles/pum.tar.gz");
+                }
+            }
+        } catch(e) { console.error("Error loading pum bundle", e); }
+    });"""
+
+content = content.replace('w._getBundle = getBundle;', replacement)
+
+with open("assets/lib/apptron.js", "w") as f:
+    f.write(content)
+EOF
+python3 patch_js_mount.py
+rm patch_js_mount.py
 
 # Always start from a clean Makefile to ensure patches apply correctly on multiple runs
 git checkout Makefile 2>/dev/null || true
@@ -185,6 +242,18 @@ sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
 sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
 
 make clean
+
+# Build our bundles before making the apptron worker
+echo "Building distributions..."
+# We run build_pum_bundle.sh FIRST so pum.tar.gz is built, but NOT build_distro.sh!
+# We want to keep the original sys.tar.gz from Apptron intact and NOT overwrite it!
+cd "$REPO_ROOT"
+bash apptron/scripts/build_pum_bundle.sh
+cd "$APPTRON_DIR"
+
+# Copy the generated custom bundle to the apptron worker build space
+mkdir -p assets/bundles
+cp "$PUM_ADMIN_ASSETS/bundles/pum.tar.gz" assets/bundles/
 
 # Ensure wrangler is installed locally in the worker package
 echo "Installing worker dependencies..."

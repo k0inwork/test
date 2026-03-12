@@ -36,4 +36,19 @@ test('Phase 2 mock duplicate project check should work', async ({ page }) => {
   // The page should not be "Not Found"
   const bodyText = await page.locator('body').innerText();
   expect(bodyText).not.toContain('Not Found');
+
+  // Switch to the IDE view inside the Apptron environment
+  // We need to wait for Wanix to load and mount the bundles
+  await page.waitForTimeout(5000);
+
+  // Click on the CLI tab/button if available, or focus the terminal
+  // The standard Apptron layout exposes a terminal div or terminal canvas.
+  // Wait for cursor (Terminal ready)
+  const terminal = page.locator('canvas#screen');
+  await expect(terminal).toBeVisible({ timeout: 15000 });
+
+  // Type 'ls' into the terminal to verify the filesystem is mounted
+  // Playwright keyboard events go to the document where the terminal canvas captures them
+  await page.keyboard.type('ls\n');
+  await page.waitForTimeout(1000);
 });

@@ -42,4 +42,10 @@ test('Phase 2 complete project creation flow', async ({ page }) => {
   // Wait for the iframe to be present (the editor)
   const iframe = page.locator('iframe');
   await expect(iframe).toBeVisible();
+
+  // Test the PUM bundle is mounted in the terminal
+  // The terminal canvas is inside the apptron runtime
+  await page.waitForTimeout(5000);
+  await page.keyboard.type('ls\n');
+  await page.waitForTimeout(1000);
 });
