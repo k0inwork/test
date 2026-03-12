@@ -35,9 +35,6 @@
                     {{end}}
                 </ul>
                 <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-info btn-sm me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#wsPanel" aria-controls="wsPanel">
-                        🔔 Notifications
-                    </button>
                     <span class="text-white-50 me-3">User: <strong>{{.User}}</strong></span>
                     <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
                 </div>
@@ -59,12 +56,18 @@
         {{end}}
     </div>
 
-    <div class="offcanvas offcanvas-end shadow" data-bs-scroll="true" tabindex="-1" id="wsPanel" aria-labelledby="wsPanelLabel">
-        <div class="offcanvas-header bg-dark text-white">
+    <!-- Floating Bookmark Button -->
+    <button class="btn btn-info shadow rounded-pill px-4 py-2 position-fixed" type="button" data-bs-toggle="offcanvas" data-bs-target="#wsPanel" aria-controls="wsPanel" style="bottom: 20px; right: 20px; z-index: 1050; border: 2px solid white;">
+        <span class="fw-bold text-white">🔔 Notifications</span>
+    </button>
+
+    <!-- Bottom Notification Panel -->
+    <div class="offcanvas offcanvas-bottom shadow" data-bs-scroll="true" tabindex="-1" id="wsPanel" aria-labelledby="wsPanelLabel" style="height: 40vh; border-top: 4px solid var(--bs-info);">
+        <div class="offcanvas-header bg-dark text-white py-2">
             <h5 class="offcanvas-title" id="wsPanelLabel">🔔 Notifications</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body bg-light">
+        <div class="offcanvas-body bg-light overflow-auto py-2">
             <div id="ws-messages" class="d-flex flex-column gap-2">
                 <div class="text-muted text-center" id="ws-empty">No messages yet.</div>
             </div>

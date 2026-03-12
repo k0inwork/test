@@ -1,6 +1,6 @@
 Starting PUM Microservices (Go Registry-based Architecture)...
 Starting Registry Service on :8088...
-{"time":"2026-03-12T20:49:48.290996341Z","level":"INFO","msg":"Registry starting","service":"registry","port":8088}
+{"time":"2026-03-12T21:13:33.050342859Z","level":"INFO","msg":"Registry starting","service":"registry","port":8088}
 Starting Identity Service on :8081...
 Starting Product Service on :8082...
 Starting Inventory Service on :8083...
@@ -9,29 +9,24 @@ Starting Task Service on :8085...
 Starting External Modules Proxy on :8086...
 Starting External Data Service on :8089...
 Starting Terminal Service on :8087...
-{"time":"2026-03-12T20:49:51.887085991Z","level":"INFO","msg":"External Modules Proxy starting","service":"external-modules","port":8086}
-{"time":"2026-03-12T20:49:52.014203918Z","level":"INFO","msg":"External Data Service starting","service":"external-data","port":8089}
-{"time":"2026-03-12T20:49:52.014816815Z","level":"ERROR","msg":"failed to start server","service":"external-data","error":"listen tcp :8089: bind: address already in use"}
-{"time":"2026-03-12T20:49:52.034953114Z","level":"INFO","msg":"Terminal service starting","service":"terminal","port":8087}
+{"time":"2026-03-12T21:13:36.155115929Z","level":"INFO","msg":"Terminal service starting","service":"terminal","port":8087}
+{"time":"2026-03-12T21:13:36.44027866Z","level":"INFO","msg":"External Modules Proxy starting","service":"external-modules","port":8086}
+{"time":"2026-03-12T21:13:36.558297987Z","level":"INFO","msg":"External Data Service starting","service":"external-data","port":8089}
+{"time":"2026-03-12T21:13:36.570428438Z","level":"ERROR","msg":"failed to start server","service":"external-data","error":"listen tcp :8089: bind: address already in use"}
 [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] POST   /configurable             --> main.main.func1 (4 handlers)
-[GIN-debug] POST   /inventory/task/sync      --> pum-go/pkg/tasklib.RegisterEndpoint.func1 (4 handlers)
-[GIN-debug] GET    /switches                 --> main.main.func3 (4 handlers)
-[GIN-debug] GET    /pdus                     --> main.main.func4 (4 handlers)
-[GIN-debug] GET    /ipmi                     --> main.main.func5 (4 handlers)
-[GIN-debug] POST   /query                    --> main.main.func6 (4 handlers)
-[GIN-debug] GET    /                         --> main.main.func7 (4 handlers)
-{"time":"2026-03-12T20:49:52.083624819Z","level":"INFO","msg":"Inventory starting","service":"inventory","port":8083}
+[GIN-debug] GET    /subnets                  --> main.main.func1 (4 handlers)
+[GIN-debug] GET    /dhcp                     --> main.main.func2 (4 handlers)
+[GIN-debug] GET    /dns                      --> main.main.func3 (4 handlers)
+{"time":"2026-03-12T21:13:36.609001572Z","level":"INFO","msg":"Network starting","service":"network","port":8084}
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
-[GIN-debug] Listening and serving HTTP on :8083
-{"time":"2026-03-12T20:49:52.08735289Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-[GIN-debug] [ERROR] listen tcp :8083: bind: address already in use
+[GIN-debug] Listening and serving HTTP on :8084
+[GIN-debug] [ERROR] listen tcp :8084: bind: address already in use
 [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
@@ -45,40 +40,30 @@ Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust
 [GIN-debug] DELETE /users/:username/groups/:group --> main.main.func5 (4 handlers)
 [GIN-debug] POST   /activitylist             --> main.main.func6 (4 handlers)
 [GIN-debug] GET    /activitylist             --> main.main.func7 (4 handlers)
-[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
-
-[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using env:	export GIN_MODE=release
- - using code:	gin.SetMode(gin.ReleaseMode)
-
 [GIN-debug] POST   /query                    --> main.main.func8 (4 handlers)
 [GIN-debug] GET    /                         --> main.main.func9 (4 handlers)
-{"time":"2026-03-12T20:49:52.114972298Z","level":"INFO","msg":"Identity starting","service":"identity","port":8081}
+{"time":"2026-03-12T21:13:36.665437409Z","level":"INFO","msg":"Identity starting","service":"identity","port":8081}
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8081
 [GIN-debug] [ERROR] listen tcp :8081: bind: address already in use
-[GIN-debug] GET    /subnets                  --> main.main.func1 (4 handlers)
-[GIN-debug] GET    /dhcp                     --> main.main.func2 (4 handlers)
-[GIN-debug] GET    /dns                      --> main.main.func3 (4 handlers)
-{"time":"2026-03-12T20:49:52.115667384Z","level":"INFO","msg":"Network starting","service":"network","port":8084}
-[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
-Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
-[GIN-debug] Listening and serving HTTP on :8084
-[GIN-debug] [ERROR] listen tcp :8084: bind: address already in use
 [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] POST   /product/task/sync        --> pum-go/pkg/tasklib.RegisterEndpoint.func1 (4 handlers)
-[GIN-debug] GET    /nodes                    --> main.main.func2 (4 handlers)
-{"time":"2026-03-12T20:49:52.121735806Z","level":"INFO","msg":"Product starting","service":"product","port":8082}
+[GIN-debug] POST   /configurable             --> main.main.func1 (4 handlers)
+[GIN-debug] POST   /inventory/task/sync      --> pum-go/pkg/tasklib.RegisterEndpoint.func1 (4 handlers)
+[GIN-debug] GET    /switches                 --> main.main.func3 (4 handlers)
+[GIN-debug] GET    /pdus                     --> main.main.func4 (4 handlers)
+[GIN-debug] GET    /ipmi                     --> main.main.func5 (4 handlers)
+[GIN-debug] POST   /query                    --> main.main.func6 (4 handlers)
+[GIN-debug] GET    /                         --> main.main.func7 (4 handlers)
+{"time":"2026-03-12T21:13:36.677289588Z","level":"INFO","msg":"Inventory starting","service":"inventory","port":8083}
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
-[GIN-debug] Listening and serving HTTP on :8082
-[GIN-debug] [ERROR] listen tcp :8082: bind: address already in use
+[GIN-debug] Listening and serving HTTP on :8083
 [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
@@ -96,11 +81,29 @@ Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust
 [GIN-debug] GET    /api/recurring            --> main.listRecurringTasks (4 handlers)
 [GIN-debug] POST   /api/recurring            --> main.createRecurringTask (4 handlers)
 [GIN-debug] GET    /tasks                    --> main.listTasks (4 handlers)
-{"time":"2026-03-12T20:49:52.130775685Z","level":"INFO","msg":"Task service starting","service":"task","port":8085}
+{"time":"2026-03-12T21:13:36.70252105Z","level":"INFO","msg":"Task service starting","service":"task","port":8085}
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8085
 [GIN-debug] [ERROR] listen tcp :8085: bind: address already in use
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /product/task/sync        --> pum-go/pkg/tasklib.RegisterEndpoint.func1 (4 handlers)
+[GIN-debug] GET    /nodes                    --> main.main.func2 (4 handlers)
+{"time":"2026-03-12T21:13:36.713060833Z","level":"INFO","msg":"Product starting","service":"product","port":8082}
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8082
+[GIN-debug] [ERROR] listen tcp :8082: bind: address already in use
+{"time":"2026-03-12T21:13:36.726555631Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:13:36.728150813Z","level":"INFO","msg":"Registered with service discovery","service":"inventory","url":"http://localhost:8088"}
+{"time":"2026-03-12T21:13:36.751156198Z","level":"INFO","msg":"Successfully received configuration from registry","service":"inventory","external_modules_count":4}
+{"time":"2026-03-12T21:13:36.753458308Z","level":"INFO","msg":"request handled","service":"inventory","status":200,"method":"POST","path":"/configurable","latency":7316638}
+[GIN] 2026/03/12 - 21:13:36 | 200 |    7.590829ms |             ::1 | POST     "/configurable"
 Starting Frontend Service on :8080...
 ------------------------------------------------
 Nodes List: http://localhost:8080/nodes
@@ -116,6 +119,7 @@ Dashboard: http://localhost:8080
  - using code:	gin.SetMode(gin.ReleaseMode)
 
 [GIN-debug] Loaded HTML Templates (8):
+	- content_module
 	- content_admin_users
 	- content_admin
 	- identity_activitylist.html
@@ -123,7 +127,6 @@ Dashboard: http://localhost:8080
 	-
 	- base.html
 	- content_index
-	- content_module
 
 [GIN-debug] GET    /login                    --> main.main.func3 (5 handlers)
 [GIN-debug] POST   /login                    --> main.main.func4 (5 handlers)
@@ -138,159 +141,49 @@ Dashboard: http://localhost:8080
 [GIN-debug] GET    /admin/users              --> main.main.func13 (5 handlers)
 [GIN-debug] POST   /admin/users/assign-role  --> main.main.func14 (5 handlers)
 [GIN-debug] POST   /admin/users/remove-role  --> main.main.func15 (5 handlers)
-{"time":"2026-03-12T20:49:55.34863336Z","level":"INFO","msg":"Frontend starting","service":"frontend","port":8080}
+{"time":"2026-03-12T21:13:38.809500258Z","level":"INFO","msg":"Frontend starting","service":"frontend","port":8080}
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN-debug] [ERROR] listen tcp :8080: bind: address already in use
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           {"time":"2026-03-12T20:49:50.263761001Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/external-data","latency":147558}
-{"time":"2026-03-12T20:49:50.682170486Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":96181}
-{"time":"2026-03-12T20:49:50.683483464Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:49:51.901090871Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/register","latency":177759}
-{"time":"2026-03-12T20:49:51.901317521Z","level":"INFO","msg":"Pushing configuration to service","service":"registry","service":"external-modules","endpoint":"http://localhost:8086/configurable"}
-{"time":"2026-03-12T20:49:51.916723393Z","level":"INFO","msg":"Successfully received configuration from registry","service":"external-modules","external_modules_count":4}
-{"time":"2026-03-12T20:49:51.916776962Z","level":"INFO","msg":"request handled","service":"external-modules","status":200,"method":"POST","path":"/configurable","latency":140592}
-{"time":"2026-03-12T20:49:51.928635384Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"GET","path":"/capabilities/audit","latency":82361}
-{"time":"2026-03-12T20:49:51.928852852Z","level":"INFO","msg":"Successfully pushed configuration","service":"registry","service":"external-modules"}
-{"time":"2026-03-12T20:49:52.086735966Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":110724}
-{"time":"2026-03-12T20:49:52.897059732Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":53497}
-{"time":"2026-03-12T20:49:52.897402033Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:49:55.684620391Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":101773}
-{"time":"2026-03-12T20:49:55.685144873Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:49:57.898593058Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":67189}
-{"time":"2026-03-12T20:49:57.899022106Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:00.689563196Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":62696}
-{"time":"2026-03-12T20:50:00.689954282Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:02.903474987Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":79321}
-{"time":"2026-03-12T20:50:02.903913866Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:05.694525576Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":64271}
-{"time":"2026-03-12T20:50:05.694856379Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:07.030911895Z","level":"INFO","msg":"request handled","service":"frontend","status":202,"method":"POST","path":"/frontend/task/notify","latency":4199108}
-[GIN] 2026/03/12 - 20:50:07 | 202 |    4.242557ms |             ::1 | POST     "/frontend/task/notify"
-{"time":"2026-03-12T20:50:07.038353924Z","level":"INFO","msg":"Executing recurring timer notification","service":"frontend"}
-{"time":"2026-03-12T20:50:07.065586985Z","level":"INFO","msg":"request handled","service":"inventory","status":202,"method":"POST","path":"/inventory/task/sync","latency":38303592}
-[GIN] 2026/03/12 - 20:50:07 | 202 |   38.355708ms |             ::1 | POST     "/inventory/task/sync"
-{"time":"2026-03-12T20:50:07.066141244Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"GET","path":"/capabilities/audit","latency":21429}
-{"time":"2026-03-12T20:50:07.072401545Z","level":"INFO","msg":"Executing recurring inventory sync","service":"inventory"}
-{"time":"2026-03-12T20:50:07.072437247Z","level":"INFO","msg":"Starting inventory synchronization","service":"inventory"}
-{"time":"2026-03-12T20:50:07.089883385Z","level":"INFO","msg":"Inventory synchronization complete","service":"inventory"}
-{"time":"2026-03-12T20:50:07.549687162Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/task","latency":45643}
-{"time":"2026-03-12T20:50:07.904513943Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":55462}
-{"time":"2026-03-12T20:50:07.904896037Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:09.865746553Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/external-modules","latency":67069}
-{"time":"2026-03-12T20:50:10.448409513Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/product","latency":46291}
-{"time":"2026-03-12T20:50:10.593740833Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/identity","latency":67533}
-{"time":"2026-03-12T20:50:10.64117919Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/inventory","latency":47057}
-{"time":"2026-03-12T20:50:10.696865962Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":92890}
-{"time":"2026-03-12T20:50:10.697233116Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:11.369207686Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/network","latency":49730}
-{"time":"2026-03-12T20:50:12.909022275Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":67570}
-{"time":"2026-03-12T20:50:12.909442178Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:14.76183926Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/terminal","latency":44004}
-{"time":"2026-03-12T20:50:15.700610094Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":46292}
-{"time":"2026-03-12T20:50:15.70100209Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:17.91395159Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":48290}
-{"time":"2026-03-12T20:50:17.914440964Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:20.303389212Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/external-data","latency":48714}
-{"time":"2026-03-12T20:50:20.702338411Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":51844}
-{"time":"2026-03-12T20:50:20.702639554Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:22.914280103Z","level":"INFO","msg":"request handled","service":"frontend","status":200,"method":"GET","path":"/login","latency":3755543}
-[GIN] 2026/03/12 - 20:50:22 | 200 |    3.830998ms |             ::1 | GET      "/login"
-{"time":"2026-03-12T20:50:22.915372954Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":43692}
-{"time":"2026-03-12T20:50:22.915830613Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:23.142011218Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":76484}
-{"time":"2026-03-12T20:50:23.146885034Z","level":"INFO","msg":"request handled","service":"frontend","status":302,"method":"POST","path":"/login","latency":5208616}
-[GIN] 2026/03/12 - 20:50:23 | 302 |    5.264921ms |             ::1 | POST     "/login"
-{"time":"2026-03-12T20:50:23.150013737Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":57913}
-{"time":"2026-03-12T20:50:23.151553883Z","level":"INFO","msg":"request handled","service":"frontend","status":200,"method":"GET","path":"/","latency":1867873}
-[GIN] 2026/03/12 - 20:50:23 | 200 |    1.939598ms |             ::1 | GET      "/"
-{"time":"2026-03-12T20:50:25.507526572Z","level":"INFO","msg":"request handled","service":"frontend","status":200,"method":"GET","path":"/ws","latency":2240827329}
-[GIN] 2026/03/12 - 20:50:25 | 200 |   2.24091396s |             ::1 | GET      "/ws"
-{"time":"2026-03-12T20:50:25.707419322Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":71068}
-{"time":"2026-03-12T20:50:25.707854095Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:27.916945687Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":63249}
-{"time":"2026-03-12T20:50:27.917536796Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:30.712263305Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":69224}
-{"time":"2026-03-12T20:50:30.712668118Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:32.918453093Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":59875}
-{"time":"2026-03-12T20:50:32.918807444Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:35.717472999Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":109484}
-{"time":"2026-03-12T20:50:35.717918416Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:37.551127085Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/task","latency":44380}
-{"time":"2026-03-12T20:50:37.923569127Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":90893}
-{"time":"2026-03-12T20:50:37.923892904Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:39.896605773Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/external-modules","latency":88843}
-{"time":"2026-03-12T20:50:40.478799852Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/product","latency":43135}
-{"time":"2026-03-12T20:50:40.612479115Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/identity","latency":46576}
-{"time":"2026-03-12T20:50:40.646295941Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/inventory","latency":20715}
-{"time":"2026-03-12T20:50:40.719962458Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":68674}
-{"time":"2026-03-12T20:50:40.720317635Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:41.370983565Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/network","latency":46251}
-{"time":"2026-03-12T20:50:42.928739854Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":72807}
-{"time":"2026-03-12T20:50:42.929089412Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:44.792634519Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/terminal","latency":66116}
-{"time":"2026-03-12T20:50:45.723735312Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":48249}
-{"time":"2026-03-12T20:50:45.724207621Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:47.933569574Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":49594}
-{"time":"2026-03-12T20:50:47.934085707Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:50.334251285Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/external-data","latency":59231}
-{"time":"2026-03-12T20:50:50.725253647Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":83421}
-{"time":"2026-03-12T20:50:50.725668148Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:52.938688674Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":95721}
-{"time":"2026-03-12T20:50:52.939111448Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:50:55.730193726Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":56103}
-{"time":"2026-03-12T20:50:55.730573891Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:50:57.94362181Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":49732}
-{"time":"2026-03-12T20:50:57.943938648Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:51:00.735053651Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":60760}
-{"time":"2026-03-12T20:51:00.735413659Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:51:02.948508679Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":48587}
-{"time":"2026-03-12T20:51:02.948887646Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:51:05.740199915Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":49041}
-{"time":"2026-03-12T20:51:05.740501831Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:51:07.034803406Z","level":"INFO","msg":"request handled","service":"frontend","status":202,"method":"POST","path":"/frontend/task/notify","latency":3996332}
-[GIN] 2026/03/12 - 20:51:07 | 202 |    4.036543ms |             ::1 | POST     "/frontend/task/notify"
-{"time":"2026-03-12T20:51:07.040586668Z","level":"INFO","msg":"Executing recurring timer notification","service":"frontend"}
-{"time":"2026-03-12T20:51:07.045251171Z","level":"INFO","msg":"request handled","service":"inventory","status":202,"method":"POST","path":"/inventory/task/sync","latency":13873870}
-[GIN] 2026/03/12 - 20:51:07 | 202 |   13.956132ms |             ::1 | POST     "/inventory/task/sync"
-{"time":"2026-03-12T20:51:07.045882376Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"GET","path":"/capabilities/audit","latency":50550}
-{"time":"2026-03-12T20:51:07.049739444Z","level":"INFO","msg":"Executing recurring inventory sync","service":"inventory"}
-{"time":"2026-03-12T20:51:07.049762052Z","level":"INFO","msg":"Starting inventory synchronization","service":"inventory"}
-{"time":"2026-03-12T20:51:07.076234206Z","level":"INFO","msg":"Inventory synchronization complete","service":"inventory"}
-{"time":"2026-03-12T20:51:07.55278294Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/task","latency":44410}
-{"time":"2026-03-12T20:51:07.949922835Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":111861}
-{"time":"2026-03-12T20:51:07.950309812Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:51:09.89824172Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/external-modules","latency":55629}
-{"time":"2026-03-12T20:51:10.480245168Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/product","latency":42907}
-{"time":"2026-03-12T20:51:10.614552828Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/identity","latency":59618}
-{"time":"2026-03-12T20:51:10.650492906Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/inventory","latency":46532}
-{"time":"2026-03-12T20:51:10.742120722Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":78614}
-{"time":"2026-03-12T20:51:10.742634015Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:51:11.401561656Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"POST","path":"/heartbeat/network","latency":73203}
-{"time":"2026-03-12T20:51:12.954917053Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":75088}
-{"time":"2026-03-12T20:51:12.955308665Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:51:14.794344094Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/terminal","latency":45938}
-{"time":"2026-03-12T20:51:15.746172017Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":120952}
-{"time":"2026-03-12T20:51:15.746515096Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:51:17.956539218Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":47844}
-{"time":"2026-03-12T20:51:17.95692103Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:51:20.364919262Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/external-data","latency":47805}
-{"time":"2026-03-12T20:51:20.75119635Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":100385}
-{"time":"2026-03-12T20:51:20.75153632Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:51:22.958101073Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":61505}
-{"time":"2026-03-12T20:51:22.958590406Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:51:25.756286094Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":94942}
-{"time":"2026-03-12T20:51:25.756726333Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:51:27.948802426Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"GET","path":"/config","latency":265}
-{"time":"2026-03-12T20:51:27.960649344Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":66192}
-{"time":"2026-03-12T20:51:27.961013021Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:51:30.760718123Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":99631}
-{"time":"2026-03-12T20:51:30.761148861Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:51:32.962276214Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":70253}
-{"time":"2026-03-12T20:51:32.962718162Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
-{"time":"2026-03-12T20:51:35.765532107Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/services","latency":81632}
-{"time":"2026-03-12T20:51:35.765919783Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
-{"time":"2026-03-12T20:51:37.55438808Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/task","latency":65020}
-signal: terminated
-signal: terminated
-signal: terminated
+{"time":"2026-03-12T21:13:38.820526886Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:13:41.733581614Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:13:43.822387468Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:13:46.73656052Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:13:48.827321664Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:13:51.741817165Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:13:53.832328965Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:13:56.744567516Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:13:58.835407703Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:14:01.749653611Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:14:03.837369135Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:14:06.752907951Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:14:07.363412831Z","level":"INFO","msg":"request handled","service":"frontend","status":200,"method":"GET","path":"/login","latency":6833543}
+[GIN] 2026/03/12 - 21:14:07 | 200 |    6.968049ms |             ::1 | GET      "/login"
+{"time":"2026-03-12T21:14:07.782826853Z","level":"INFO","msg":"request handled","service":"frontend","status":302,"method":"POST","path":"/login","latency":28888622}
+[GIN] 2026/03/12 - 21:14:07 | 302 |   28.974355ms |             ::1 | POST     "/login"
+{"time":"2026-03-12T21:14:07.800254714Z","level":"INFO","msg":"request handled","service":"frontend","status":200,"method":"GET","path":"/","latency":10071858}
+[GIN] 2026/03/12 - 21:14:07 | 200 |   10.155766ms |             ::1 | GET      "/"
+{"time":"2026-03-12T21:14:08.839055336Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:14:10.200523908Z","level":"INFO","msg":"request handled","service":"frontend","status":200,"method":"GET","path":"/ws","latency":2273936373}
+[GIN] 2026/03/12 - 21:14:10 | 200 |  2.274003899s |             ::1 | GET      "/ws"
+{"time":"2026-03-12T21:14:11.755238922Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:14:13.840719681Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:14:16.76032746Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:14:18.844958001Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:14:21.765893064Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:14:23.850547401Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:14:26.771432102Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:14:28.854653329Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:14:31.781562112Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:14:33.85942331Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:14:34.076386684Z","level":"INFO","msg":"request handled","service":"inventory","status":202,"method":"POST","path":"/inventory/task/sync","latency":14920953}
+[GIN] 2026/03/12 - 21:14:34 | 202 |    14.97639ms |             ::1 | POST     "/inventory/task/sync"
+{"time":"2026-03-12T21:14:34.102772979Z","level":"INFO","msg":"request handled","service":"frontend","status":202,"method":"POST","path":"/frontend/task/notify","latency":37324030}
+[GIN] 2026/03/12 - 21:14:34 | 202 |   37.390702ms |             ::1 | POST     "/frontend/task/notify"
+{"time":"2026-03-12T21:14:34.114474044Z","level":"INFO","msg":"Executing recurring timer notification","service":"frontend"}
+{"time":"2026-03-12T21:14:34.175963691Z","level":"INFO","msg":"Executing recurring inventory sync","service":"inventory"}
+{"time":"2026-03-12T21:14:34.176179109Z","level":"INFO","msg":"Starting inventory synchronization","service":"inventory"}
+{"time":"2026-03-12T21:14:34.219497134Z","level":"INFO","msg":"Inventory synchronization complete","service":"inventory"}
+{"time":"2026-03-12T21:14:36.78339717Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
+{"time":"2026-03-12T21:14:38.865885558Z","level":"INFO","msg":"Waiting for service to become available...","service":"frontend","service":"task"}
+{"time":"2026-03-12T21:14:41.787312294Z","level":"INFO","msg":"Waiting for service to become available...","service":"inventory","service":"task"}
