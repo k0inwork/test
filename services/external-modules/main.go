@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
 	"time"
 
@@ -28,6 +29,7 @@ func main() {
 			{Name: "ipmi", Endpoints: []string{"/ipmi"}},
 			{Name: "network-management", Endpoints: []string{"/network-management"}},
 			{Name: "routing", Endpoints: []string{"/routing"}},
+			{Name: "configurable", Endpoints: []string{"/configurable"}},
 		},
 		IsCore:       false,
 	})
@@ -36,6 +38,20 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
+
+	// Configurable endpoint to receive system configuration
+	r.POST("/configurable", func(c *gin.Context) {
+		var cfg config.Config
+		if err := c.ShouldBindJSON(&cfg); err != nil {
+			slog.Error("Failed to parse configuration push", "error", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid configuration payload"})
+			return
+		}
+
+		slog.Info("Successfully received configuration from registry", "external_modules_count", len(cfg.ExternalModules))
+		// Apply configuration here if needed, for example updating endpoints or modes
+		c.JSON(http.StatusOK, gin.H{"status": "configuration applied"})
+	})
 
 	// Generic Module Call (RabbitMQ Proxy Placeholder)
 	r.POST("/call", func(c *gin.Context) {

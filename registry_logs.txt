@@ -1,0 +1,10 @@
+{"time":"2026-03-12T20:51:48.410986065Z","level":"INFO","msg":"Registry starting","service":"registry","port":8088}
+{"time":"2026-03-12T20:51:50.390207172Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/external-data","latency":48088}
+{"time":"2026-03-12T20:52:00.512928711Z","level":"INFO","msg":"request handled","service":"registry","status":200,"method":"GET","path":"/config","latency":228246}
+{"time":"2026-03-12T20:52:07.556550307Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/task","latency":47513}
+{"time":"2026-03-12T20:52:09.953285566Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/external-modules","latency":65178}
+{"time":"2026-03-12T20:52:10.489124643Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/product","latency":61671}
+{"time":"2026-03-12T20:52:10.618379412Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/identity","latency":80358}
+{"time":"2026-03-12T20:52:11.451126733Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/network","latency":45510}
+{"time":"2026-03-12T20:52:14.85319418Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/terminal","latency":46156}
+{"time":"2026-03-12T20:52:20.417051084Z","level":"INFO","msg":"request handled","service":"registry","status":404,"method":"POST","path":"/heartbeat/external-data","latency":40314}
