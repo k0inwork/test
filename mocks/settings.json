@@ -1,11 +1,6 @@
 {
   "object_list": [
     {
-      "id": "8dff7cb0-9906-4379-ab7b-3d01c9d6b00c",
-      "key": "ALARM_STATE",
-      "value": "ALARM"
-    },
-    {
       "id": "adaf8477-c6ce-4732-853f-bce3f2460dc9",
       "key": "ZABBIX_SEVERITY",
       "value": "4"
@@ -56,11 +51,6 @@
       "value": "fpsu-stend-108"
     },
     {
-      "id": "05c9a8ca-ae79-42c8-8dcb-24dc0d788843",
-      "key": "ALARMS",
-      "value": "[\"Module: ipmi-module\", \"Module: switch-module\"]"
-    },
-    {
       "id": "fc153925-cd05-422a-9545-ff592d01f06b",
       "key": "STATE",
       "value": "ALARM"
@@ -71,9 +61,19 @@
       "value": "ACTIVE"
     },
     {
+      "id": "05c9a8ca-ae79-42c8-8dcb-24dc0d788843",
+      "key": "ALARMS",
+      "value": "[\"Module: switch-module\", \"Module: ipmi-module\"]"
+    },
+    {
       "id": "f51c0095-6047-4fee-b0bf-62ef84ff63a6",
       "key": "ARM ADDRESS",
-      "value": "[\"rteug-77-234-200-226.a.free.pinggy.link\", \"c0783bc74cf80eca-77-234-200-226.serveousercontent.com\", \"10.0.111.187\", \"localhost:8000\", \"localhost\", \"10.0.111.182\", \"arm-dev-2.svm\", \"thydx-77-234-200-226.a.free.pinggy.link\"]"
+      "value": "[\"localhost:8080\", \"thydx-77-234-200-226.a.free.pinggy.link\", \"localhost:8081\", \"c0783bc74cf80eca-77-234-200-226.serveousercontent.com\", \"localhost:8000\", \"localhost\", \"10.0.111.187\", \"rteug-77-234-200-226.a.free.pinggy.link\", \"arm-dev-2.svm\", \"10.0.111.182\"]"
+    },
+    {
+      "id": "8dff7cb0-9906-4379-ab7b-3d01c9d6b00c",
+      "key": "ALARM_STATE",
+      "value": "ALARM"
     },
     {
       "id": "22bbb5b7-9910-4979-9d49-6fd5f02b533a",
