@@ -14,9 +14,14 @@ It lists the legacy endpoints across all Django apps and identifies whether they
 *   **Missing Features:**
     *   **Authentication Flow:** `/accounts/login/`, `/accounts/logout/`, `/accounts/changepassword/`, `/accounts/create/` (Registration). *Note: The new system relies on Apptron/Hanko for auth, but user profile syncing might be needed.*
     *   **User Management Actions:** `/accounts/edit/<username>/`, `/accounts/block/<username>/`, `/accounts/unblock/<username>/`, `/accounts/delete/<username>/`.
+    *   **Registration Application Workflow:** The endpoints under `/accounts/register_application/` represent a complete GUI workflow for new user onboarding.
+        1. A user applies for access.
+        2. An admin approves the application and assigns an LDAP group (`RegistrationApplicationUpdate`).
+        3. The system sends an email with a signup link and verification code.
+        4. The user completes signup, which provisions the user account and password directly into LDAP (`RegistrationApplicationSignup`).
     *   **Access Rules (Deprecated for now):** Everything under `accounts/access/` (views, rights, create, delete) is explicitly **not needed yet**. Basic users/groups are sufficient for now.
-    *   **Miscellaneous:** `/accounts/activity_list_export/`, `/accounts/register_application/` (OAuth/Tokens?), `/accounts/support/`, `/accounts/monitoring/`, `/accounts/ssh_session_search`.
-*   **Required Action:** Expand `identity` to support user mutations (edit, block, delete). Access Rules (RBAC) mapping can be deferred as it is not currently required.
+    *   **Miscellaneous:** `/accounts/activity_list_export/`, `/accounts/support/`, `/accounts/monitoring/`, `/accounts/ssh_session_search`.
+*   **Required Action:** Expand `identity` to support user mutations (edit, block, delete). The Registration Workflow must be deeply analyzed—if Apptron/Hanko is handling auth, it must be integrated with the LDAP provisioning steps, or the Go `identity` service must natively replicate this multi-step approval workflow. Access Rules (RBAC) mapping can be deferred as it is not currently required.
 
 ## 2. `data` App (Inventory & Hardware)
 **Original Responsibility:** Management of switches, PDUs, IPMI nodes, configuration management, and physical connections.
