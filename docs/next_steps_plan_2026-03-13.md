@@ -4,6 +4,15 @@ Based on the latest gap analysis (`gap_analysis_2026-03-13.md`), the following a
 
 These tasks are prioritized by domain criticality.
 
+## Highest Priority (Testing & Quality Assurance)
+
+**0. Establish Comprehensive Test Coverage for Existing Go Services**
+*   **Goal:** Ensure the stability and correctness of the newly implemented Go architecture before adding any new complex mutations or workflows.
+*   **Actions:**
+    *   **Unit Tests:** Write robust unit tests for the existing read-only (`GET`) endpoints in `identity`, `product`, `inventory`, `network`, and `external-data`.
+    *   **Integration Tests:** Create end-to-end integration tests that verify the internal microservices can successfully retrieve and map data from the mocked `external-modules` proxy.
+    *   **Future Test Coverage (TDD):** As new mutations (POST/PUT/DELETE) are built for things like `KeyService` provisioning, switch hardware control, or DHCP IP assignment, adopt a Test-Driven Development (TDD) approach. These tests must simulate the actual RabbitMQ payload exchange with hardware mocks.
+
 ## High Priority (Core Missing Domains & Mutations)
 
 **1. `network` Microservice (IPAM: DHCP, DNS, Subnets)**
