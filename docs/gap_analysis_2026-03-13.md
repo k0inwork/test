@@ -19,9 +19,10 @@ It lists the legacy endpoints across all Django apps and identifies whether they
         2. An admin approves the application and assigns an LDAP group (`RegistrationApplicationUpdate`).
         3. The system sends an email with a signup link and verification code.
         4. The user completes signup, which provisions the user account and password directly into LDAP (`RegistrationApplicationSignup`).
+    *   **CAS Identity Provider (IdP):** The legacy app utilized `django_mama_cas` exposed at `/cas/` to act as a Central Authentication Service (CAS) server. This allowed the Apache reverse proxy (using `mod_auth_cas`) and other external applications to authenticate users against the Django backend.
     *   **Access Rules (Deprecated for now):** Everything under `accounts/access/` (views, rights, create, delete) is explicitly **not needed yet**. Basic users/groups are sufficient for now.
     *   **Miscellaneous:** `/accounts/activity_list_export/`, `/accounts/support/`, `/accounts/monitoring/`, `/accounts/ssh_session_search`.
-*   **Required Action:** Expand `identity` to support the 3 specific user mutations (change password, edit data, block user) by mapping them as RPC/External-Module calls directly to LDAP. The Registration Workflow must be natively replicated in the `identity` microservice, ensuring that any future integration with Hanko triggers the proper LDAP provisioning and approval logic.
+*   **Required Action:** Expand `identity` to support the 3 specific user mutations (change password, edit data, block user) by mapping them as RPC/External-Module calls directly to LDAP. The Registration Workflow must be natively replicated in the `identity` microservice. Additionally, if the new architecture is required to act as an IdP for other services (replacing `mama_cas`/`mod_auth_cas`), a CAS or OAuth2 module must be implemented within `identity` (or delegated to an external system like Keycloak).
 
 ## 2. `data` App (Inventory & Hardware)
 **Original Responsibility:** Management of switches, PDUs, IPMI nodes, configuration management, and physical connections.

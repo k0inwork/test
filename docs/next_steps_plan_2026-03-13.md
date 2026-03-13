@@ -42,12 +42,11 @@ These tasks are prioritized by domain criticality.
     *   Convert the `task` service to support Server-Sent Events (SSE) or WebSockets on the `/tasks` endpoint, streaming live status updates for background processes.
 
 **6. `identity` Microservice (LDAP User Management & Onboarding)**
-*   **Goal:** Port the user management mutations and the GUI workflow for new user application, admin approval, and LDAP provisioning (`RegistrationApplication`).
+*   **Goal:** Port the user management mutations, the GUI workflow for new user application/LDAP provisioning (`RegistrationApplication`), and provide an Identity Provider (IdP) module if required by downstream services.
 *   **Actions:**
     *   **User Mutations:** Implement API endpoints for the three supported mutations: Change Password, Edit User Data, and Block User. Wire these directly into the external LDAP directory to manipulate the data.
-    *   **Onboarding Workflow:** Implement REST/GraphQL APIs in `identity` to allow users to apply for access.
-    *   **Onboarding Workflow:** Implement an API for admins to review applications, assign groups, and generate an email verification code.
-    *   **Onboarding Workflow:** Implement the final signup endpoint that takes the code, sets the user password, and officially creates the user profile in LDAP (via the `external-modules` LDAP integration).
+    *   **Onboarding Workflow:** Implement REST/GraphQL APIs in `identity` to allow users to apply for access, admins to review applications and generate email verification codes, and a final signup endpoint to create the user profile in LDAP.
+    *   **CAS Identity Provider (IdP):** Replicate the legacy `django_mama_cas` functionality by implementing a CAS (or OAuth2/OIDC) server within the `identity` service. This is necessary if external applications or reverse proxies (like Apache with `mod_auth_cas`) still need to authenticate against the PUM system.
 
 **7. Switch Configuration Management**
 *   **Goal:** Replicate the TFTP config backup and restore logic.
