@@ -185,10 +185,12 @@ sed -i.bak "s|\$(DOCKER_CMD) pull --platform linux/amd64 ghcr.io/tractordev/wani
 sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
 sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
 
-# Copy the checked-in base sys.tar.gz bundle from the repo to the worker assets
-echo "Copying base sys.tar.gz from repository..."
+# Copy the checked-in base sys.tar.gz bundle from the repo to the worker assets BEFORE make all
+echo "Ensuring base sys.tar.gz is present from repository..."
 mkdir -p assets/bundles
-cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
+if [ ! -f "assets/bundles/sys.tar.gz" ]; then
+    cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
+fi
 
 # Only run make clean and make all if assets/wanix.wasm is missing
 if [ ! -f "assets/wanix.wasm" ]; then
@@ -197,6 +199,11 @@ if [ ! -f "assets/wanix.wasm" ]; then
     # Ensure wrangler is installed locally in the worker package
     echo "Installing worker dependencies..."
     cd worker && npm ci && cd ..
+
+    # make clean deletes sys.tar.gz, so copy it back before make all runs
+    mkdir -p assets/bundles
+    cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
+
     make all
 else
     echo "Base Apptron assets found. Skipping make all to speed up startup."
@@ -204,21 +211,49 @@ else
     cd worker && npm ci && cd ..
 fi
 
-echo "Checking if pum-cli needs to be built and injected..."
-# Run the distro script to ensure pum tools are compiled (it's fast if nothing changed)
-(cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
+# Check if CLI needs rebuilding by comparing timestamps
+CLI_CHANGED=false
+if [ ! -f "$REPO_ROOT/build/distro/bundle/bin/pum.wasm" ]; then
+    CLI_CHANGED=true
+elif [ -n "$(find "$REPO_ROOT/apptron/services/pum-cli" -newer "$REPO_ROOT/build/distro/bundle/bin/pum.wasm" 2>/dev/null | head -n 1)" ]; then
+    CLI_CHANGED=true
+fi
 
-# Extract base sys.tar.gz to a temp folder, merge in pum tools, and repack
-echo "Merging pum-cli into Phase 2 sys.tar.gz..."
-TMP_BUNDLE_DIR=$(mktemp -d)
-tar -xzf "assets/bundles/sys.tar.gz" -C "$TMP_BUNDLE_DIR"
+NEEDS_MERGE=false
+if [ ! -f "assets/bundles/sys.tar.gz" ]; then
+    echo "Base sys.tar.gz not found in worker, will copy and merge..."
+    NEEDS_MERGE=true
+elif ! tar -tf "assets/bundles/sys.tar.gz" | grep -q "rootfs/bin/pum"; then
+    echo "pum not found in worker sys.tar.gz, will merge..."
+    NEEDS_MERGE=true
+elif [ "$CLI_CHANGED" = true ]; then
+    echo "CLI source changed, will rebuild and merge..."
+    NEEDS_MERGE=true
+fi
 
-# Copy custom pum binaries over the extracted rootfs
-cp -r "$REPO_ROOT/build/distro/sys-bundle/rootfs/"* "$TMP_BUNDLE_DIR/rootfs/"
+if [ "$NEEDS_MERGE" = true ]; then
+    echo "Restoring clean base sys.tar.gz from repository for merge..."
+    mkdir -p assets/bundles
+    cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
 
-# Repack the final bundle
-tar -C "$TMP_BUNDLE_DIR" -czf "assets/bundles/sys.tar.gz" rootfs kernel v86
-rm -rf "$TMP_BUNDLE_DIR"
+    if [ "$CLI_CHANGED" = true ]; then
+        echo "Checking if pum-cli needs to be built and injected..."
+        (cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
+    fi
+
+    echo "Merging pum-cli into Phase 2 sys.tar.gz..."
+    TMP_BUNDLE_DIR=$(mktemp -d)
+    tar -xzf "assets/bundles/sys.tar.gz" -C "$TMP_BUNDLE_DIR"
+
+    # Copy custom pum binaries over the extracted rootfs
+    cp -r "$REPO_ROOT/build/distro/sys-bundle/rootfs/"* "$TMP_BUNDLE_DIR/rootfs/"
+
+    # Repack the final bundle
+    tar -C "$TMP_BUNDLE_DIR" -czf "assets/bundles/sys.tar.gz" rootfs kernel v86
+    rm -rf "$TMP_BUNDLE_DIR"
+else
+    echo "sys.tar.gz is up to date with pum-cli. Skipping merge."
+fi
 
 echo "Starting Phase 2 Worker in dev mode..."
 echo "Mock Auth is ENABLED in apptron/worker/src/auth.ts."
