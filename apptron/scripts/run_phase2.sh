@@ -185,6 +185,13 @@ sed -i.bak "s|\$(DOCKER_CMD) pull --platform linux/amd64 ghcr.io/tractordev/wani
 sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
 sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
 
+# Copy the checked-in base sys.tar.gz bundle from the repo to the worker assets BEFORE make all
+echo "Ensuring base sys.tar.gz is present from repository..."
+mkdir -p assets/bundles
+if [ ! -f "assets/bundles/sys.tar.gz" ]; then
+    cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
+fi
+
 # Only run make clean and make all if assets/wanix.wasm is missing
 if [ ! -f "assets/wanix.wasm" ]; then
     echo "Base Apptron assets not found. Running make clean and make all..."
@@ -192,6 +199,11 @@ if [ ! -f "assets/wanix.wasm" ]; then
     # Ensure wrangler is installed locally in the worker package
     echo "Installing worker dependencies..."
     cd worker && npm ci && cd ..
+
+    # make clean deletes sys.tar.gz, so copy it back before make all runs
+    mkdir -p assets/bundles
+    cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
+
     make all
 else
     echo "Base Apptron assets found. Skipping make all to speed up startup."
@@ -220,7 +232,7 @@ elif [ "$CLI_CHANGED" = true ]; then
 fi
 
 if [ "$NEEDS_MERGE" = true ]; then
-    echo "Copying base sys.tar.gz from repository..."
+    echo "Restoring clean base sys.tar.gz from repository for merge..."
     mkdir -p assets/bundles
     cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
 
