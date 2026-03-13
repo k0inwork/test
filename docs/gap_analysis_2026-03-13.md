@@ -69,10 +69,9 @@ It lists the legacy endpoints across all Django apps and identifies whether they
     *   `/products/products/<pk>/` -> `product/nodes/<pk>`
     *   `/products/nodes-problems/` & `/products/zabbix_problems/` -> Unified into `external-data/problems`.
 *   **Missing Features:**
-    *   **Node Management:** `/products/create/`, `/products/<pk>/edit/`, `/products/<pk>/delete/`.
-    *   **Node Control:** `/products/<pk>/stop/`, `/products/<pk>/start/`, `/products/spdu_request/`.
+    *   **Node Management & Control (Deprecated):** `/products/create/`, `/products/<pk>/edit/`, `/products/<pk>/delete/`, `/products/<pk>/stop/`, `/products/<pk>/start/`, `/products/spdu_request/`. *Nodes are strictly imported via external data synchronization and are never directly created, modified, started, or stopped manually through the GUI.*
     *   **Console/Terminal:** `/modules/console` (Legacy terminal). *Note: The new `terminal` Go microservice is intended to handle SSH/console access.*
-*   **Required Action:** Implement mutations for nodes. Wire up the start/stop controls to the `inventory` service or hardware controllers. Ensure the new `terminal` service fully replaces the `/modules/console` functionality.
+*   **Required Action:** Ensure the new `terminal` service fully replaces the `/modules/console` functionality. Explicit node mutations (create/edit/delete/start/stop) are explicitly **deprecated** and do not need to be ported.
 
 ## 7. `tasks` App (Asynchronous Jobs)
 **Original Responsibility:** Tracking background tasks (Celery).
@@ -91,6 +90,6 @@ It lists the legacy endpoints across all Django apps and identifies whether they
 
 ---
 **Summary of Major Technical Debts in Go:**
-1. **Lack of Mutation Support:** Most Go microservices currently only implement `GET` (read-only) operations. `POST`, `PUT`, and `DELETE` handlers must be implemented across `identity`, `inventory`, `network`, `gws`, `keyservice`, and `product`.
+1. **Lack of Mutation Support:** Most Go microservices currently only implement `GET` (read-only) operations. `POST`, `PUT`, and `DELETE` handlers must be implemented across `identity`, `inventory`, `network`, and `keyservice`. (Note: `product` node mutations and `gws` are deprecated).
 2. **Missing External Controller Integration:** Hardware actions (rebooting switches, starting VMs, allocating IPs) are not yet wired up. The `external-modules` proxy needs to fully implement the RabbitMQ RPC payload generation for DHCP, DNS, IPMI, and PDU control.
 3. **Missing Domains:** The `core` (global settings) domain is completely absent from the Go architecture.

@@ -52,13 +52,8 @@ These tasks are prioritized by domain criticality.
 *   **Actions:**
     *   Create a new `core` microservice (or append to `registry`) to serve `core/settings` and `core/readyness` endpoints, migrating away from `system.yaml` if runtime mutation is needed.
 
-**8. `product` Node Actions**
-*   **Goal:** Control node state.
-*   **Actions:**
-    *   Implement Start/Stop logic for products/nodes (`/products/<pk>/start`, `/products/<pk>/stop`).
-    *   Implement CRUD logic for `/products/create` and `/products/<pk>/edit`.
-
 ## Deprecated / Deferred Scope
+*   **Product Node Mutations:** Explicitly creating, editing, deleting, starting, or stopping `Node`s is deprecated. Nodes are strictly imported and managed via external synchronization.
 *   **Access Rights (RBAC):** Legacy `accounts/access/` roles and views are explicitly deferred. Basic groups are sufficient for the current sprint.
-*   **History Sessions:** `/gws/historysession/` remains unneeded in the new architecture.
+*   **History Sessions:** `/gws/historysession/` and `Session` logic remains unneeded in the new architecture.
 *   **Data Services:** `/services/listdataservice/` remains unneeded in the new architecture.
