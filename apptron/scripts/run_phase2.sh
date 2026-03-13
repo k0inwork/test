@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-REPO_ROOT=$(git rev-parse --show-toplevel)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
 APPTRON_DIR="$REPO_ROOT/apptron/apptron"
 
 if [ ! -d "$APPTRON_DIR" ]; then
@@ -184,13 +185,35 @@ sed -i.bak "s|\$(DOCKER_CMD) pull --platform linux/amd64 ghcr.io/tractordev/wani
 sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
 sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
 
-make clean
+# Only run make clean and make all if assets/bundles/sys.tar.gz is missing
+if [ ! -f "assets/bundles/sys.tar.gz" ]; then
+    echo "Base sys.tar.gz not found. Running make clean and make all..."
+    make clean
+    # Ensure wrangler is installed locally in the worker package
+    echo "Installing worker dependencies..."
+    cd worker && npm ci && cd ..
+    make all
+else
+    echo "Base sys.tar.gz found. Skipping make all to speed up startup."
+    echo "Installing worker dependencies..."
+    cd worker && npm ci && cd ..
+fi
 
-# Ensure wrangler is installed locally in the worker package
-echo "Installing worker dependencies..."
-cd worker && npm ci && cd ..
+echo "Checking if pum-cli needs to be built and injected..."
+# Run the distro script to ensure pum tools are compiled (it's fast if nothing changed)
+(cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
 
-make all
+# Extract base sys.tar.gz to a temp folder, merge in pum tools, and repack
+echo "Merging pum-cli into Phase 2 sys.tar.gz..."
+TMP_BUNDLE_DIR=$(mktemp -d)
+tar -xzf "assets/bundles/sys.tar.gz" -C "$TMP_BUNDLE_DIR"
+
+# Copy custom pum binaries over the extracted rootfs
+cp -r "$REPO_ROOT/build/distro/sys-bundle/rootfs/"* "$TMP_BUNDLE_DIR/rootfs/"
+
+# Repack the final bundle
+tar -C "$TMP_BUNDLE_DIR" -czf "assets/bundles/sys.tar.gz" rootfs kernel v86
+rm -rf "$TMP_BUNDLE_DIR"
 
 echo "Starting Phase 2 Worker in dev mode..."
 echo "Mock Auth is ENABLED in apptron/worker/src/auth.ts."
