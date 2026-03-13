@@ -29,32 +29,10 @@ func initDB() {
 	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{})
 }
 
-func main() {
-	logging.Init("inventory")
-	initDB()
-	provider := &external.GraphQLClient{Endpoint: "http://localhost:8089/query"}
-	engine := sync.NewSyncEngine(db, provider)
-	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
-		Name:         "inventory",
-		Endpoint:     "http://localhost:8083",
-		Capabilities: []logging.CapabilityRegistration{
-			{Name: "inventory", Endpoints: []string{"/"}},
-			{Name: "switches", Endpoints: []string{"/switches"}},
-			{Name: "ports", Endpoints: []string{"/ports"}},
-			{Name: "sync", Endpoints: []string{"/sync"}},
-			{Name: "graphql", Endpoints: []string{"/query"}},
-			{Name: "configurable", Endpoints: []string{"/configurable"}},
-		},
-		IsCore:  false,
-		OrderID: 2,
-		Menu:    []logging.MenuItem{{Label: "Switches", Path: "/switches"}},
-	})
-
-	// Initialize tasklib to communicate with the central task microservice
-	tasklib.Init("http://localhost:8085")
-
+func setupRouter(dbConn *gorm.DB, engine *sync.SyncEngine) *gin.Engine {
 	r := gin.Default()
 	r.Use(logging.GinMiddleware())
+	db = dbConn
 
 	// Configurable endpoint to receive system configuration
 	r.POST("/configurable", func(c *gin.Context) {
@@ -69,23 +47,6 @@ func main() {
 		// Inventory could use this to configure its graphql provider or sync engine if it depended on external configurations
 		c.JSON(http.StatusOK, gin.H{"status": "configuration applied"})
 	})
-
-	// Register recurring sync task
-	tasklib.RegisterEndpoint(
-		"http://localhost:8088", // registry URL
-		r,
-		"/inventory/task/sync", // local webhook path
-		"@every 1m",            // schedule
-		"http://localhost:8083/inventory/task/sync", // target URL reachable by task service
-		"system",               // username
-		"sync-switches",        // operation
-		"inventory-all",        // object ID
-		"Switch",               // class name
-		func(payload []byte) error {
-			slog.Info("Executing recurring inventory sync")
-			return engine.Run()
-		},
-	)
 
 	r.GET("/switches", func(c *gin.Context) {
 		var switches []models.Switch
@@ -113,6 +74,52 @@ func main() {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db, Sync: engine}}))
 	r.POST("/query", func(c *gin.Context) { srv.ServeHTTP(c.Writer, c.Request) })
 	r.GET("/", func(c *gin.Context) { playground.Handler("GraphQL", "/query").ServeHTTP(c.Writer, c.Request) })
+
+	return r
+}
+
+func main() {
+	logging.Init("inventory")
+	initDB()
+	provider := &external.GraphQLClient{Endpoint: "http://localhost:8089/query"}
+	engine := sync.NewSyncEngine(db, provider)
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "inventory",
+		Endpoint:     "http://localhost:8083",
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "inventory", Endpoints: []string{"/"}},
+			{Name: "switches", Endpoints: []string{"/switches"}},
+			{Name: "ports", Endpoints: []string{"/ports"}},
+			{Name: "sync", Endpoints: []string{"/sync"}},
+			{Name: "graphql", Endpoints: []string{"/query"}},
+			{Name: "configurable", Endpoints: []string{"/configurable"}},
+		},
+		IsCore:  false,
+		OrderID: 2,
+		Menu:    []logging.MenuItem{{Label: "Switches", Path: "/switches"}},
+	})
+
+	// Initialize tasklib to communicate with the central task microservice
+	tasklib.Init("http://localhost:8085")
+
+	r := setupRouter(db, engine)
+
+	// Register recurring sync task
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088", // registry URL
+		r,
+		"/inventory/task/sync", // local webhook path
+		"@every 1m",            // schedule
+		"http://localhost:8083/inventory/task/sync", // target URL reachable by task service
+		"system",               // username
+		"sync-switches",        // operation
+		"inventory-all",        // object ID
+		"Switch",               // class name
+		func(payload []byte) error {
+			slog.Info("Executing recurring inventory sync")
+			return engine.Run()
+		},
+	)
 
 	slog.Info("Inventory starting", "port", 8083)
 	r.Run(":8083")

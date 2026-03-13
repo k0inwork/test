@@ -11,22 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	logging.Init("external-data")
-
-	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
-		Name:         "external-data",
-		Endpoint:     "http://localhost:8089",
-		Capabilities: []logging.CapabilityRegistration{
-			{Name: "external-data", Endpoints: []string{"/"}},
-			{Name: "glpi", Endpoints: []string{"/glpi"}},
-			{Name: "zabbix", Endpoints: []string{"/zabbix"}},
-			{Name: "graphql", Endpoints: []string{"/query"}},
-		},
-		IsCore:       false,
-	})
-
-	gin.SetMode(gin.ReleaseMode)
+func setupRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
@@ -66,6 +51,27 @@ func main() {
 			},
 		})
 	})
+
+	return r
+}
+
+func main() {
+	logging.Init("external-data")
+
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "external-data",
+		Endpoint:     "http://localhost:8089",
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "external-data", Endpoints: []string{"/"}},
+			{Name: "glpi", Endpoints: []string{"/glpi"}},
+			{Name: "zabbix", Endpoints: []string{"/zabbix"}},
+			{Name: "graphql", Endpoints: []string{"/query"}},
+		},
+		IsCore:       false,
+	})
+
+	gin.SetMode(gin.ReleaseMode)
+	r := setupRouter()
 
 	slog.Info("External Data Service starting", "port", 8089)
 	if err := r.Run(":8089"); err != nil {
