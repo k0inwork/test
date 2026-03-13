@@ -52,6 +52,11 @@ download_dependency() {
         # Flatten extraction (move the binary out of its versioned folder directly into .bin)
         find "$BIN_DIR" -name "$BIN_NAME" -type f -exec mv {} "$BIN_DIR/" \;
         chmod +x "$BIN_DIR/$BIN_NAME"
+
+        # If prometheus, also move prometheus.yml to the root directory
+        if [ "$DEP_NAME" = "prometheus" ]; then
+            find "$BIN_DIR" -name "prometheus.yml" -type f -exec mv {} ./prometheus.yml \;
+        fi
     fi
 }
 
