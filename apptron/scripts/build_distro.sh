@@ -13,6 +13,7 @@ APPTRON_SRC="$APPTRON_DIR/apptron"
 
 echo "Initializing build directory..."
 rm -rf "$BUNDLE_DIR"
+rm -rf "$BUILD_DIR/sys-bundle"
 mkdir -p "$BUNDLE_DIR/bin"
 mkdir -p "$FINAL_ASSETS_DIR"
 
