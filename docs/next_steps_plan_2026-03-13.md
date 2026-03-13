@@ -41,12 +41,13 @@ These tasks are prioritized by domain criticality.
 *   **Actions:**
     *   Convert the `task` service to support Server-Sent Events (SSE) or WebSockets on the `/tasks` endpoint, streaming live status updates for background processes.
 
-**6. `identity` Microservice (User Onboarding & Provisioning Workflow)**
-*   **Goal:** Port the GUI workflow for new user application, admin approval, and LDAP provisioning (`RegistrationApplication`).
+**6. `identity` Microservice (LDAP User Management & Onboarding)**
+*   **Goal:** Port the user management mutations and the GUI workflow for new user application, admin approval, and LDAP provisioning (`RegistrationApplication`).
 *   **Actions:**
-    *   Implement REST/GraphQL APIs in `identity` to allow users to apply for access.
-    *   Implement an API for admins to review applications, assign groups, and generate an email verification code.
-    *   Implement the final signup endpoint that takes the code, sets the user password, and officially creates the user profile in LDAP (via the `external-modules` LDAP integration).
+    *   **User Mutations:** Implement API endpoints for the three supported mutations: Change Password, Edit User Data, and Block User. Wire these directly into the external LDAP directory to manipulate the data.
+    *   **Onboarding Workflow:** Implement REST/GraphQL APIs in `identity` to allow users to apply for access.
+    *   **Onboarding Workflow:** Implement an API for admins to review applications, assign groups, and generate an email verification code.
+    *   **Onboarding Workflow:** Implement the final signup endpoint that takes the code, sets the user password, and officially creates the user profile in LDAP (via the `external-modules` LDAP integration).
 
 **7. Switch Configuration Management**
 *   **Goal:** Replicate the TFTP config backup and restore logic.
