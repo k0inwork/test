@@ -185,16 +185,21 @@ sed -i.bak "s|\$(DOCKER_CMD) pull --platform linux/amd64 ghcr.io/tractordev/wani
 sed -i.bak '/$(DOCKER_CMD) create --name apptron-wanix.*/d' Makefile
 sed -i.bak '/$(DOCKER_CMD) cp apptron-wanix.*/d' Makefile
 
-# Only run make clean and make all if assets/bundles/sys.tar.gz is missing
-if [ ! -f "assets/bundles/sys.tar.gz" ]; then
-    echo "Base sys.tar.gz not found. Running make clean and make all..."
+# Copy the checked-in base sys.tar.gz bundle from the repo to the worker assets
+echo "Copying base sys.tar.gz from repository..."
+mkdir -p assets/bundles
+cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
+
+# Only run make clean and make all if assets/wanix.wasm is missing
+if [ ! -f "assets/wanix.wasm" ]; then
+    echo "Base Apptron assets not found. Running make clean and make all..."
     make clean
     # Ensure wrangler is installed locally in the worker package
     echo "Installing worker dependencies..."
     cd worker && npm ci && cd ..
     make all
 else
-    echo "Base sys.tar.gz found. Skipping make all to speed up startup."
+    echo "Base Apptron assets found. Skipping make all to speed up startup."
     echo "Installing worker dependencies..."
     cd worker && npm ci && cd ..
 fi
