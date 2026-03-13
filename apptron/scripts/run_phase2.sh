@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-REPO_ROOT=$(git rev-parse --show-toplevel)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
 APPTRON_DIR="$REPO_ROOT/apptron/apptron"
 
 if [ ! -d "$APPTRON_DIR" ]; then
@@ -200,7 +201,7 @@ fi
 
 echo "Checking if pum-cli needs to be built and injected..."
 # Run the distro script to ensure pum tools are compiled (it's fast if nothing changed)
-bash "$REPO_ROOT/apptron/scripts/build_distro.sh"
+(cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
 
 # Extract base sys.tar.gz to a temp folder, merge in pum tools, and repack
 echo "Merging pum-cli into Phase 2 sys.tar.gz..."
