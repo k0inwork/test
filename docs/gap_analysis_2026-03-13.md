@@ -51,7 +51,7 @@ It lists the legacy endpoints across all Django apps and identifies whether they
 *   **Status in Go Architecture:** The `gws` service currently exists as a standalone microservice exposing `/gateways` and `/sessions`.
 *   **Analysis & Required Action:** In the original legacy codebase, `Gw` objects were **purely internal** entities simply tracking a name, address, state, and region. They do not require exposure as a standalone microservice or a separate entity. The concept of a `Gw` is functionally equivalent to a `Node` in the new system.
     *   **Action:** The standalone `gws` microservice should be **deprecated**. `Gw` attributes and logic must be merged directly into the `models.Node` structure within the `product` microservice.
-    *   **Session Management:** The `Session` model simply linked `gw1` and `gw2` and tracked network test status (`tx_bytes`, `subnet`). This tracking should be implemented as an internal API or linked relational object between `Node` models within the `product` or `network` services, rather than requiring a dedicated public microservice.
+    *   **Session Management:** The `Session` model is unused legacy code and is **completely unneeded**. All connectivity logic and tracking is actually handled via Key Services.
 
 ## 5. `services` App (Connectivity Orders)
 **Original Responsibility:** High-level abstractions for key services and data transmission orders.
@@ -60,7 +60,7 @@ It lists the legacy endpoints across all Django apps and identifies whether they
     *   `/services/listdataservice/` -> *Deprecated / Dropped*
 *   **Missing Features:**
     *   **Key Service Management:** `/services/createkeyservice/`, `/services/keyservice/<pk>/` (view), `/services/keyservice/<pk>/delete/`.
-*   **Required Action:** Expand `keyservice` to handle creation and deletion. Creating a key service requires linking two nodes and assigning configuration via the `network` service.
+*   **Required Action:** Expand `keyservice` to handle full CRUD operations. `KeyService` is the source of truth for all connectivity orders, and the real underlying logic (hardware routing configurations) is executed asynchronously via the `route` external module.
 
 ## 6. `products` App (Nodes & Monitoring)
 **Original Responsibility:** Virtual/physical node management and Zabbix problem aggregation.

@@ -16,9 +16,9 @@ These tasks are prioritized by domain criticality.
 **2. `product` Microservice (Node Refactoring & Gateways)**
 *   **Goal:** Merge the internal concept of `Gw` (Gateways) into the `Node` model, as Gateways were purely internal entities in the legacy architecture.
 *   **Actions:**
-    *   **Deprecate** the standalone `gws` Go microservice.
-    *   Migrate gateway attributes (state, region) from the `models.Gw` structure into `models.Node` within the `product` service.
-    *   Migrate `Session` tracking logic (linking two nodes to track `tx_bytes` and assigned subnets) into the `product` or `network` microservice as an internal associative model, rather than requiring standalone public `gws/sessions` endpoints.
+    *   **Deprecate** the standalone `gws` Go microservice entirely.
+    *   Migrate gateway attributes (state, region) from the `models.Gw` structure directly into `models.Node` within the `product` service.
+    *   **Drop** the `Session` model entirely as it is unused legacy code.
 
 **3. `inventory` Microservice (Hardware Management & Topology)**
 *   **Goal:** Allow physical hardware modifications and track port-level connections.
@@ -30,10 +30,10 @@ These tasks are prioritized by domain criticality.
 ## Medium Priority (Services, Configuration, and Async Feedback)
 
 **4. `keyservice` Microservice (Connectivity Orders)**
-*   **Goal:** Fully implement the creation of a "key service".
+*   **Goal:** Fully implement the creation and deletion of a "key service".
 *   **Actions:**
     *   Implement POST/DELETE handlers for `keyservice`.
-    *   Wire the service creation to link target nodes and provision IP/subnets via the `network` service.
+    *   Wire the service creation logic to trigger asynchronous routing configurations using the `route` external module.
 
 **5. `task` Microservice (Async Updates)**
 *   **Goal:** Replicate the live progress bar functionality of legacy Celery tasks.
