@@ -12,7 +12,7 @@ It lists the legacy endpoints across all Django apps and identifies whether they
     *   `/accounts/group/list` -> `identity/groups`
     *   `/accounts/activitylist/` -> `identity/activitylist`
 *   **Missing Features:**
-    *   **Authentication Flow:** `/accounts/login/`, `/accounts/logout/`. *Note: The new system relies on Apptron/Hanko for auth.*
+    *   **Authentication Flow:** `/accounts/login/`, `/accounts/logout/`. *Note: Hanko authentication is currently mocked/bypassed. In the future, any external auth provider (like Hanko) must route through the `identity` module to ensure LDAP synchronization.*
     *   **User Management & Mutations:** The original codebase supports three core user mutations: `/accounts/edit/<username>/` (Change User Data), `/accounts/changepassword/` (Change Password), and `/accounts/block/<username>/` (Block User). **Crucially, all of these actions simply perform direct updates on the backend LDAP directory.**
     *   **Registration Application Workflow:** The endpoints under `/accounts/register_application/` represent a complete GUI workflow for new user onboarding.
         1. A user applies for access.
@@ -21,7 +21,7 @@ It lists the legacy endpoints across all Django apps and identifies whether they
         4. The user completes signup, which provisions the user account and password directly into LDAP (`RegistrationApplicationSignup`).
     *   **Access Rules (Deprecated for now):** Everything under `accounts/access/` (views, rights, create, delete) is explicitly **not needed yet**. Basic users/groups are sufficient for now.
     *   **Miscellaneous:** `/accounts/activity_list_export/`, `/accounts/support/`, `/accounts/monitoring/`, `/accounts/ssh_session_search`.
-*   **Required Action:** Expand `identity` to support the 3 specific user mutations (change password, edit data, block user) by mapping them as RPC/External-Module calls directly to LDAP. The Registration Workflow must be analyzed—if Apptron/Hanko handles auth, it must integrate with these LDAP provisioning steps, or the Go `identity` service must natively replicate the approval workflow.
+*   **Required Action:** Expand `identity` to support the 3 specific user mutations (change password, edit data, block user) by mapping them as RPC/External-Module calls directly to LDAP. The Registration Workflow must be natively replicated in the `identity` microservice, ensuring that any future integration with Hanko triggers the proper LDAP provisioning and approval logic.
 
 ## 2. `data` App (Inventory & Hardware)
 **Original Responsibility:** Management of switches, PDUs, IPMI nodes, configuration management, and physical connections.
