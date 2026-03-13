@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"pum-go/pkg/external"
 	"pum-go/pkg/models"
+	"pum-go/pkg/logging"
 	"pum-go/services/product/sync"
 	"testing"
 
@@ -23,22 +24,12 @@ func setupProductTestDB() *gorm.DB {
 
 func TestProductAPI(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	logging.Init("test-product")
 	testDB := setupProductTestDB()
-	db = testDB
 
-	r := gin.Default()
 	provider := &external.MockProvider{}
-	engine := sync.NewSyncEngine(db, provider)
-
-	r.GET("/nodes", func(c *gin.Context) {
-		var products []models.Product
-		db.Find(&products)
-		c.JSON(http.StatusOK, products)
-	})
-	r.POST("/sync", func(c *gin.Context) {
-		engine.Run()
-		c.JSON(http.StatusOK, gin.H{"message": "Sync completed"})
-	})
+	engine := sync.NewSyncEngine(testDB, provider)
+	r := setupRouter(testDB, engine)
 
 	// Test GET /nodes (Empty)
 	req, _ := http.NewRequest("GET", "/nodes", nil)

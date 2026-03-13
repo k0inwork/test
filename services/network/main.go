@@ -19,23 +19,10 @@ func initDB() {
 	db.AutoMigrate(&models.Subnet{}, &models.IPAddress{})
 }
 
-func main() {
-	logging.Init("network")
-	initDB()
-	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
-		Name:         "network",
-		Endpoint:     "http://localhost:8084",
-		Capabilities: []logging.CapabilityRegistration{
-			{Name: "network", Endpoints: []string{"/"}},
-			{Name: "ipam", Endpoints: []string{"/ipam"}},
-			{Name: "routing", Endpoints: []string{"/routing"}},
-		},
-		IsCore:       false,
-		OrderID:      3,
-		Menu:         []logging.MenuItem{{Label: "Subnets", Path: "/subnets"}},
-	})
+func setupRouter(dbConn *gorm.DB) *gin.Engine {
 	r := gin.Default()
 	r.Use(logging.GinMiddleware())
+	db = dbConn
 	r.GET("/subnets", func(c *gin.Context) {
 		var subnets []models.Subnet
 		db.Find(&subnets)
@@ -58,6 +45,27 @@ func main() {
 			{"name": "router.local", "ip": "10.10.1.1", "type": "A"},
 		})
 	})
+
+	return r
+}
+
+func main() {
+	logging.Init("network")
+	initDB()
+	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:         "network",
+		Endpoint:     "http://localhost:8084",
+		Capabilities: []logging.CapabilityRegistration{
+			{Name: "network", Endpoints: []string{"/"}},
+			{Name: "ipam", Endpoints: []string{"/ipam"}},
+			{Name: "routing", Endpoints: []string{"/routing"}},
+		},
+		IsCore:       false,
+		OrderID:      3,
+		Menu:         []logging.MenuItem{{Label: "Subnets", Path: "/subnets"}},
+	})
+
+	r := setupRouter(db)
 
 	slog.Info("Network starting", "port", 8084)
 	r.Run(":8084")

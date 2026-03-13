@@ -23,6 +23,25 @@ func initDB() {
 	db.AutoMigrate(&models.Product{})
 }
 
+func setupRouter(dbConn *gorm.DB, engine *sync.SyncEngine) *gin.Engine {
+	r := gin.Default()
+	r.Use(logging.GinMiddleware())
+	db = dbConn
+
+	r.GET("/nodes", func(c *gin.Context) {
+		var products []models.Product
+		db.Find(&products)
+		c.JSON(200, products)
+	})
+
+	r.POST("/sync", func(c *gin.Context) {
+		engine.Run()
+		c.JSON(200, gin.H{"message": "Sync completed"})
+	})
+
+	return r
+}
+
 func main() {
 	logging.Init("product")
 	initDB()
@@ -43,8 +62,7 @@ func main() {
 	// Initialize tasklib to communicate with the central task microservice
 	tasklib.Init("http://localhost:8085")
 
-	r := gin.Default()
-	r.Use(logging.GinMiddleware())
+	r := setupRouter(db, engine)
 
 	// Register recurring sync task
 	tasklib.RegisterEndpoint(
@@ -62,12 +80,6 @@ func main() {
 			return engine.Run()
 		},
 	)
-
-	r.GET("/nodes", func(c *gin.Context) {
-		var products []models.Product
-		db.Find(&products)
-		c.JSON(200, products)
-	})
 
 	slog.Info("Product starting", "port", 8082)
 	r.Run(":8082")
