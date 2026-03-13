@@ -14,11 +14,11 @@ These tasks are prioritized by domain criticality.
     *   Integrate these mutations with the `external-modules` proxy/RabbitMQ logic to dispatch physical configuration commands to the backend `ip-module`.
 
 **2. `product` Microservice (Node Refactoring & Gateways)**
-*   **Goal:** Merge the concept of `Gw` (Gateways) into the `Node` model, as Gateways were purely internal entities in the legacy architecture and do not warrant a separate service.
+*   **Goal:** Merge the internal concept of `Gw` (Gateways) into the `Node` model, as Gateways were purely internal entities in the legacy architecture.
 *   **Actions:**
     *   **Deprecate** the standalone `gws` Go microservice.
-    *   Migrate any necessary gateway attributes/state from the `models.Gw` structure into `models.Node` within the `product` service.
-    *   Shift VXLAN session orchestration logic (linking nodes/gateways) into an internal control-plane process within `product` or `network`, removing the need for public `gws/sessions` REST endpoints.
+    *   Migrate gateway attributes (state, region) from the `models.Gw` structure into `models.Node` within the `product` service.
+    *   Migrate `Session` tracking logic (linking two nodes to track `tx_bytes` and assigned subnets) into the `product` or `network` microservice as an internal associative model, rather than requiring standalone public `gws/sessions` endpoints.
 
 **3. `inventory` Microservice (Hardware Management & Topology)**
 *   **Goal:** Allow physical hardware modifications and track port-level connections.
@@ -30,10 +30,10 @@ These tasks are prioritized by domain criticality.
 ## Medium Priority (Services, Configuration, and Async Feedback)
 
 **4. `keyservice` Microservice (Connectivity Orders)**
-*   **Goal:** Fully implement the orchestration of a "key service".
+*   **Goal:** Fully implement the creation of a "key service".
 *   **Actions:**
-    *   Implement POST/DELETE for `keyservice`.
-    *   Wire the service creation to automatically dispatch routing/tunneling commands to the `gws`/`network` services.
+    *   Implement POST/DELETE handlers for `keyservice`.
+    *   Wire the service creation to link target nodes and provision IP/subnets via the `network` service.
 
 **5. `task` Microservice (Async Updates)**
 *   **Goal:** Replicate the live progress bar functionality of legacy Celery tasks.
