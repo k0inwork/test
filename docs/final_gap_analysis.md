@@ -14,9 +14,9 @@ It lists the legacy endpoints across all Django apps and identifies whether they
 *   **Missing Features:**
     *   **Authentication Flow:** `/accounts/login/`, `/accounts/logout/`, `/accounts/changepassword/`, `/accounts/create/` (Registration). *Note: The new system relies on Apptron/Hanko for auth, but user profile syncing might be needed.*
     *   **User Management Actions:** `/accounts/edit/<username>/`, `/accounts/block/<username>/`, `/accounts/unblock/<username>/`, `/accounts/delete/<username>/`.
-    *   **Access Rules:** Everything under `accounts/access/` (views, rights, create, delete). Currently, the Go `identity` service only returns basic users/groups. True Role-Based Access Control (RBAC) mapping is missing.
+    *   **Access Rules (Deprecated for now):** Everything under `accounts/access/` (views, rights, create, delete) is explicitly **not needed yet**. Basic users/groups are sufficient for now.
     *   **Miscellaneous:** `/accounts/activity_list_export/`, `/accounts/register_application/` (OAuth/Tokens?), `/accounts/support/`, `/accounts/monitoring/`, `/accounts/ssh_session_search`.
-*   **Required Action:** Expand `identity` to support user mutations (edit, block, delete). Clarify the architecture for access rules (RBAC) in Go—whether it remains in `identity` or becomes a middleware/separate service.
+*   **Required Action:** Expand `identity` to support user mutations (edit, block, delete). Access Rules (RBAC) mapping can be deferred as it is not currently required.
 
 ## 2. `data` App (Inventory & Hardware)
 **Original Responsibility:** Management of switches, PDUs, IPMI nodes, configuration management, and physical connections.
@@ -97,4 +97,4 @@ It lists the legacy endpoints across all Django apps and identifies whether they
 **Summary of Major Technical Debts in Go:**
 1. **Lack of Mutation Support:** Most Go microservices currently only implement `GET` (read-only) operations. `POST`, `PUT`, and `DELETE` handlers must be implemented across `identity`, `inventory`, `network`, `gws`, `keyservice`, and `product`.
 2. **Missing External Controller Integration:** Hardware actions (rebooting switches, starting VMs, allocating IPs) are not yet wired up. The `external-modules` proxy needs to fully implement the RabbitMQ RPC payload generation for DHCP, DNS, IPMI, and PDU control.
-3. **Missing Domains:** The `accounts/access` (RBAC rules) and `core` (global settings) domains are completely absent from the Go architecture.
+3. **Missing Domains:** The `core` (global settings) domain is completely absent from the Go architecture.
