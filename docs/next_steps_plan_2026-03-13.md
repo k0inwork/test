@@ -30,10 +30,11 @@ These tasks are prioritized by domain criticality.
 ## Medium Priority (Services, Configuration, and Async Feedback)
 
 **4. `keyservice` Microservice (Connectivity Orders)**
-*   **Goal:** Fully implement the creation and deletion of a "key service".
+*   **Goal:** Fully implement the lifecycle (creation and deletion) of a "key service", fully integrating with the `route` external module.
 *   **Actions:**
-    *   Implement POST/DELETE handlers for `keyservice`.
-    *   Wire the service creation logic to trigger asynchronous routing configurations using the `route` external module.
+    *   Implement POST/DELETE handlers for `keyservice`. Note that these records are not simply database entries; they represent active routing commands.
+    *   **Creation:** Wire the creation of a `KeyService` record to automatically dispatch an asynchronous routing request to the `route` external module (`send_routing_request` logic).
+    *   **Deletion:** Wire the deletion (or archiving) of a `KeyService` record to automatically dispatch a delete API command to the `route` external module (`send_delete_request` logic) before updating the database status.
 
 **5. `task` Microservice (Async Updates)**
 *   **Goal:** Replicate the live progress bar functionality of legacy Celery tasks.

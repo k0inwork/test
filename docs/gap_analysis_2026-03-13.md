@@ -60,7 +60,9 @@ It lists the legacy endpoints across all Django apps and identifies whether they
     *   `/services/listdataservice/` -> *Deprecated / Dropped*
 *   **Missing Features:**
     *   **Key Service Management:** `/services/createkeyservice/`, `/services/keyservice/<pk>/` (view), `/services/keyservice/<pk>/delete/`.
-*   **Required Action:** Expand `keyservice` to handle full CRUD operations. `KeyService` is the source of truth for all connectivity orders, and the real underlying logic (hardware routing configurations) is executed asynchronously via the `route` external module.
+*   **Required Action:** Expand `keyservice` to handle creation and deletion. However, it's critical to note that `KeyService` records are not manually manipulated as static records:
+    *   **Creation:** When a `KeyService` is created, it must automatically dispatch an async API command to the `route` external module to configure the physical routing logic (`send_routing_request` in legacy code).
+    *   **Deletion/Removal:** When a `KeyService` is deleted or marked as archived, it must automatically dispatch a delete API command (`send_delete_request`) to the `route` external module to tear down the connectivity.
 
 ## 6. `products` App (Nodes & Monitoring)
 **Original Responsibility:** Virtual/physical node management and Zabbix problem aggregation.
