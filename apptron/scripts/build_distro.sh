@@ -48,6 +48,6 @@ echo "Adding kernel and v86 emulator assets to the bundle..."
 cp -r "$APPTRON_DIR/scripts/kernel" "$BUILD_DIR/sys-bundle/"
 cp -r "$APPTRON_DIR/scripts/v86" "$BUILD_DIR/sys-bundle/"
 
-tar -C "$BUILD_DIR/sys-bundle" -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" rootfs kernel v86
+(cd "$BUILD_DIR/sys-bundle" && tar -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" .)
 
 echo "Build complete! Custom Apptron assets are ready for embedding in $FINAL_ASSETS_DIR"

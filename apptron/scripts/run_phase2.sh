@@ -249,7 +249,8 @@ if [ "$NEEDS_MERGE" = true ]; then
     cp -r "$REPO_ROOT/build/distro/sys-bundle/rootfs/"* "$TMP_BUNDLE_DIR/rootfs/"
 
     # Repack the final bundle
-    tar -C "$TMP_BUNDLE_DIR" -czf "assets/bundles/sys.tar.gz" rootfs kernel v86
+    TARGET_TAR="$(pwd)/assets/bundles/sys.tar.gz"
+    (cd "$TMP_BUNDLE_DIR" && tar -czf "$TARGET_TAR" .)
     rm -rf "$TMP_BUNDLE_DIR"
 else
     echo "sys.tar.gz is up to date with pum-cli. Skipping merge."
