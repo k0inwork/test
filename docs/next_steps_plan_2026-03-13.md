@@ -13,11 +13,12 @@ These tasks are prioritized by domain criticality.
     *   Implement POST/PUT/DELETE handlers for `/network/dhcp` and `/network/dns`.
     *   Integrate these mutations with the `external-modules` proxy/RabbitMQ logic to dispatch physical configuration commands to the backend `ip-module`.
 
-**2. `gws` Microservice (Gateways & Tunnels)**
-*   **Goal:** Ensure full CRUD capability for overlay networks.
+**2. `product` Microservice (Node Refactoring & Gateways)**
+*   **Goal:** Merge the concept of `Gw` (Gateways) into the `Node` model, as Gateways were purely internal entities in the legacy architecture and do not warrant a separate service.
 *   **Actions:**
-    *   Implement `POST`, `PUT`, `DELETE` endpoints for `/gws/gateways`.
-    *   Implement full session orchestration logic (create/delete vxlan sessions between gateways) on `/gws/sessions` endpoints.
+    *   **Deprecate** the standalone `gws` Go microservice.
+    *   Migrate any necessary gateway attributes/state from the `models.Gw` structure into `models.Node` within the `product` service.
+    *   Shift VXLAN session orchestration logic (linking nodes/gateways) into an internal control-plane process within `product` or `network`, removing the need for public `gws/sessions` REST endpoints.
 
 **3. `inventory` Microservice (Hardware Management & Topology)**
 *   **Goal:** Allow physical hardware modifications and track port-level connections.

@@ -48,14 +48,10 @@ It lists the legacy endpoints across all Django apps and identifies whether they
 
 ## 4. `gws` App (Gateways & Tunnels)
 **Original Responsibility:** Overlay networks, gateways, and VXLAN session orchestration.
-*   **Ported Features (Implemented in Go `gws` service):**
-    *   `/gws/gws/` -> `gws/gateways`
-    *   `/gws/historysession/` -> *Deprecated / Dropped*
-    *   `/gws/createsession/` -> Partially covered by POST to `gws/sessions` (logic might be incomplete).
-*   **Missing Features:**
-    *   **Gateway Mutations:** `/gws/create/`, `/gws/<pk>/edit/`, `/gws/<pk>/delete/`.
-    *   **Session Management:** `/gws/session/<pk>/`, `/gws/session/<pk>/delete/`, `/gws/sessiontest/<pk>/`, `/gws/ownsession`.
-*   **Required Action:** Expand `gws` service to support full CRUD for Gateways and Sessions. Session creation/deletion must orchestrate the actual VXLAN tunnel configurations on network devices.
+*   **Status in Go Architecture:** The `gws` service currently exists as a standalone microservice exposing `/gateways` and `/sessions`.
+*   **Analysis & Required Action:** In the original legacy codebase, `Gw` objects were **purely internal** and do not require exposure as a standalone microservice or a separate entity. The concept of a `Gw` (Gateway) is functionally equivalent to a `Node` in the new system.
+    *   **Action:** The standalone `gws` microservice should be **deprecated**. `Gw` attributes and logic must be merged directly into the `models.Node` structure within the `product` microservice.
+    *   **Session Management:** VXLAN Session orchestration (linking nodes) should be implemented as an internal API or network control plane logic, likely orchestrated through the `product` or `network` services acting on `Node` objects, rather than through public REST endpoints.
 
 ## 5. `services` App (Connectivity Orders)
 **Original Responsibility:** High-level abstractions for key services and data transmission orders.
