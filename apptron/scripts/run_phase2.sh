@@ -168,6 +168,26 @@ rm patch_boot.py
 
 # Always start from a clean Makefile to ensure patches apply correctly on multiple runs
 git checkout Makefile 2>/dev/null || true
+git checkout worker/Dockerfile 2>/dev/null || true
+
+# Patch the worker Dockerfile so it uses the host's pre-built bundles rather than rebuilding them
+# This fixes busybox tar stripping './' prefixes AND prevents a 5-minute Docker rebuild on every wrangler startup
+echo "Patching worker/Dockerfile to copy pre-built bundles..."
+cat << 'EOF' > patch_dockerfile.py
+import re
+
+with open("worker/Dockerfile", "r") as f:
+    content = f.read()
+
+# Replace the worker container copying bundles from multi-stage builds
+# with copying them directly from the host's assets/bundles/ directory
+content = re.sub(r'COPY --from=bundle-sys /bundles/\* /bundles/', 'COPY assets/bundles/sys.tar.gz /bundles/sys.tar.gz', content)
+
+with open("worker/Dockerfile", "w") as f:
+    f.write(content)
+EOF
+python3 patch_dockerfile.py
+rm patch_dockerfile.py
 
 # To properly and cleanly resolve missing components
 echo "Patching Makefile to download dependencies cleanly..."
@@ -249,7 +269,8 @@ if [ "$NEEDS_MERGE" = true ]; then
     cp -r "$REPO_ROOT/build/distro/sys-bundle/rootfs/"* "$TMP_BUNDLE_DIR/rootfs/"
 
     # Repack the final bundle
-    tar -C "$TMP_BUNDLE_DIR" -czf "assets/bundles/sys.tar.gz" rootfs kernel v86
+    TARGET_TAR="$(pwd)/assets/bundles/sys.tar.gz"
+    (cd "$TMP_BUNDLE_DIR" && tar -czf "$TARGET_TAR" .)
     rm -rf "$TMP_BUNDLE_DIR"
 else
     echo "sys.tar.gz is up to date with pum-cli. Skipping merge."
