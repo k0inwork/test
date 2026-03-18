@@ -10,26 +10,28 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestInventorySyncEngine_Run(t *testing.T) {
+func TestSyncEngine_Run(t *testing.T) {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{})
+	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{}, &models.Ipmi{}, &models.PDU{})
 
 	provider := &external.MockProvider{}
 	engine := NewSyncEngine(db, provider)
 
-	// 1. Initial Sync
 	err := engine.Run()
 	assert.NoError(t, err)
 
-	var swCount int64
-	db.Model(&models.Switch{}).Count(&swCount)
-	assert.Equal(t, int64(2), swCount)
+	var switches []models.Switch
+	db.Find(&switches)
+	assert.Len(t, switches, 2)
+	assert.Equal(t, "MSK-SW-01", switches[0].Name)
 
-	var portCount int64
-	db.Model(&models.SwitchPort{}).Count(&portCount)
-	assert.Equal(t, int64(6), portCount) // 2 switches * 3 ports each
+	var ipmis []models.Ipmi
+	db.Find(&ipmis)
+	assert.Len(t, ipmis, 1)
+	assert.Equal(t, "Server-01", ipmis[0].Name)
 
-	var sw1 models.Switch
-	db.Where("glpi_id = ?", "sw-1").First(&sw1)
-	assert.Equal(t, "MSK-SW-01", sw1.Name)
+	var pdus []models.PDU
+	db.Find(&pdus)
+	assert.Len(t, pdus, 2)
+	assert.Equal(t, "MSK/1-ПОУ Rack 1", pdus[0].Name)
 }

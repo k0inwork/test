@@ -9,21 +9,25 @@ import (
 
 // GLPI Models
 type GNetworkEquipment struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Model   string `json:"model"`
-	IP      string `json:"ip"`
-	Status  string `json:"status"`
-	Serial  string `json:"serial"`
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Model        string `json:"model"`
+	IP           string `json:"ip"`
+	Status       string `json:"status"`
+	Serial       string `json:"serial"`
+	Manufacturer string `json:"manufacturer"`
+	Firmware     string `json:"firmware"`
 }
 
 type Gpdu struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Long    string `json:"long"`
-	Lat     string `json:"lat"`
-	Address string `json:"address"`
-	Model   string `json:"model"`
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Long         string `json:"long"`
+	Lat          string `json:"lat"`
+	Address      string `json:"address"`
+	Model        string `json:"model"`
+	Manufacturer string `json:"manufacturer"`
+	Serial       string `json:"serial"`
 }
 
 type GComputer struct {
@@ -31,6 +35,7 @@ type GComputer struct {
 	Name    string `json:"name"`
 	IP      string `json:"ip"`
 	Status  string `json:"status"`
+	DNS     string `json:"dns"`
 }
 
 // Zabbix Models
@@ -80,18 +85,23 @@ func (p *MockProvider) GetNetworkEquipment(ctx context.Context) ([]*GNetworkEqui
 					IP          string `json:"ip"`
 					Model       string `json:"model"`
 					Status      string `json:"status"`
+					Serial      string `json:"serial"`
+					Manufacturer string `json:"manufacturer"`
+					Firmware     string `json:"firmware"`
 				} `json:"switch_list"`
 			}
 			if err := json.Unmarshal(data, &wrapper); err == nil {
 				res := make([]*GNetworkEquipment, 0, len(wrapper.SwitchList))
 				for _, s := range wrapper.SwitchList {
 					res = append(res, &GNetworkEquipment{
-						ID:     s.ID,
-						Name:   s.Name,
-						Model:  s.Model,
-						IP:     s.IP,
-						Status: s.Status,
-						Serial: s.GlpiID,
+						ID:           s.ID,
+						Name:         s.Name,
+						Model:        s.Model,
+						IP:           s.IP,
+						Status:       s.Status,
+						Serial:       s.GlpiID,
+						Manufacturer: s.Manufacturer,
+						Firmware:     s.Firmware,
 					})
 				}
 				return res, nil
@@ -119,25 +129,27 @@ func (p *MockProvider) GetPDUs(ctx context.Context) ([]*Gpdu, error) {
 					SequentialNumber int    `json:"sequential_number"`
 					PouType          string `json:"pouType"`
 					Region           string `json:"region"`
+					Manufacturer     string `json:"manufacturer"`
+					Model            string `json:"model"`
+					Serial           string `json:"serial"`
 				} `json:"object_list"`
 			}
 			if err := json.Unmarshal(data, &wrapper); err == nil {
 				res := make([]*Gpdu, 0, len(wrapper.ObjectList))
 				for _, obj := range wrapper.ObjectList {
-					// We need to re-construct the name format that the sync engine expects:
-					// REGION/#seq-POU name
-					// Example: MSK/1-ПОУ Rack 1
 					fullName := obj.Region + "/" +
 						string(rune('0'+obj.SequentialNumber)) + "-" +
 						obj.PouType + " " + obj.Name
 
 					res = append(res, &Gpdu{
-						ID:      obj.GlpiUUID,
-						Name:    fullName,
-						Long:    obj.Long,
-						Lat:     obj.Lat,
-						Address: obj.Address,
-						Model:   "Generic PDU",
+						ID:           obj.GlpiUUID,
+						Name:         fullName,
+						Long:         obj.Long,
+						Lat:          obj.Lat,
+						Address:      obj.Address,
+						Model:        obj.Model,
+						Manufacturer: obj.Manufacturer,
+						Serial:       obj.Serial,
 					})
 				}
 				return res, nil
@@ -160,16 +172,22 @@ func (p *MockProvider) GetComputers(ctx context.Context) ([]*GComputer, error) {
 					Name   string `json:"name"`
 					IP     string `json:"ip"`
 					Status string `json:"status"`
+					DNS    []string `json:"dns"`
 				} `json:"ipmi_list"`
 			}
 			if err := json.Unmarshal(data, &wrapper); err == nil {
 				res := make([]*GComputer, 0, len(wrapper.IpmiList))
 				for _, c := range wrapper.IpmiList {
+					dns := ""
+					if len(c.DNS) > 0 {
+						dns = c.DNS[0]
+					}
 					res = append(res, &GComputer{
 						ID:     c.ID,
 						Name:   c.Name,
 						IP:     c.IP,
 						Status: c.Status,
+						DNS:    dns,
 					})
 				}
 				return res, nil

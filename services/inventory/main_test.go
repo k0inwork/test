@@ -21,7 +21,7 @@ import (
 
 func setupTestDB() *gorm.DB {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{})
+	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{}, &models.Ipmi{}, &models.PDU{})
 	return db
 }
 
@@ -48,20 +48,22 @@ func TestInventoryAPI(t *testing.T) {
 	assert.Equal(t, "test-switch", switches[0].Name)
 
 	// Test GET /pdus
+	testDB.Create(&models.PDU{Name: "test-pdu", IP: "10.0.0.5"})
 	req, _ = http.NewRequest("GET", "/pdus", nil)
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	var pdus []map[string]interface{}
+	var pdus []models.PDU
 	json.Unmarshal(w.Body.Bytes(), &pdus)
-	assert.Len(t, pdus, 2)
+	assert.Len(t, pdus, 1)
 
 	// Test GET /ipmi
+	testDB.Create(&models.Ipmi{Name: "test-ipmi", IP: "10.0.0.100"})
 	req, _ = http.NewRequest("GET", "/ipmi", nil)
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	var ipmis []map[string]interface{}
+	var ipmis []models.Ipmi
 	json.Unmarshal(w.Body.Bytes(), &ipmis)
 	assert.Len(t, ipmis, 1)
 

@@ -22,6 +22,9 @@ type Product struct {
 	PouType          string         `gorm:"size:10;default:'ПОУ'" json:"pou_type"`
 	Region           string         `gorm:"size:20;default:''" json:"region"`
 	Log              string         `gorm:"size:1000" json:"log"`
+	Manufacturer     string         `gorm:"size:100" json:"manufacturer"`
+	ModelName        string         `gorm:"size:100" json:"model_name"`
+	SerialNumber     string         `gorm:"size:100" json:"serial_number"`
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"index" json:"-"`

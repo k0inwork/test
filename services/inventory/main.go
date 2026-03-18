@@ -26,7 +26,7 @@ func initDB() {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{})
+	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{}, &models.Ipmi{}, &models.PDU{})
 }
 
 func setupRouter(dbConn *gorm.DB, engine *sync.SyncEngine) *gin.Engine {
@@ -54,21 +54,27 @@ func setupRouter(dbConn *gorm.DB, engine *sync.SyncEngine) *gin.Engine {
 		c.JSON(200, switches)
 	})
 
-	// PDU Mock list (formerly /data/pdu/list)
+	// PDU list
 	r.GET("/pdus", func(c *gin.Context) {
-		// Mock response mimicking legacy Django
-		c.JSON(200, []map[string]interface{}{
-			{"id": "pdu-1", "name": "MSK/1-ПОУ Rack 1", "ip": "10.10.1.5", "status": "Online"},
-			{"id": "pdu-2", "name": "SPB/2-ПОУ Rack 2", "ip": "10.20.1.5", "status": "Offline"},
-		})
+		var pdus []models.PDU
+		db.Find(&pdus)
+		c.JSON(200, pdus)
 	})
 
-	// IPMI Mock list (formerly /data/ipmi/list)
+	// IPMI list
 	r.GET("/ipmi", func(c *gin.Context) {
-		// Mock response mimicking legacy Django
-		c.JSON(200, []map[string]interface{}{
-			{"id": "ipmi-1", "name": "Server-01-IPMI", "ip": "10.10.2.100", "status": "Online"},
-		})
+		var ipmi []models.Ipmi
+		db.Find(&ipmi)
+		c.JSON(200, ipmi)
+	})
+
+	r.POST("/sync", func(c *gin.Context) {
+		if engine != nil {
+			engine.Run()
+			c.JSON(200, gin.H{"message": "Sync completed"})
+		} else {
+			c.JSON(400, gin.H{"error": "Sync engine not available"})
+		}
 	})
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db, Sync: engine}}))
@@ -89,6 +95,8 @@ func main() {
 		Capabilities: []logging.CapabilityRegistration{
 			{Name: "inventory", Endpoints: []string{"/"}},
 			{Name: "switches", Endpoints: []string{"/switches"}},
+			{Name: "pdus", Endpoints: []string{"/pdus"}},
+			{Name: "ipmi", Endpoints: []string{"/ipmi"}},
 			{Name: "ports", Endpoints: []string{"/ports"}},
 			{Name: "sync", Endpoints: []string{"/sync"}},
 			{Name: "graphql", Endpoints: []string{"/query"}},
@@ -96,7 +104,11 @@ func main() {
 		},
 		IsCore:  false,
 		OrderID: 2,
-		Menu:    []logging.MenuItem{{Label: "Switches", Path: "/switches"}},
+		Menu: []logging.MenuItem{
+			{Label: "Switches", Path: "/switches"},
+			{Label: "PDUs", Path: "/pdus"},
+			{Label: "IPMI", Path: "/ipmi"},
+		},
 	})
 
 	// Initialize tasklib to communicate with the central task microservice
@@ -112,9 +124,9 @@ func main() {
 		"@every 1m",            // schedule
 		"http://localhost:8083/inventory/task/sync", // target URL reachable by task service
 		"system",               // username
-		"sync-switches",        // operation
+		"sync-inventory",        // operation
 		"inventory-all",        // object ID
-		"Switch",               // class name
+		"Inventory",              // class name
 		func(payload []byte) error {
 			slog.Info("Executing recurring inventory sync")
 			return engine.Run()

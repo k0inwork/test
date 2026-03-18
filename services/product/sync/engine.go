@@ -101,6 +101,9 @@ func (e *SyncEngine) Run() error {
 		product.Address = asset.Address
 		product.Geo = asset.Lat + ";" + asset.Long
 		product.GlpiUUID = asset.ID
+		product.Manufacturer = asset.Manufacturer
+		product.ModelName = asset.Model
+		product.SerialNumber = asset.Serial
 
 		if err := e.DB.Save(&product).Error; err != nil {
 			slog.Error("Failed to save product", "name", name, "error", err)

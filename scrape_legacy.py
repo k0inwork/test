@@ -57,9 +57,11 @@ def main():
         "products": "/products/?json=true",
         "ipmi_list": "/data/ipmi/list?json=true",
         "switch_list": "/data/switch/?json=true",
+        "pdu_list": "/data/pdu/list?json=true",
         "currentuser": "/accounts/currentuser?json=true",
         "settings": "/core/settings?json=true&json_object_list",
-        "tasks": "/tasks/viewtasks/"
+        "tasks": "/tasks/viewtasks/",
+        "gateways": "/gws/gws/?json=true"
     }
 
     for name, ep in endpoints.items():
