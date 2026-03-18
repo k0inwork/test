@@ -19,7 +19,7 @@ import (
 
 func setupProductTestDB() *gorm.DB {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	db.AutoMigrate(&models.Product{})
+	db.AutoMigrate(&models.Product{}, &models.Gw{}, &models.Session{})
 	return db
 }
 
@@ -61,11 +61,10 @@ func TestGatewayAPI(t *testing.T) {
 	logging.Init("test-product-gw")
 	testDB := setupProductTestDB()
 
-	engine := sync.NewSyncEngine(testDB, nil)
-	r := setupRouter(testDB, engine)
+	r := setupRouter(testDB, nil)
 
 	// Test POST /gateways
-	gw := models.Product{
+	gw := models.Gw{
 		Name:    "Test GW",
 		Region:  "MSK",
 		Address: "1.1.1.1",
@@ -78,9 +77,9 @@ func TestGatewayAPI(t *testing.T) {
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
 
-	var createdGW models.Product
+	var createdGW models.Gw
 	json.Unmarshal(w.Body.Bytes(), &createdGW)
-	assert.Equal(t, "GW", createdGW.PouType)
+	assert.NotEmpty(t, createdGW.ID)
 	assert.Equal(t, "Test GW", createdGW.Name)
 
 	// Test GET /gateways
@@ -89,8 +88,34 @@ func TestGatewayAPI(t *testing.T) {
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var gateways []models.Product
+	var gateways []models.Gw
 	json.Unmarshal(w.Body.Bytes(), &gateways)
 	assert.Len(t, gateways, 1)
 	assert.Equal(t, "Test GW", gateways[0].Name)
+}
+
+func TestSessionAPI(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	logging.Init("test-product-session")
+	testDB := setupProductTestDB()
+
+	r := setupRouter(testDB, nil)
+
+	// Seed a session directly
+	session := models.Session{
+		Name: "Test Session",
+		Subnet: "10.0.0.0/24",
+	}
+	testDB.Create(&session)
+
+	// Test GET /sessions
+	req, _ := http.NewRequest("GET", "/sessions", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var sessions []models.Session
+	json.Unmarshal(w.Body.Bytes(), &sessions)
+	assert.Len(t, sessions, 1)
+	assert.Equal(t, "Test Session", sessions[0].Name)
 }

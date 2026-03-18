@@ -20,7 +20,7 @@ func initDB() {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&models.Product{})
+	db.AutoMigrate(&models.Product{}, &models.Gw{}, &models.Session{})
 }
 
 func setupRouter(dbConn *gorm.DB, engine *sync.SyncEngine) *gin.Engine {
@@ -35,28 +35,34 @@ func setupRouter(dbConn *gorm.DB, engine *sync.SyncEngine) *gin.Engine {
 	})
 
 	r.GET("/gateways", func(c *gin.Context) {
-		var gateways []models.Product
-		// In the new architecture, gateways are just nodes with pou_type='GW'
-		// or we can just return all nodes if the GUI expects that.
-		// For backward compatibility with the GWS service, we'll try to filter.
-		db.Where("pou_type = ?", "GW").Find(&gateways)
+		var gateways []models.Gw
+		db.Find(&gateways)
 		c.JSON(200, gateways)
 	})
 
 	r.POST("/gateways", func(c *gin.Context) {
-		var gateway models.Product
+		var gateway models.Gw
 		if err := c.ShouldBindJSON(&gateway); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-		gateway.PouType = "GW"
 		db.Create(&gateway)
 		c.JSON(201, gateway)
 	})
 
+	r.GET("/sessions", func(c *gin.Context) {
+		var sessions []models.Session
+		db.Find(&sessions)
+		c.JSON(200, sessions)
+	})
+
 	r.POST("/sync", func(c *gin.Context) {
-		engine.Run()
-		c.JSON(200, gin.H{"message": "Sync completed"})
+		if engine != nil {
+			engine.Run()
+			c.JSON(200, gin.H{"message": "Sync completed"})
+		} else {
+			c.JSON(400, gin.H{"error": "Sync engine not available"})
+		}
 	})
 
 	return r
@@ -73,6 +79,7 @@ func main() {
 		Capabilities: []logging.CapabilityRegistration{
 			{Name: "nodes", Endpoints: []string{"/nodes"}},
 			{Name: "gateways", Endpoints: []string{"/gateways"}},
+			{Name: "sessions", Endpoints: []string{"/sessions"}},
 			{Name: "sync", Endpoints: []string{"/sync"}},
 		},
 		IsCore:  true,
@@ -80,6 +87,7 @@ func main() {
 		Menu: []logging.MenuItem{
 			{Label: "Nodes", Path: "/nodes"},
 			{Label: "Gateways", Path: "/gateways"},
+			{Label: "Sessions", Path: "/sessions"},
 		},
 	})
 

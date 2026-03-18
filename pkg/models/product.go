@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -24,4 +25,41 @@ type Product struct {
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+type Gw struct {
+	ID          string `gorm:"primaryKey" json:"id"`
+	Name        string `gorm:"uniqueIndex:idx_name_region" json:"name"`
+	Region      string `gorm:"uniqueIndex:idx_name_region" json:"region"`
+	Description string `json:"description"`
+	Address     string `json:"address"`
+	State       string `json:"state"`
+	Log         string `json:"log"`
+}
+
+func (g *Gw) BeforeCreate(tx *gorm.DB) (err error) {
+	if g.ID == "" {
+		g.ID = uuid.New().String()
+	}
+	return
+}
+
+type Session struct {
+	ID           string `gorm:"primaryKey" json:"id"`
+	Name         string `json:"name"`
+	Gw1ID        string `json:"gw1_id"`
+	Gw2ID        string `json:"gw2_id"`
+	UserID       string `json:"user_id"`
+	Subnet       string `json:"subnet"`
+	Successful   int    `json:"successful"`
+	Unsuccessful int    `json:"unsuccessful"`
+	TxBytes      int    `json:"tx_bytes"`
+	TxBytesOld   int    `json:"tx_bytes_old"`
+}
+
+func (s *Session) BeforeCreate(tx *gorm.DB) (err error) {
+	if s.ID == "" {
+		s.ID = uuid.New().String()
+	}
+	return
 }
