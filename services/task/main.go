@@ -2,25 +2,37 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
-
+	"pum-go/pkg/tracing"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	otelgorm "gorm.io/plugin/opentelemetry/tracing"
 )
 
+var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 var db *gorm.DB
 
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("task.db"), &gorm.Config{})
+	if err == nil {
+		if err := db.Use(otelgorm.NewPlugin()); err != nil {
+			slog.Error("failed to install gorm otel plugin", "err", err)
+		}
+	}
 	if err != nil {
 		panic(err)
 	}
@@ -28,18 +40,24 @@ func initDB() {
 }
 
 func main() {
+	tp, _ := tracing.InitTracer("task")
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			slog.Error("failed to shutdown tracer", "err", err)
+		}
+	}()
 	logging.Init("task")
 	initDB()
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
-		Name:         "task",
-		Endpoint:     "http://localhost:8085",
+		Name:     "task",
+		Endpoint: "http://localhost:8085",
 		Capabilities: []logging.CapabilityRegistration{
 			{Name: "tasks", Endpoints: []string{"/tasks"}},
 			{Name: "async-executor", Endpoints: []string{"/async-executor"}},
 		},
-		IsCore:       false,
-		OrderID:      5,
+		IsCore:  false,
+		OrderID: 5,
 		Menu: []logging.MenuItem{
 			{Label: "Tasks", Path: "/tasks"},
 		},
@@ -50,16 +68,8 @@ func main() {
 	go startSchedulerJob()
 
 	r := gin.Default()
+	r.Use(otelgin.Middleware("task"))
 	r.Use(logging.GinMiddleware())
-
-	r.GET("/manifest", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"order_id": 5,
-			"menu": []gin.H{
-				{"label": "Tasks", "path": "/tasks"},
-			},
-		})
-	})
 
 	api := r.Group("/api")
 	{
@@ -90,7 +100,7 @@ func main() {
 
 func listTasks(c *gin.Context) {
 	var tasks []models.TaskRecord
-	query := db.Order("started_at desc")
+	query := db.WithContext(c.Request.Context()).Order("started_at desc")
 	if status := c.Query("status"); status != "" {
 		query = query.Where("status = ?", status)
 	}
@@ -108,7 +118,7 @@ func createTask(c *gin.Context) {
 	req.Status = models.TaskStateInitiated
 	req.StartedAt = time.Now()
 
-	if err := db.Create(&req).Error; err != nil {
+	if err := db.WithContext(c.Request.Context()).Create(&req).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -127,7 +137,7 @@ func updateTaskStatus(c *gin.Context) {
 	}
 
 	var task models.TaskRecord
-	if err := db.First(&task, c.Param("id")).Error; err != nil {
+	if err := db.WithContext(c.Request.Context()).First(&task, c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
 		return
 	}
@@ -168,7 +178,7 @@ func updateTaskStatus(c *gin.Context) {
 		task.FinishedAt = &now
 	}
 
-	if err := db.Save(&task).Error; err != nil {
+	if err := db.WithContext(c.Request.Context()).Save(&task).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -180,7 +190,7 @@ func updateTaskStatus(c *gin.Context) {
 
 func listAlarms(c *gin.Context) {
 	var alarms []models.Alarm
-	query := db.Order("created_at desc")
+	query := db.WithContext(c.Request.Context()).Order("created_at desc")
 	if status := c.Query("status"); status != "" {
 		query = query.Where("status = ?", status)
 	}
@@ -202,7 +212,7 @@ func createAlarm(c *gin.Context) {
 	}
 
 	req.Status = models.AlarmStatusRaised
-	if err := db.Create(&req).Error; err != nil {
+	if err := db.WithContext(c.Request.Context()).Create(&req).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -221,7 +231,7 @@ func updateAlarmStatus(c *gin.Context) {
 	}
 
 	var alarm models.Alarm
-	if err := db.First(&alarm, c.Param("id")).Error; err != nil {
+	if err := db.WithContext(c.Request.Context()).First(&alarm, c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Alarm not found"})
 		return
 	}
@@ -237,7 +247,7 @@ func updateAlarmStatus(c *gin.Context) {
 		return
 	}
 
-	if err := db.Save(&alarm).Error; err != nil {
+	if err := db.WithContext(c.Request.Context()).Save(&alarm).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -261,10 +271,10 @@ func closeActiveAlarms(c *gin.Context) {
 		return
 	}
 
-	result := db.Model(&models.Alarm{}).
+	result := db.WithContext(c.Request.Context()).Model(&models.Alarm{}).
 		Where("object_id = ? AND class_name = ? AND status = ?", req.ObjectID, req.ClassName, models.AlarmStatusRaised).
 		Updates(map[string]interface{}{
-			"status":             models.AlarmStatusClosed,
+			"status":            models.AlarmStatusClosed,
 			"closed_by_task_id": req.ClosedByTaskID,
 		})
 
@@ -280,7 +290,7 @@ func closeActiveAlarms(c *gin.Context) {
 
 func listRecurringTasks(c *gin.Context) {
 	var tasks []models.RecurringTask
-	db.Find(&tasks)
+	db.WithContext(c.Request.Context()).Find(&tasks)
 	c.JSON(http.StatusOK, tasks)
 }
 
@@ -294,17 +304,17 @@ func createRecurringTask(c *gin.Context) {
 	req.IsActive = true
 	// Upsert based on Name to avoid duplicates when services restart
 	var existing models.RecurringTask
-	if err := db.Session(&gorm.Session{Logger: db.Logger.LogMode(logger.Silent)}).Where("name = ?", req.Name).First(&existing).Error; err == nil {
+	if err := db.WithContext(c.Request.Context()).Session(&gorm.Session{Logger: db.Logger.LogMode(logger.Silent)}).Where("name = ?", req.Name).First(&existing).Error; err == nil {
 		existing.Schedule = req.Schedule
 		existing.TargetURL = req.TargetURL
 		existing.Payload = req.Payload
 		existing.IsActive = true
-		db.Save(&existing)
+		db.WithContext(c.Request.Context()).Save(&existing)
 		c.JSON(http.StatusOK, existing)
 		return
 	}
 
-	if err := db.Create(&req).Error; err != nil {
+	if err := db.WithContext(c.Request.Context()).Create(&req).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -318,10 +328,11 @@ func startArchiverJob() {
 	ticker := time.NewTicker(5 * time.Minute)
 	for {
 		<-ticker.C
+		ctx, span := otel.Tracer("scheduler").Start(context.Background(), "ArchiveOldTasks")
 		slog.Info("Running task archiver job")
 		// Archive tasks older than 24 hours in terminal states
 		threshold := time.Now().Add(-24 * time.Hour)
-		result := db.Model(&models.TaskRecord{}).
+		result := db.WithContext(ctx).Model(&models.TaskRecord{}).
 			Where("status IN ? AND updated_at < ?", []string{models.TaskStateFinished, models.TaskStateFailed, models.TaskStateError}, threshold).
 			Update("status", models.TaskStateArchived)
 
@@ -330,6 +341,7 @@ func startArchiverJob() {
 		} else if result.RowsAffected > 0 {
 			slog.Info("Archived old tasks", "count", result.RowsAffected)
 		}
+		span.End()
 	}
 }
 
@@ -349,9 +361,11 @@ func startSchedulerJob() {
 
 	ticker := time.NewTicker(1 * time.Minute)
 	for {
+		ctx, span := otel.Tracer("scheduler").Start(context.Background(), "SyncRecurringTasks")
 		var tasks []models.RecurringTask
-		if err := db.Where("is_active = ?", true).Find(&tasks).Error; err != nil {
+		if err := db.WithContext(ctx).Where("is_active = ?", true).Find(&tasks).Error; err != nil {
 			slog.Error("Error fetching recurring tasks", "error", err)
+			span.End()
 			time.Sleep(1 * time.Minute)
 			continue
 		}
@@ -365,8 +379,13 @@ func startSchedulerJob() {
 				// We need to add this new/updated task to the cron scheduler
 				t := task // capture loop variable
 				entryID, err := c.AddFunc(t.Schedule, func() {
+					ctxT, spanT := otel.Tracer("scheduler").Start(context.Background(), "TriggerRecurringTask:"+t.Name)
+					defer spanT.End()
+
 					slog.Info("Triggering recurring task", "name", t.Name, "url", t.TargetURL)
-					resp, err := http.Post(t.TargetURL, "application/json", bytes.NewBuffer([]byte(t.Payload)))
+					req, _ := http.NewRequestWithContext(ctxT, "POST", t.TargetURL, bytes.NewBuffer([]byte(t.Payload)))
+					req.Header.Set("Content-Type", "application/json")
+					resp, err := otelClient.Do(req)
 					if err != nil {
 						slog.Error("Failed to trigger recurring task via webhook", "task_id", t.ID, "url", t.TargetURL, "error", err)
 						return
@@ -375,7 +394,7 @@ func startSchedulerJob() {
 					slog.Info("Recurring task webhook response", "task_id", t.ID, "status", resp.StatusCode)
 
 					now := time.Now()
-					db.Model(&models.RecurringTask{}).Where("id = ?", t.ID).Update("last_run_at", now)
+					db.WithContext(ctxT).Model(&models.RecurringTask{}).Where("id = ?", t.ID).Update("last_run_at", now)
 				})
 
 				if err != nil {
@@ -395,6 +414,7 @@ func startSchedulerJob() {
 				slog.Info("Removed inactive recurring task from cron scheduler", "task_id", taskID)
 			}
 		}
+		span.End()
 
 		<-ticker.C
 	}

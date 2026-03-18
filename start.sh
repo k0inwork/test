@@ -1,11 +1,6 @@
 #!/bin/bash
 
-set -e
-
-BIN_DIR=".bin"
-mkdir -p "$BIN_DIR"
-
-# Setup Python virtual environment to avoid global pip install issues on macOS
+# Setup Python virtual environment
 VENV_DIR=".venv"
 if [ ! -d "$VENV_DIR" ]; then
     echo "Creating Python virtual environment..."
@@ -13,32 +8,28 @@ if [ ! -d "$VENV_DIR" ]; then
 fi
 source "$VENV_DIR/bin/activate"
 
-# Install pyyaml if not present
-if ! python3 -c "import yaml" >/dev/null 2>&1; then
-    echo "Installing pyyaml for Python generator script..."
-    python3 -m pip install pyyaml
-fi
+# Install pyyaml
+python3 -m pip install pyyaml
+
+BIN_DIR=".bin"
+mkdir -p "$BIN_DIR"
 
 # Detect OS and architecture
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 
-get_arch_key() {
-    if [ "$OS" = "Linux" ]; then
-        echo "linux_url"
-    elif [ "$OS" = "Darwin" ]; then
-        if [ "$ARCH" = "arm64" ]; then
-            echo "darwin_arm64_url"
-        else
-            echo "darwin_amd64_url"
-        fi
+if [ "$OS" = "Linux" ]; then
+    ARCH_KEY="linux_url"
+elif [ "$OS" = "Darwin" ]; then
+    if [ "$ARCH" = "arm64" ]; then
+        ARCH_KEY="darwin_arm64_url"
     else
-        echo "Unsupported OS: $OS"
-        exit 1
+        ARCH_KEY="darwin_amd64_url"
     fi
-}
-
-ARCH_KEY=$(get_arch_key)
+else
+    echo "Unsupported OS: $OS"
+    # return 1
+fi
 
 download_dependency() {
     local DEP_NAME=$1
@@ -49,11 +40,9 @@ download_dependency() {
         echo "Downloading $DEP_NAME from $URL..."
         wget -qO- "$URL" | tar xvz -C "$BIN_DIR"
 
-        # Flatten extraction (move the binary out of its versioned folder directly into .bin)
         find "$BIN_DIR" -name "$BIN_NAME" -type f -exec mv {} "$BIN_DIR/" \;
         chmod +x "$BIN_DIR/$BIN_NAME"
 
-        # If prometheus, also move prometheus.yml to the root directory
         if [ "$DEP_NAME" = "prometheus" ]; then
             find "$BIN_DIR" -name "prometheus.yml" -type f -exec mv {} ./prometheus.yml \;
         fi
@@ -62,7 +51,6 @@ download_dependency() {
 
 echo "Ensuring Goreman is installed..."
 if ! command -v goreman &> /dev/null; then
-    echo "Goreman not found in PATH, installing via go install..."
     go install github.com/mattn/goreman@latest
     export PATH="$PATH:$(go env GOPATH)/bin"
 fi
@@ -70,6 +58,7 @@ fi
 echo "Checking external dependencies..."
 download_dependency "jaeger" "jaeger-all-in-one"
 download_dependency "prometheus" "prometheus"
+download_dependency "otelcol" "otelcol-contrib"
 
 echo "Generating environment files..."
 python3 scripts/generate_env.py

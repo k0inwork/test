@@ -1,0 +1,173 @@
+version: '3.8'
+services:
+  prometheus:
+    image: prom/prometheus:v2.47.1
+    ports:
+    - 9090:9090
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    ports:
+    - 4318:4318
+    - 8889:8889
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    ports:
+    - 16686:16686
+    - 14317:14317
+    - 14318:14318
+  registry:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/registry/main.go
+    ports:
+    - 8088:8088
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  identity:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/identity/main.go
+    ports:
+    - 8081:8081
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  product:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/product/main.go
+    ports:
+    - 8082:8082
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  inventory:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/inventory/main.go
+    ports:
+    - 8083:8083
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  network:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/network/main.go
+    ports:
+    - 8084:8084
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  task:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/task/main.go
+    ports:
+    - 8085:8085
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  external-modules:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/external-modules/main.go
+    ports:
+    - 8086:8086
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  terminal:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/terminal/main.go
+    ports:
+    - 8087:8087
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  external-data:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/external-data/main.go
+    ports:
+    - 8089:8089
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  frontend:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/frontend/main.go
+    ports:
+    - 8080:8080
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  compatibility:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/compatibility/main.go
+    ports:
+    - 8090:8090
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  gws:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/gws/main.go
+    ports:
+    - 8091:8091
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger
+  keyservice:
+    image: golang:1.21
+    volumes:
+    - .:/app
+    working_dir: /app
+    command: go run services/keyservice/main.go
+    ports:
+    - 8092:8092
+    depends_on:
+    - prometheus
+    - otelcol
+    - jaeger

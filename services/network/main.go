@@ -2,25 +2,36 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
+	"pum-go/pkg/tracing"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	otelgorm "gorm.io/plugin/opentelemetry/tracing"
 )
 
+var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 var db *gorm.DB
 var externalModulesURL = "http://localhost:8086" // In a real scenario, discovered via registry or env var
 
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("network.db"), &gorm.Config{})
+	if err == nil {
+		if err := db.Use(otelgorm.NewPlugin()); err != nil {
+			slog.Error("failed to install gorm otel plugin", "err", err)
+		}
+	}
 	if err != nil {
 		panic(err)
 	}
@@ -28,7 +39,7 @@ func initDB() {
 }
 
 // Helper to call external-modules proxy
-func callExternalModule(targetIP, command string, param interface{}) error {
+func callExternalModule(ctx context.Context, targetIP, command string, param interface{}) error {
 	paramJSON, _ := json.Marshal(param)
 	reqBody := map[string]interface{}{
 		"target_ip": targetIP,
@@ -36,7 +47,9 @@ func callExternalModule(targetIP, command string, param interface{}) error {
 		"param":     string(paramJSON),
 	}
 	reqBytes, _ := json.Marshal(reqBody)
-	resp, err := http.Post(fmt.Sprintf("%s/call", externalModulesURL), "application/json", bytes.NewBuffer(reqBytes))
+	req, _ := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s/call", externalModulesURL), bytes.NewBuffer(reqBytes))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := otelClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -69,13 +82,14 @@ type DNSReq struct {
 
 func setupRouter(dbConn *gorm.DB) *gin.Engine {
 	r := gin.Default()
+	r.Use(otelgin.Middleware("network"))
 	r.Use(logging.GinMiddleware())
 	db = dbConn
 
 	// SUBNETS
 	r.GET("/subnets", func(c *gin.Context) {
 		var subnets []models.Subnet
-		db.Find(&subnets)
+		db.WithContext(c.Request.Context()).Find(&subnets)
 		c.JSON(200, subnets)
 	})
 
@@ -115,15 +129,15 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 
 		param := map[string]interface{}{
 			"subnet": map[string]interface{}{
-				"id": req.ID,
-				"pools": poolsList,
-				"subnet": req.Subnet,
-				"relay": map[string]interface{}{"ip-addresses": relayList},
+				"id":          req.ID,
+				"pools":       poolsList,
+				"subnet":      req.Subnet,
+				"relay":       map[string]interface{}{"ip-addresses": relayList},
 				"option-data": optionsList,
 			},
 		}
 
-		err := callExternalModule("127.0.0.1", "dhcp subnet add", param)
+		err := callExternalModule(c.Request.Context(), "127.0.0.1", "dhcp subnet add", param)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -132,7 +146,6 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 	})
 
 	r.PUT("/subnets", func(c *gin.Context) {
-		// Not explicitly in legacy, but good for parity
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
@@ -143,7 +156,7 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 			return
 		}
 		param := map[string]interface{}{"subnetid": req.ID}
-		err := callExternalModule("127.0.0.1", "dhcp subnet remove", param)
+		err := callExternalModule(c.Request.Context(), "127.0.0.1", "dhcp subnet remove", param)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -151,10 +164,8 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
-
 	// DHCP
 	r.GET("/dhcp", func(c *gin.Context) {
-		// Mock response simulating RabbitMQ "dhcp host list" RPC result
 		c.JSON(200, []map[string]interface{}{
 			{"ip": "10.10.1.50", "mac": "00:1A:2B:3C:4D:5E", "hostname": "client-pc-1"},
 		})
@@ -168,13 +179,13 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 		}
 		param := map[string]interface{}{
 			"host": map[string]interface{}{
-				"ip": req.Address,
+				"ip":       req.Address,
 				"hostname": req.Hostname,
-				"mac": req.Mac,
+				"mac":      req.Mac,
 				"subnetid": req.SubnetID,
 			},
 		}
-		err := callExternalModule("127.0.0.1", "dhcp host add", param)
+		err := callExternalModule(c.Request.Context(), "127.0.0.1", "dhcp host add", param)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -190,15 +201,13 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 		}
 		param := map[string]interface{}{
 			"host": map[string]interface{}{
-				"ip": req.Address,
+				"ip":       req.Address,
 				"hostname": req.Hostname,
-				"mac": req.Mac,
+				"mac":      req.Mac,
 				"subnetid": req.SubnetID,
 			},
 		}
-		// First delete existing... handled implicitly by create/overwrite in old backend,
-		// but let's just do add since it handles updates in the mock
-		err := callExternalModule("127.0.0.1", "dhcp host add", param)
+		err := callExternalModule(c.Request.Context(), "127.0.0.1", "dhcp host add", param)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -214,11 +223,11 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 		}
 		param := map[string]interface{}{
 			"host": map[string]interface{}{
-				"ip": req.Address,
+				"ip":       req.Address,
 				"hostname": req.Hostname,
 			},
 		}
-		err := callExternalModule("127.0.0.1", "dhcp host remove", param)
+		err := callExternalModule(c.Request.Context(), "127.0.0.1", "dhcp host remove", param)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -226,10 +235,8 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
-
 	// DNS
 	r.GET("/dns", func(c *gin.Context) {
-		// Mock response simulating RabbitMQ "dns host list" RPC result
 		c.JSON(200, []map[string]interface{}{
 			{"name": "server.local", "ip": "10.10.1.100", "type": "A"},
 			{"name": "router.local", "ip": "10.10.1.1", "type": "A"},
@@ -244,11 +251,11 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 		}
 		param := map[string]interface{}{
 			"host": map[string]interface{}{
-				"ip": req.Address,
+				"ip":       req.Address,
 				"hostname": req.Hostname,
 			},
 		}
-		err := callExternalModule("127.0.0.1", "dns host add", param)
+		err := callExternalModule(c.Request.Context(), "127.0.0.1", "dns host add", param)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -264,11 +271,11 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 		}
 		param := map[string]interface{}{
 			"host": map[string]interface{}{
-				"ip": req.Address,
+				"ip":       req.Address,
 				"hostname": req.Hostname,
 			},
 		}
-		err := callExternalModule("127.0.0.1", "dns host add", param)
+		err := callExternalModule(c.Request.Context(), "127.0.0.1", "dns host add", param)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -284,11 +291,11 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 		}
 		param := map[string]interface{}{
 			"host": map[string]interface{}{
-				"ip": req.Address,
+				"ip":       req.Address,
 				"hostname": req.Hostname,
 			},
 		}
-		err := callExternalModule("127.0.0.1", "dns host remove", param)
+		err := callExternalModule(c.Request.Context(), "127.0.0.1", "dns host remove", param)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -300,19 +307,25 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 }
 
 func main() {
+	tp, _ := tracing.InitTracer("network")
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			slog.Error("failed to shutdown tracer", "err", err)
+		}
+	}()
 	logging.Init("network")
 	initDB()
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
-		Name:         "network",
-		Endpoint:     "http://localhost:8084",
+		Name:     "network",
+		Endpoint: "http://localhost:8084",
 		Capabilities: []logging.CapabilityRegistration{
 			{Name: "network", Endpoints: []string{"/"}},
 			{Name: "ipam", Endpoints: []string{"/ipam"}},
 			{Name: "routing", Endpoints: []string{"/routing"}},
 		},
-		IsCore:       false,
-		OrderID:      3,
-		Menu:         []logging.MenuItem{{Label: "Subnets", Path: "/subnets"}},
+		IsCore:  false,
+		OrderID: 3,
+		Menu:    []logging.MenuItem{{Label: "Subnets", Path: "/subnets"}},
 	})
 
 	r := setupRouter(db)
