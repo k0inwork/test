@@ -15,7 +15,7 @@ import (
 // RegisterEndpoint registers a reverse endpoint for the task microservice scheduler to call.
 // It also spawns a goroutine to wait for the task service to be available and automatically
 // registers its schedule.
-func RegisterEndpoint(registryURL string, router *gin.Engine, path, schedule, targetURL, username, operation, objectID, className string, handler func(payload []byte) error) {
+func RegisterEndpoint(registryURL string, router *gin.Engine, path, schedule, targetURL, username, operation, objectID, className string, handler func(ctx context.Context, payload []byte) error) {
 	// Setup the webhook endpoint to receive triggers
 	router.POST(path, func(c *gin.Context) {
 		payload, err := io.ReadAll(c.Request.Body)
@@ -25,8 +25,8 @@ func RegisterEndpoint(registryURL string, router *gin.Engine, path, schedule, ta
 		}
 
 		// Spawn the task using the standard tasklib flow
-		taskID, err := Spawn(context.Background(), username, operation, objectID, className, func() error {
-			return handler(payload)
+		taskID, err := Spawn(c.Request.Context(), username, operation, objectID, className, func(ctx context.Context) error {
+			return handler(ctx, payload)
 		})
 
 		if err != nil {
@@ -59,7 +59,7 @@ func RegisterEndpoint(registryURL string, router *gin.Engine, path, schedule, ta
 			return
 		}
 
-		resp, err := postWithRetry(taskServiceURL+"/api/recurring", bodyBytes)
+		resp, err := postWithRetry(context.Background(), taskServiceURL+"/api/recurring", bodyBytes)
 		if err != nil {
 			slog.Error("Failed to register recurring task with task service", "error", err)
 			return

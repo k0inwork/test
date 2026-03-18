@@ -1,7 +1,10 @@
 package ldap
 
 import (
+	"context"
 	"log/slog"
+
+	"go.opentelemetry.io/otel"
 )
 
 type MockLDAPProvider struct{}
@@ -16,7 +19,10 @@ type GroupInfo struct {
 	Capabilities []string
 }
 
-func (m *MockLDAPProvider) Authenticate(username, password string) (bool, string, []GroupInfo, error) {
+func (m *MockLDAPProvider) Authenticate(ctx context.Context, username, password string) (bool, string, []GroupInfo, error) {
+	_, span := otel.Tracer("MockLDAP").Start(ctx, "Authenticate")
+	defer span.End()
+
 	slog.Info("Authenticating via mock LDAP", "username", username)
 
 	// Mock LDAP definitions

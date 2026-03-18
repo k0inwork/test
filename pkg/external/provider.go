@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"go.opentelemetry.io/otel"
 )
 
 // GLPI Models
@@ -31,11 +33,11 @@ type Gpdu struct {
 }
 
 type GComputer struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	IP      string `json:"ip"`
-	Status  string `json:"status"`
-	DNS     string `json:"dns"`
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	IP     string `json:"ip"`
+	Status string `json:"status"`
+	DNS    string `json:"dns"`
 }
 
 // Zabbix Models
@@ -72,6 +74,9 @@ func NewMockProvider(mockDataPath string) *MockProvider {
 }
 
 func (p *MockProvider) GetNetworkEquipment(ctx context.Context) ([]*GNetworkEquipment, error) {
+	ctx, span := otel.Tracer("MockProvider").Start(ctx, "GetNetworkEquipment")
+	defer span.End()
+
 	if p.MockDataPath != "" {
 		data, err := os.ReadFile(filepath.Join(p.MockDataPath, "switch_list.json"))
 		if err == nil {
@@ -115,6 +120,9 @@ func (p *MockProvider) GetNetworkEquipment(ctx context.Context) ([]*GNetworkEqui
 }
 
 func (p *MockProvider) GetPDUs(ctx context.Context) ([]*Gpdu, error) {
+	ctx, span := otel.Tracer("MockProvider").Start(ctx, "GetPDUs")
+	defer span.End()
+
 	if p.MockDataPath != "" {
 		data, err := os.ReadFile(filepath.Join(p.MockDataPath, "products.json"))
 		if err == nil {
@@ -163,6 +171,9 @@ func (p *MockProvider) GetPDUs(ctx context.Context) ([]*Gpdu, error) {
 }
 
 func (p *MockProvider) GetComputers(ctx context.Context) ([]*GComputer, error) {
+	ctx, span := otel.Tracer("MockProvider").Start(ctx, "GetComputers")
+	defer span.End()
+
 	if p.MockDataPath != "" {
 		data, err := os.ReadFile(filepath.Join(p.MockDataPath, "ipmi_list.json"))
 		if err == nil {
@@ -200,6 +211,9 @@ func (p *MockProvider) GetComputers(ctx context.Context) ([]*GComputer, error) {
 }
 
 func (p *MockProvider) GetHosts(ctx context.Context) ([]*ZHost, error) {
+	ctx, span := otel.Tracer("MockProvider").Start(ctx, "GetHosts")
+	defer span.End()
+
 	return []*ZHost{
 		{
 			ID: "z-1", Name: "MSK-SW-01", IP: "10.10.1.1", Status: 1,
@@ -217,17 +231,29 @@ type GraphQLClient struct {
 }
 
 func (c *GraphQLClient) GetNetworkEquipment(ctx context.Context) ([]*GNetworkEquipment, error) {
+	ctx, span := otel.Tracer("GraphQLClient").Start(ctx, "GetNetworkEquipment")
+	defer span.End()
+
 	return (&MockProvider{}).GetNetworkEquipment(ctx)
 }
 
 func (c *GraphQLClient) GetPDUs(ctx context.Context) ([]*Gpdu, error) {
+	ctx, span := otel.Tracer("GraphQLClient").Start(ctx, "GetPDUs")
+	defer span.End()
+
 	return (&MockProvider{}).GetPDUs(ctx)
 }
 
 func (c *GraphQLClient) GetComputers(ctx context.Context) ([]*GComputer, error) {
+	ctx, span := otel.Tracer("GraphQLClient").Start(ctx, "GetComputers")
+	defer span.End()
+
 	return (&MockProvider{}).GetComputers(ctx)
 }
 
 func (c *GraphQLClient) GetHosts(ctx context.Context) ([]*ZHost, error) {
+	ctx, span := otel.Tracer("GraphQLClient").Start(ctx, "GetHosts")
+	defer span.End()
+
 	return (&MockProvider{}).GetHosts(ctx)
 }

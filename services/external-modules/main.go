@@ -1,14 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
+	"pum-go/pkg/tracing"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 type ModuleRequest struct {
@@ -18,11 +21,17 @@ type ModuleRequest struct {
 }
 
 func main() {
+	tp, _ := tracing.InitTracer("external-modules")
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			slog.Error("failed to shutdown tracer", "err", err)
+		}
+	}()
 	logging.Init("external-modules")
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
-		Name:         "external-modules",
-		Endpoint:     "http://localhost:8086",
+		Name:     "external-modules",
+		Endpoint: "http://localhost:8086",
 		Capabilities: []logging.CapabilityRegistration{
 			{Name: "external-modules", Endpoints: []string{"/"}},
 			{Name: "pdu", Endpoints: []string{"/pdu"}},
@@ -31,11 +40,12 @@ func main() {
 			{Name: "routing", Endpoints: []string{"/routing"}},
 			{Name: "configurable", Endpoints: []string{"/configurable"}},
 		},
-		IsCore:       false,
+		IsCore: false,
 	})
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+	r.Use(otelgin.Middleware("external-modules"))
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
 
@@ -67,7 +77,7 @@ func main() {
 		time.Sleep(200 * time.Millisecond)
 
 		c.JSON(http.StatusOK, gin.H{
-			"status": "success",
+			"status":   "success",
 			"response": fmt.Sprintf("Module command %s executed on %s", req.Command, req.TargetIP),
 		})
 	})
@@ -84,7 +94,7 @@ func main() {
 		time.Sleep(500 * time.Millisecond)
 
 		c.JSON(http.StatusOK, gin.H{
-			"status": "success",
+			"status":  "success",
 			"message": fmt.Sprintf("PDU Command %s executed on %s (Outlet %s)", req.Command, req.TargetIP, req.Param),
 		})
 	})
@@ -101,7 +111,7 @@ func main() {
 		time.Sleep(1 * time.Second)
 
 		c.JSON(http.StatusOK, gin.H{
-			"status": "success",
+			"status":  "success",
 			"message": fmt.Sprintf("IPMI Command %s initiated on %s", req.Command, req.TargetIP),
 		})
 	})

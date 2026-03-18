@@ -1,6 +1,7 @@
 package sync
 
 import (
+	"context"
 	"pum-go/pkg/external"
 	"pum-go/pkg/models"
 	"testing"
@@ -17,7 +18,7 @@ func TestSyncEngine_Run(t *testing.T) {
 	provider := &external.MockProvider{}
 	engine := NewSyncEngine(db, provider)
 
-	err := engine.Run()
+	err := engine.Run(context.Background())
 	assert.NoError(t, err)
 
 	var switches []models.Switch

@@ -1,37 +1,50 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/logging"
+	"pum-go/pkg/tracing"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
+
+var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 // LegacyResponse mimics the Django context structure returned by json_middleware
 type LegacyResponse struct {
-	Context map[string]interface{} `json:"context"`
-	Errors  []string               `json:"errors"`
-	Redirect string                `json:"url_redirect,omitempty"`
+	Context  map[string]interface{} `json:"context"`
+	Errors   []string               `json:"errors"`
+	Redirect string                 `json:"url_redirect,omitempty"`
 }
 
 func main() {
+	tp, _ := tracing.InitTracer("compatibility")
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			slog.Error("failed to shutdown tracer", "err", err)
+		}
+	}()
 	logging.Init("compatibility")
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
-		Name:         "compatibility",
-		Endpoint:     "http://localhost:8090",
+		Name:     "compatibility",
+		Endpoint: "http://localhost:8090",
 		Capabilities: []logging.CapabilityRegistration{
 			{Name: "compatibility", Endpoints: []string{"/"}},
 			{Name: "legacy-api", Endpoints: []string{"/legacy-api"}},
 		},
-		IsCore:       false,
-		OrderID:      99,
+		IsCore:  false,
+		OrderID: 99,
 	})
 
 	r := gin.Default()
+	r.Use(otelgin.Middleware("compatibility"))
 	r.Use(logging.GinMiddleware())
 
 	// Compatibility Group
@@ -103,7 +116,8 @@ func stubHandler(contextKey string) gin.HandlerFunc {
 func proxyLegacy(c *gin.Context, targetURL string, contextKey string) {
 	isJSON := c.Query("json") == "true"
 
-	resp, err := http.Get(targetURL)
+	req, _ := http.NewRequestWithContext(c.Request.Context(), "GET", targetURL, nil)
+	resp, err := otelClient.Do(req)
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Target service unreachable"})
 		return

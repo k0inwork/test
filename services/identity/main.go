@@ -1,19 +1,23 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
-	"strings"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
+	"pum-go/pkg/tracing"
 	"pum-go/services/identity/graph"
 	"pum-go/services/identity/ldap"
+	"strings"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	otelgorm "gorm.io/plugin/opentelemetry/tracing"
 )
 
 var db *gorm.DB
@@ -22,7 +26,14 @@ var ldapMock *ldap.MockLDAPProvider
 func initDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("identity.db"), &gorm.Config{})
-	if err != nil { panic(err) }
+	if err == nil {
+		if err := db.Use(otelgorm.NewPlugin()); err != nil {
+			slog.Error("failed to install gorm otel plugin", "err", err)
+		}
+	}
+	if err != nil {
+		panic(err)
+	}
 	db.AutoMigrate(&models.User{}, &models.Group{}, &models.ActivityLog{})
 
 	// Seed groups
@@ -41,18 +52,21 @@ func initDB() {
 
 	var count int64
 	db.Model(&models.User{}).Count(&count)
-	if count == 0 { db.Create(&models.User{Username: "admin", Role: "admin"}) }
+	if count == 0 {
+		db.Create(&models.User{Username: "admin", Role: "admin"})
+	}
 }
 
 func setupRouter(dbConn *gorm.DB) *gin.Engine {
 	r := gin.Default()
+	r.Use(otelgin.Middleware("identity"))
 	r.Use(logging.GinMiddleware())
 
 	db = dbConn
 
 	r.GET("/users", func(c *gin.Context) {
 		var users []models.User
-		db.Preload("Groups").Find(&users)
+		db.WithContext(c.Request.Context()).Preload("Groups").Find(&users)
 
 		// Map response for better table rendering
 		var res []map[string]interface{}
@@ -62,36 +76,39 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 				groupNames = append(groupNames, g.Name)
 			}
 			res = append(res, map[string]interface{}{
-				"id": u.ID,
+				"id":       u.ID,
 				"username": u.Username,
-				"role": u.Role,
-				"groups": strings.Join(groupNames, ", "),
+				"role":     u.Role,
+				"groups":   strings.Join(groupNames, ", "),
 			})
 		}
 		c.JSON(http.StatusOK, res)
 	})
 
 	r.POST("/login", func(c *gin.Context) {
-		var login struct { Username, Password string }
-		if err := c.ShouldBindJSON(&login); err != nil { c.JSON(400, gin.H{"error": "err"}); return }
-		success, role, groups, _ := ldapMock.Authenticate(login.Username, login.Password)
+		var login struct{ Username, Password string }
+		if err := c.ShouldBindJSON(&login); err != nil {
+			c.JSON(400, gin.H{"error": "err"})
+			return
+		}
+		success, role, groups, _ := ldapMock.Authenticate(c.Request.Context(), login.Username, login.Password)
 		if success {
 			// Sync user to DB
 			var user models.User
-			if err := db.Preload("Groups").Where("username = ?", login.Username).First(&user).Error; err != nil {
+			if err := db.WithContext(c.Request.Context()).Preload("Groups").Where("username = ?", login.Username).First(&user).Error; err != nil {
 				user = models.User{Username: login.Username, Role: role}
-				db.Create(&user)
+				db.WithContext(c.Request.Context()).Create(&user)
 			}
 
 			// Add/Update LDAP groups without clearing manually assigned ones
 			for _, g := range groups {
 				var group models.Group
-				if err := db.Where("name = ?", g.Name).First(&group).Error; err != nil {
+				if err := db.WithContext(c.Request.Context()).Where("name = ?", g.Name).First(&group).Error; err != nil {
 					group = models.Group{Name: g.Name, Capabilities: strings.Join(g.Capabilities, ",")}
-					db.Create(&group)
+					db.WithContext(c.Request.Context()).Create(&group)
 				} else {
 					group.Capabilities = strings.Join(g.Capabilities, ",")
-					db.Save(&group)
+					db.WithContext(c.Request.Context()).Save(&group)
 				}
 
 				// Only append if not already present
@@ -103,12 +120,12 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 					}
 				}
 				if !hasGroup {
-					db.Model(&user).Association("Groups").Append(&group)
+					db.WithContext(c.Request.Context()).Model(&user).Association("Groups").Append(&group)
 				}
 			}
 
 			// Reload user to get all groups (including manually assigned ones)
-			db.Preload("Groups").First(&user, user.ID)
+			db.WithContext(c.Request.Context()).Preload("Groups").First(&user, user.ID)
 
 			var caps []string
 			for _, g := range user.Groups {
@@ -118,9 +135,9 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 			}
 
 			c.JSON(200, gin.H{
-				"username": login.Username,
-				"role": role,
-				"status": "logged_in",
+				"username":     login.Username,
+				"role":         role,
+				"status":       "logged_in",
 				"capabilities": strings.Join(caps, ","),
 			})
 		} else {
@@ -130,7 +147,7 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 
 	r.GET("/groups", func(c *gin.Context) {
 		var groups []models.Group
-		db.Preload("Users").Find(&groups)
+		db.WithContext(c.Request.Context()).Preload("Users").Find(&groups)
 
 		// Map response for better table rendering
 		var res []map[string]interface{}
@@ -140,10 +157,10 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 				userNames = append(userNames, u.Username)
 			}
 			res = append(res, map[string]interface{}{
-				"id": g.ID,
-				"name": g.Name,
+				"id":           g.ID,
+				"name":         g.Name,
 				"capabilities": g.Capabilities,
-				"users": strings.Join(userNames, ", "),
+				"users":        strings.Join(userNames, ", "),
 			})
 		}
 		c.JSON(http.StatusOK, res)
@@ -151,25 +168,27 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 
 	r.POST("/users/:username/groups", func(c *gin.Context) {
 		username := c.Param("username")
-		var body struct { GroupName string `json:"group"` }
+		var body struct {
+			GroupName string `json:"group"`
+		}
 		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 			return
 		}
 
 		var user models.User
-		if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+		if err := db.WithContext(c.Request.Context()).Where("username = ?", username).First(&user).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 			return
 		}
 
 		var group models.Group
-		if err := db.Where("name = ?", body.GroupName).First(&group).Error; err != nil {
+		if err := db.WithContext(c.Request.Context()).Where("name = ?", body.GroupName).First(&group).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "group not found"})
 			return
 		}
 
-		db.Model(&user).Association("Groups").Append(&group)
+		db.WithContext(c.Request.Context()).Model(&user).Association("Groups").Append(&group)
 		c.JSON(http.StatusOK, gin.H{"status": "assigned"})
 	})
 
@@ -178,18 +197,18 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 		groupName := c.Param("group")
 
 		var user models.User
-		if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+		if err := db.WithContext(c.Request.Context()).Where("username = ?", username).First(&user).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 			return
 		}
 
 		var group models.Group
-		if err := db.Where("name = ?", groupName).First(&group).Error; err != nil {
+		if err := db.WithContext(c.Request.Context()).Where("name = ?", groupName).First(&group).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "group not found"})
 			return
 		}
 
-		db.Model(&user).Association("Groups").Delete(&group)
+		db.WithContext(c.Request.Context()).Model(&user).Association("Groups").Delete(&group)
 		c.JSON(http.StatusOK, gin.H{"status": "removed"})
 	})
 
@@ -197,14 +216,14 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 	r.POST("/activitylist", func(c *gin.Context) {
 		var log models.ActivityLog
 		if err := c.ShouldBindJSON(&log); err == nil {
-			db.Create(&log)
+			db.WithContext(c.Request.Context()).Create(&log)
 		}
 		c.Status(http.StatusOK)
 	})
 
 	r.GET("/activitylist", func(c *gin.Context) {
 		var activities []models.ActivityLog
-		query := db.Order("datetime desc").Limit(100)
+		query := db.WithContext(c.Request.Context()).Order("datetime desc").Limit(100)
 
 		if userFilter := c.Query("username"); userFilter != "" {
 			query = query.Where("username LIKE ?", "%"+userFilter+"%")
@@ -243,21 +262,27 @@ func setupRouter(dbConn *gorm.DB) *gin.Engine {
 }
 
 func main() {
+	tp, _ := tracing.InitTracer("identity")
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			slog.Error("failed to shutdown tracer", "err", err)
+		}
+	}()
 	logging.Init("identity")
 	initDB()
 	ldapMock = ldap.NewMockLDAPProvider()
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
-		Name:         "identity",
-		Endpoint:     "http://localhost:8081",
+		Name:     "identity",
+		Endpoint: "http://localhost:8081",
 		Capabilities: []logging.CapabilityRegistration{
 			{Name: "users", Endpoints: []string{"/users"}},
 			{Name: "auth", Endpoints: []string{"/login"}},
 			{Name: "audit", Endpoints: []string{"/activitylist"}},
 		},
-		IsCore:       true,
-		OrderID:      0,
-		Menu:         []logging.MenuItem{
+		IsCore:  true,
+		OrderID: 0,
+		Menu: []logging.MenuItem{
 			{Label: "Users", Path: "/users"},
 			{Label: "Groups", Path: "/groups"},
 			{Label: "Audit Log", Path: "/activitylist"},

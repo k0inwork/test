@@ -47,9 +47,9 @@ func ParseName(fullName string) (region string, seq int, pouType string, name st
 	return
 }
 
-func (e *SyncEngine) Run() error {
+func (e *SyncEngine) Run(ctx context.Context) error {
 	slog.Info("Starting synchronization", "provider", "External Data Service")
-	assets, err := e.Provider.GetPDUs(context.Background())
+	assets, err := e.Provider.GetPDUs(ctx)
 	if err != nil {
 		slog.Error("Failed to fetch assets from provider", "error", err)
 		return err
@@ -69,13 +69,13 @@ func (e *SyncEngine) Run() error {
 
 		var product models.Product
 		// 1. Search by Index (Name, Region, SeqNum)
-		result := e.DB.Where("name = ? AND region = ? AND sequential_number = ?", name, region, seq).First(&product)
+		result := e.DB.WithContext(ctx).Where("name = ? AND region = ? AND sequential_number = ?", name, region, seq).First(&product)
 
 		if result.Error == gorm.ErrRecordNotFound {
 			slog.Debug("Node not found by name index, checking for rename", "glpi_id", asset.ID)
 
 			// 2. Search by Foreign ID (GLPI UUID) - Rename Detection
-			result = e.DB.Where("glpi_uuid = ?", asset.ID).First(&product)
+			result = e.DB.WithContext(ctx).Where("glpi_uuid = ?", asset.ID).First(&product)
 			if result.Error == nil {
 				slog.Info("Rename detected",
 					"glpi_id", asset.ID,
@@ -105,7 +105,7 @@ func (e *SyncEngine) Run() error {
 		product.ModelName = asset.Model
 		product.SerialNumber = asset.Serial
 
-		if err := e.DB.Save(&product).Error; err != nil {
+		if err := e.DB.WithContext(ctx).Save(&product).Error; err != nil {
 			slog.Error("Failed to save product", "name", name, "error", err)
 		} else {
 			slog.Debug("Product updated successfully", "id", product.ID, "name", product.Name)

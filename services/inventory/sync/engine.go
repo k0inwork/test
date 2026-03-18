@@ -22,17 +22,17 @@ func NewSyncEngine(db *gorm.DB, provider external.Provider) *SyncEngine {
 	}
 }
 
-func (e *SyncEngine) Run() error {
+func (e *SyncEngine) Run(ctx context.Context) error {
 	slog.Info("Starting inventory synchronization")
 
 	// 1. Sync Switches
-	equipments, err := e.Provider.GetNetworkEquipment(context.Background())
+	equipments, err := e.Provider.GetNetworkEquipment(ctx)
 	if err != nil {
 		slog.Error("Failed to fetch network equipment", "error", err)
 	} else {
 		for _, eq := range equipments {
 			var sw models.Switch
-			result := e.DB.Where("glpi_id = ?", eq.ID).First(&sw)
+			result := e.DB.WithContext(ctx).Where("glpi_id = ?", eq.ID).First(&sw)
 			if result.Error == gorm.ErrRecordNotFound {
 				slog.Info("New switch discovered", "name", eq.Name, "glpi_id", eq.ID)
 				sw = models.Switch{ID: eq.ID, GlpiID: eq.ID}
@@ -47,7 +47,7 @@ func (e *SyncEngine) Run() error {
 			sw.Firmware = eq.Firmware
 			sw.PortsCount = 48
 
-			if err := e.DB.Save(&sw).Error; err != nil {
+			if err := e.DB.WithContext(ctx).Save(&sw).Error; err != nil {
 				slog.Error("Failed to save switch", "name", sw.Name, "error", err)
 				continue
 			}
@@ -56,7 +56,7 @@ func (e *SyncEngine) Run() error {
 			for i := 1; i <= 3; i++ {
 				portID := fmt.Sprintf("p-%s-%d", sw.ID, i)
 				var port models.SwitchPort
-				if err := e.DB.Where("id = ?", portID).First(&port).Error; err == gorm.ErrRecordNotFound {
+				if err := e.DB.WithContext(ctx).Where("id = ?", portID).First(&port).Error; err == gorm.ErrRecordNotFound {
 					port = models.SwitchPort{
 						ID:       portID,
 						SwitchID: sw.ID,
@@ -64,19 +64,19 @@ func (e *SyncEngine) Run() error {
 					}
 				}
 				port.Port = fmt.Sprintf("%s:Port %d", sw.Name, i)
-				e.DB.Save(&port)
+				e.DB.WithContext(ctx).Save(&port)
 			}
 		}
 	}
 
 	// 2. Sync IPMI (Computers)
-	computers, err := e.Provider.GetComputers(context.Background())
+	computers, err := e.Provider.GetComputers(ctx)
 	if err != nil {
 		slog.Error("Failed to fetch computers (IPMI)", "error", err)
 	} else {
 		for _, c := range computers {
 			var ipmi models.Ipmi
-			result := e.DB.Where("id = ?", c.ID).First(&ipmi)
+			result := e.DB.WithContext(ctx).Where("id = ?", c.ID).First(&ipmi)
 			if result.Error == gorm.ErrRecordNotFound {
 				slog.Info("New IPMI discovered", "name", c.Name, "id", c.ID)
 				ipmi = models.Ipmi{ID: c.ID}
@@ -88,20 +88,20 @@ func (e *SyncEngine) Run() error {
 			ipmi.Dns = c.DNS
 			ipmi.Available = (c.Status == "Online" || c.Status == "1")
 
-			if err := e.DB.Save(&ipmi).Error; err != nil {
+			if err := e.DB.WithContext(ctx).Save(&ipmi).Error; err != nil {
 				slog.Error("Failed to save IPMI", "name", ipmi.Name, "error", err)
 			}
 		}
 	}
 
 	// 3. Sync PDUs
-	pdus, err := e.Provider.GetPDUs(context.Background())
+	pdus, err := e.Provider.GetPDUs(ctx)
 	if err != nil {
 		slog.Error("Failed to fetch PDUs", "error", err)
 	} else {
 		for _, p := range pdus {
 			var pdu models.PDU
-			result := e.DB.Where("glpi_id = ?", p.ID).First(&pdu)
+			result := e.DB.WithContext(ctx).Where("glpi_id = ?", p.ID).First(&pdu)
 			if result.Error == gorm.ErrRecordNotFound {
 				slog.Info("New PDU discovered", "name", p.Name, "glpi_id", p.ID)
 				pdu = models.PDU{ID: p.ID, GlpiID: p.ID}
@@ -113,7 +113,7 @@ func (e *SyncEngine) Run() error {
 			pdu.Manufacturer = p.Manufacturer
 			pdu.Serial = p.Serial
 
-			if err := e.DB.Save(&pdu).Error; err != nil {
+			if err := e.DB.WithContext(ctx).Save(&pdu).Error; err != nil {
 				slog.Error("Failed to save PDU", "name", pdu.Name, "error", err)
 			}
 		}

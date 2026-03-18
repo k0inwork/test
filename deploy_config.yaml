@@ -1,18 +1,5 @@
 version: '1'
 external_dependencies:
-  jaeger:
-    version: '1.50.0'
-    bin: 'jaeger-all-in-one'
-    linux_url: 'https://github.com/jaegertracing/jaeger/releases/download/v1.50.0/jaeger-1.50.0-linux-amd64.tar.gz'
-    darwin_arm64_url: 'https://github.com/jaegertracing/jaeger/releases/download/v1.50.0/jaeger-1.50.0-darwin-arm64.tar.gz'
-    darwin_amd64_url: 'https://github.com/jaegertracing/jaeger/releases/download/v1.50.0/jaeger-1.50.0-darwin-amd64.tar.gz'
-    ports:
-      - "16686:16686"
-      - "14268:14268"
-      - "4317:4317"
-      - "4318:4318"
-    command: '.bin/jaeger-all-in-one'
-    docker_image: 'jaegertracing/all-in-one:1.50'
   prometheus:
     version: '2.47.1'
     bin: 'prometheus'
@@ -23,6 +10,29 @@ external_dependencies:
       - "9090:9090"
     command: '.bin/prometheus --config.file=prometheus.yml'
     docker_image: 'prom/prometheus:v2.47.1'
+  otelcol:
+    version: '0.96.0'
+    bin: 'otelcol-contrib'
+    linux_url: 'https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.96.0/otelcol-contrib_0.96.0_linux_amd64.tar.gz'
+    darwin_arm64_url: 'https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.96.0/otelcol-contrib_0.96.0_darwin_arm64.tar.gz'
+    darwin_amd64_url: 'https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.96.0/otelcol-contrib_0.96.0_darwin_amd64.tar.gz'
+    ports:
+      - "4318:4318"
+      - "8889:8889"
+    command: '.bin/otelcol-contrib --config=otelcol-config.yaml'
+    docker_image: 'otel/opentelemetry-collector-contrib:0.96.0'
+  jaeger:
+    version: '1.50.0'
+    bin: 'jaeger-all-in-one'
+    linux_url: 'https://github.com/jaegertracing/jaeger/releases/download/v1.50.0/jaeger-1.50.0-linux-amd64.tar.gz'
+    darwin_arm64_url: 'https://github.com/jaegertracing/jaeger/releases/download/v1.50.0/jaeger-1.50.0-darwin-arm64.tar.gz'
+    darwin_amd64_url: 'https://github.com/jaegertracing/jaeger/releases/download/v1.50.0/jaeger-1.50.0-darwin-amd64.tar.gz'
+    ports:
+      - "16686:16686"
+      - "14317:14317"
+      - "14318:14318"
+    command: 'COLLECTOR_OTLP_GRPC_HOST_PORT=:14317 COLLECTOR_OTLP_HTTP_HOST_PORT=:14318 METRICS_STORAGE_TYPE=prometheus .bin/jaeger-all-in-one --prometheus.server-url=http://localhost:9090 --prometheus.query.normalize-calls=true --prometheus.query.normalize-duration=true --prometheus.query.support-spanmetrics-connector=true --query.ui-config=jaeger-ui.json'
+    docker_image: 'jaegertracing/all-in-one:1.50'
 
 services:
   registry:
@@ -55,3 +65,12 @@ services:
   frontend:
     port: 8080
     path: 'services/frontend/main.go'
+  compatibility:
+    port: 8090
+    path: 'services/compatibility/main.go'
+  gws:
+    port: 8091
+    path: 'services/gws/main.go'
+  keyservice:
+    port: 8092
+    path: 'services/keyservice/main.go'
