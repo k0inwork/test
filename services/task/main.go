@@ -15,6 +15,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -327,10 +328,11 @@ func startArchiverJob() {
 	ticker := time.NewTicker(5 * time.Minute)
 	for {
 		<-ticker.C
+		ctx, span := otel.Tracer("scheduler").Start(context.Background(), "ArchiveOldTasks")
 		slog.Info("Running task archiver job")
 		// Archive tasks older than 24 hours in terminal states
 		threshold := time.Now().Add(-24 * time.Hour)
-		result := db.Model(&models.TaskRecord{}).
+		result := db.WithContext(ctx).Model(&models.TaskRecord{}).
 			Where("status IN ? AND updated_at < ?", []string{models.TaskStateFinished, models.TaskStateFailed, models.TaskStateError}, threshold).
 			Update("status", models.TaskStateArchived)
 
@@ -339,6 +341,7 @@ func startArchiverJob() {
 		} else if result.RowsAffected > 0 {
 			slog.Info("Archived old tasks", "count", result.RowsAffected)
 		}
+		span.End()
 	}
 }
 
@@ -358,9 +361,11 @@ func startSchedulerJob() {
 
 	ticker := time.NewTicker(1 * time.Minute)
 	for {
+		ctx, span := otel.Tracer("scheduler").Start(context.Background(), "SyncRecurringTasks")
 		var tasks []models.RecurringTask
-		if err := db.Where("is_active = ?", true).Find(&tasks).Error; err != nil {
+		if err := db.WithContext(ctx).Where("is_active = ?", true).Find(&tasks).Error; err != nil {
 			slog.Error("Error fetching recurring tasks", "error", err)
+			span.End()
 			time.Sleep(1 * time.Minute)
 			continue
 		}
@@ -374,8 +379,11 @@ func startSchedulerJob() {
 				// We need to add this new/updated task to the cron scheduler
 				t := task // capture loop variable
 				entryID, err := c.AddFunc(t.Schedule, func() {
+					ctxT, spanT := otel.Tracer("scheduler").Start(context.Background(), "TriggerRecurringTask:"+t.Name)
+					defer spanT.End()
+
 					slog.Info("Triggering recurring task", "name", t.Name, "url", t.TargetURL)
-					req, _ := http.NewRequest("POST", t.TargetURL, bytes.NewBuffer([]byte(t.Payload)))
+					req, _ := http.NewRequestWithContext(ctxT, "POST", t.TargetURL, bytes.NewBuffer([]byte(t.Payload)))
 					req.Header.Set("Content-Type", "application/json")
 					resp, err := otelClient.Do(req)
 					if err != nil {
@@ -386,7 +394,7 @@ func startSchedulerJob() {
 					slog.Info("Recurring task webhook response", "task_id", t.ID, "status", resp.StatusCode)
 
 					now := time.Now()
-					db.Model(&models.RecurringTask{}).Where("id = ?", t.ID).Update("last_run_at", now)
+					db.WithContext(ctxT).Model(&models.RecurringTask{}).Where("id = ?", t.ID).Update("last_run_at", now)
 				})
 
 				if err != nil {
@@ -406,6 +414,7 @@ func startSchedulerJob() {
 				slog.Info("Removed inactive recurring task from cron scheduler", "task_id", taskID)
 			}
 		}
+		span.End()
 
 		<-ticker.C
 	}
