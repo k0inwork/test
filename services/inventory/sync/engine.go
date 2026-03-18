@@ -22,9 +22,9 @@ func NewSyncEngine(db *gorm.DB, provider external.Provider) *SyncEngine {
 	}
 }
 
-func (e *SyncEngine) Run() error {
+func (e *SyncEngine) Run(ctx context.Context) error {
 	slog.Info("Starting inventory synchronization")
-	equipments, err := e.Provider.GetNetworkEquipment(context.Background())
+	equipments, err := e.Provider.GetNetworkEquipment(ctx)
 	if err != nil {
 		slog.Error("Failed to fetch network equipment", "error", err)
 		return err
@@ -32,7 +32,7 @@ func (e *SyncEngine) Run() error {
 
 	for _, eq := range equipments {
 		var sw models.Switch
-		result := e.DB.Where("glpi_id = ?", eq.ID).First(&sw)
+		result := e.DB.WithContext(ctx).Where("glpi_id = ?", eq.ID).First(&sw)
 		if result.Error == gorm.ErrRecordNotFound {
 			slog.Info("New switch discovered", "name", eq.Name, "glpi_id", eq.ID)
 			// Use GLPI ID as internal ID if it's new
@@ -44,7 +44,7 @@ func (e *SyncEngine) Run() error {
 		sw.Model = eq.Model
 		sw.PortsCount = 48
 
-		if err := e.DB.Save(&sw).Error; err != nil {
+		if err := e.DB.WithContext(ctx).Save(&sw).Error; err != nil {
 			slog.Error("Failed to save switch", "name", sw.Name, "error", err)
 			continue
 		}
@@ -53,7 +53,7 @@ func (e *SyncEngine) Run() error {
 		for i := 1; i <= 3; i++ {
 			portID := fmt.Sprintf("p-%s-%d", sw.ID, i)
 			var port models.SwitchPort
-			if err := e.DB.Where("id = ?", portID).First(&port).Error; err == gorm.ErrRecordNotFound {
+			if err := e.DB.WithContext(ctx).Where("id = ?", portID).First(&port).Error; err == gorm.ErrRecordNotFound {
 				port = models.SwitchPort{
 					ID:       portID,
 					SwitchID: sw.ID,
@@ -61,7 +61,7 @@ func (e *SyncEngine) Run() error {
 				}
 			}
 			port.Port = fmt.Sprintf("%s:Port %d", sw.Name, i)
-			e.DB.Save(&port)
+			e.DB.WithContext(ctx).Save(&port)
 		}
 	}
 

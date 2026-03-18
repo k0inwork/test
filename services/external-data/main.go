@@ -1,18 +1,22 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"pum-go/pkg/external"
 	"pum-go/pkg/logging"
+	"pum-go/pkg/tracing"
 	"pum-go/services/external-data/graph"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 func setupRouter() *gin.Engine {
 	r := gin.New()
+	r.Use(otelgin.Middleware("external-data"))
 	r.Use(gin.Recovery())
 	r.Use(logging.GinMiddleware())
 
@@ -56,18 +60,24 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
+	tp, _ := tracing.InitTracer("external-data")
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			slog.Error("failed to shutdown tracer", "err", err)
+		}
+	}()
 	logging.Init("external-data")
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
-		Name:         "external-data",
-		Endpoint:     "http://localhost:8089",
+		Name:     "external-data",
+		Endpoint: "http://localhost:8089",
 		Capabilities: []logging.CapabilityRegistration{
 			{Name: "external-data", Endpoints: []string{"/"}},
 			{Name: "glpi", Endpoints: []string{"/glpi"}},
 			{Name: "zabbix", Endpoints: []string{"/zabbix"}},
 			{Name: "graphql", Endpoints: []string{"/query"}},
 		},
-		IsCore:       false,
+		IsCore: false,
 	})
 
 	gin.SetMode(gin.ReleaseMode)
