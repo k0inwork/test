@@ -64,8 +64,8 @@ func main() {
 		comp.GET("/network/subnetwork/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8084/subnets", "subnetwork_list") })
 
 		// gws app
-		comp.GET("/gws/gws/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8091/gateways", "gateways") })
-		comp.GET("/gws/historysession/", stubHandler("session_history"))
+		comp.GET("/gws/gws/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8082/gateways", "gateways") })
+		comp.GET("/gws/historysession/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8082/sessions", "session_history") })
 
 		// services app
 		comp.GET("/services/listkeyservice/", func(c *gin.Context) { proxyLegacy(c, "http://localhost:8092/keyservices", "key_services") })
