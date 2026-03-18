@@ -20,6 +20,7 @@ type Product struct {
 	SequentialNumber int            `gorm:"default:1" json:"sequential_number"`
 	PouType          string         `gorm:"size:10;default:'ПОУ'" json:"pou_type"`
 	Region           string         `gorm:"size:20;default:''" json:"region"`
+	Log              string         `gorm:"size:1000" json:"log"`
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"index" json:"-"`
