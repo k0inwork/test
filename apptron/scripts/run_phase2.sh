@@ -6,8 +6,8 @@ REPO_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
 APPTRON_DIR="$REPO_ROOT/apptron/apptron"
 
 if [ ! -d "$APPTRON_DIR" ]; then
-    echo "Apptron worker source not found. Make sure to fetch the submodule or clone apptron."
-    return 1 2>/dev/null || false
+    echo "Apptron worker source not found. Cloning tractordev/apptron..."
+    git clone --depth 1 https://github.com/tractordev/apptron "$APPTRON_DIR"
 fi
 
 echo "Setting up Apptron worker..."
