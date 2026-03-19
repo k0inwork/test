@@ -11,13 +11,40 @@ import (
 	"os"
 	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
+	"pum-go/pkg/tasklib"
 	"pum-go/pkg/tracing"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
+
+var (
+	upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
+	clients   = make(map[*websocket.Conn]string) // conn -> username
+	clientsMu sync.Mutex
+)
+
+func broadcastMessage(user string, message string) {
+	clientsMu.Lock()
+	defer clientsMu.Unlock()
+	for conn, u := range clients {
+		if user == "" || user == "all" || u == user {
+			err := conn.WriteMessage(websocket.TextMessage, []byte(message))
+			if err != nil {
+				slog.Error("WebSocket write error", "error", err)
+				conn.Close()
+				delete(clients, conn)
+			}
+		}
+	}
+}
 
 var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
@@ -27,6 +54,7 @@ type RegisteredService struct {
 	Capabilities []logging.CapabilityRegistration `json:"capabilities"`
 	Enabled      bool                             `json:"enabled"`
 	IsCore       bool                             `json:"is_core"`
+	OrderID      int                              `json:"order_id"`
 	Menu         []logging.MenuItem               `json:"menu"`
 }
 
@@ -35,14 +63,67 @@ var GlobalConfig *config.Config
 func getCommonH(c *gin.Context) gin.H {
 	user, _ := c.Get("pum_user")
 	role, _ := c.Get("pum_role")
-	caps, _ := c.Get("pum_caps")
+	capsStr, _ := c.Get("pum_caps")
 	svcs, _ := c.Get("services")
 
+	var caps []string
+	if str, ok := capsStr.(string); ok && str != "" {
+		caps = strings.Split(str, ",")
+	}
+	hasAll := false
+	for _, cap := range caps {
+		if cap == "*" || cap == "all" {
+			hasAll = true
+			break
+		}
+	}
+
+	type NavItem struct {
+		Label string
+		URL   string
+	}
+	nav := []NavItem{}
+
+	if svcs != nil {
+		for _, s := range svcs.([]RegisteredService) {
+			// Check capabilities
+			allowed := false
+
+			// Allow if service requires no capabilities
+			if len(s.Capabilities) == 0 {
+				allowed = true
+			} else if hasAll {
+				allowed = true
+			} else {
+				for _, reqCap := range s.Capabilities {
+					for _, userCap := range caps {
+						if reqCap.Name == userCap && reqCap.Name != "" {
+							allowed = true
+							break
+						}
+					}
+					if allowed {
+						break
+					}
+				}
+			}
+
+			if allowed {
+				for _, item := range s.Menu {
+					nav = append(nav, NavItem{
+						Label: item.Label,
+						URL:   fmt.Sprintf("/m/%s%s", s.Name, item.Path),
+					})
+				}
+			}
+		}
+	}
+
 	return gin.H{
-		"User":         user,
-		"Role":         role,
-		"Capabilities": caps,
-		"Services":     svcs,
+		"User":    user,
+		"Role":    role,
+		"Nav":     nav,
+		"IsAdmin": role == "admin",
 	}
 }
 
@@ -61,13 +142,16 @@ func main() {
 		slog.Error("failed to load system.yaml", "err", err)
 	}
 
+	// Initialize tasklib for recurring tasks
+	tasklib.Init("http://localhost:8085")
+
 	r := gin.Default()
 	r.Use(otelgin.Middleware("frontend"))
 	r.Use(logging.GinMiddleware())
 	r.LoadHTMLGlob("services/frontend/templates/*.html")
 
 	r.Use(func(c *gin.Context) {
-		if c.Request.URL.Path == "/login" {
+		if c.Request.URL.Path == "/login" || c.Request.URL.Path == "/api/notify" || strings.HasPrefix(c.Request.URL.Path, "/frontend/task/") || c.Request.URL.Path == "/ws" {
 			c.Next()
 			return
 		}
@@ -135,6 +219,76 @@ func main() {
 		c.Redirect(http.StatusFound, "/")
 	})
 
+	// WebSocket endpoint
+	r.GET("/ws", func(c *gin.Context) {
+		user, _ := c.Cookie("pum_user")
+		if user == "" {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+		if err != nil {
+			slog.Error("Failed to upgrade websocket", "error", err)
+			return
+		}
+
+		clientsMu.Lock()
+		clients[conn] = user
+		clientsMu.Unlock()
+
+		defer func() {
+			clientsMu.Lock()
+			delete(clients, conn)
+			clientsMu.Unlock()
+			conn.Close()
+		}()
+
+		// Keep connection alive and listen for close
+		for {
+			_, _, err := conn.ReadMessage()
+			if err != nil {
+				break
+			}
+		}
+	})
+
+	// API endpoint for receiving notifications to broadcast
+	r.POST("/api/notify", func(c *gin.Context) {
+		var payload struct {
+			User    string `json:"user"`    // empty or "all" for broadcast
+			Message string `json:"message"`
+		}
+		if err := c.ShouldBindJSON(&payload); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		broadcastMessage(payload.User, payload.Message)
+		c.JSON(http.StatusOK, gin.H{"status": "sent"})
+	})
+
+	// Register recurring notification task
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088", // registry URL
+		r,
+		"/frontend/task/notify",                      // local webhook path
+		"@every 1m",                                  // schedule
+		"http://localhost:8080/frontend/task/notify", // target URL reachable by task service
+		"system",                                     // username
+		"send-timer-notification",                    // operation
+		"timer",                                      // object ID
+		"Notification",                               // class name
+		func(ctx context.Context, payload []byte) error {
+			slog.Info("Executing recurring timer notification")
+
+			// Broadcast message to all users
+			msg := fmt.Sprintf("System Timer Notification: The time is now %s", time.Now().Format(time.RFC3339))
+			broadcastMessage("all", msg)
+			return nil
+		},
+	)
+
 	r.GET("/logout", func(c *gin.Context) {
 		c.SetCookie("pum_user", "", -1, "/", "", false, true)
 		c.SetCookie("pum_role", "", -1, "/", "", false, true)
@@ -194,7 +348,7 @@ func main() {
 		importPath := fmt.Sprintf("services/frontend/templates/%s_%s.html", mod, strings.Trim(path, "/"))
 		if _, err := os.Stat(importPath); err == nil {
 			h["HasCustomTemplate"] = true
-			h["CustomTemplateName"] = fmt.Sprintf("%s_%s.html", mod, strings.Trim(path, "/"))
+			h["CustomTemplateName"] = fmt.Sprintf("content_%s_%s", mod, strings.Trim(path, "/"))
 		} else {
 			h["HasCustomTemplate"] = false
 		}
