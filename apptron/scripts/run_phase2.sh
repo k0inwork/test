@@ -239,42 +239,16 @@ elif [ -n "$(find "$REPO_ROOT/apptron/services/pum-cli" -newer "$REPO_ROOT/build
     CLI_CHANGED=true
 fi
 
-NEEDS_MERGE=false
-if [ ! -f "assets/bundles/sys.tar.gz" ]; then
-    echo "Base sys.tar.gz not found in worker, will copy and merge..."
-    NEEDS_MERGE=true
-elif ! tar -tf "assets/bundles/sys.tar.gz" | grep -q "rootfs/bin/pum"; then
-    echo "pum not found in worker sys.tar.gz, will merge..."
-    NEEDS_MERGE=true
-elif [ "$CLI_CHANGED" = true ]; then
-    echo "CLI source changed, will rebuild and merge..."
-    NEEDS_MERGE=true
+
+if [ "$CLI_CHANGED" = true ] || [ ! -f "assets/bundles/pum.tar.gz" ]; then
+    echo "pum-cli source changed or pum.tar.gz missing, building..."
+    (cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
 fi
 
-if [ "$NEEDS_MERGE" = true ]; then
-    echo "Restoring clean base sys.tar.gz from repository for merge..."
-    mkdir -p assets/bundles
-    cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
-
-    if [ "$CLI_CHANGED" = true ]; then
-        echo "Checking if pum-cli needs to be built and injected..."
-        (cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
-    fi
-
-    echo "Merging pum-cli into Phase 2 sys.tar.gz..."
-    TMP_BUNDLE_DIR=$(mktemp -d)
-    tar -xzf "assets/bundles/sys.tar.gz" -C "$TMP_BUNDLE_DIR"
-
-    # Copy custom pum binaries over the extracted rootfs
-    cp -r "$REPO_ROOT/build/distro/sys-bundle/rootfs/"* "$TMP_BUNDLE_DIR/rootfs/"
-
-    # Repack the final bundle
-    TARGET_TAR="$(pwd)/assets/bundles/sys.tar.gz"
-    (cd "$TMP_BUNDLE_DIR" && tar -czf "$TARGET_TAR" .)
-    rm -rf "$TMP_BUNDLE_DIR"
-else
-    echo "sys.tar.gz is up to date with pum-cli. Skipping merge."
-fi
+echo "Copying sys.tar.gz and pum.tar.gz into worker assets..."
+mkdir -p assets/bundles
+cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
+cp "$REPO_ROOT/apptron/cmd/pum-admin/assets/bundles/pum.tar.gz" "assets/bundles/pum.tar.gz"
 
 echo "Starting Phase 2 Worker in dev mode..."
 echo "Mock Auth is ENABLED in apptron/worker/src/auth.ts."
