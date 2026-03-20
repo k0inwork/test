@@ -279,6 +279,12 @@ fi
 echo "Starting Phase 2 Worker in dev mode..."
 echo "Mock Auth is ENABLED in apptron/worker/src/auth.ts."
 echo "You can access the environment at http://localhost:8788"
+
+
+echo "Clearing Wrangler cache..."
+rm -rf .wrangler
+docker image prune -f --filter "label=org.opencontainers.image.title=worker"
+
 export CI=true
 export WRANGLER_SEND_METRICS=false
 cd worker && npx wrangler dev --port=8788 --log-level=none
