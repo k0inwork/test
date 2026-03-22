@@ -37,17 +37,26 @@ echo "Welcome to the PUM Admin Distro (Phase 1: Mock Mode)"
 EOP
 
 
-echo "Packaging custom sys.tar.gz into runner assets..."
+echo "Packaging custom pum.tar.gz into runner assets..."
 mkdir -p "$FINAL_ASSETS_DIR/bundles"
 
 # Apptron's boot.go expects the contents to be inside a 'rootfs' directory within the tar
-mkdir -p "$BUILD_DIR/sys-bundle/rootfs"
-cp -r "$BUNDLE_DIR"/* "$BUILD_DIR/sys-bundle/rootfs/"
 
-echo "Adding kernel and v86 emulator assets to the bundle..."
-cp -r "$APPTRON_DIR/scripts/kernel" "$BUILD_DIR/sys-bundle/"
-cp -r "$APPTRON_DIR/scripts/v86" "$BUILD_DIR/sys-bundle/"
 
-(cd "$BUILD_DIR/sys-bundle" && tar -czf "$FINAL_ASSETS_DIR/bundles/sys.tar.gz" .)
+
+echo "Creating pum.tar.gz bundle..."
+
+
+
+
+# Apptron expects contents to be inside a 'rootfs' directory within the tar
+mkdir -p "$BUNDLE_DIR/rootfs/bin"
+mkdir -p "$BUNDLE_DIR/rootfs/etc/profile.d"
+mv "$BUNDLE_DIR/bin/"* "$BUNDLE_DIR/rootfs/bin/"
+mv "$BUNDLE_DIR/etc/"* "$BUNDLE_DIR/rootfs/etc/"
+rmdir "$BUNDLE_DIR/bin" "$BUNDLE_DIR/etc"
+
+(cd "$BUNDLE_DIR" && tar -czf "$FINAL_ASSETS_DIR/bundles/pum.tar.gz" .)
+
 
 echo "Build complete! Custom Apptron assets are ready for embedding in $FINAL_ASSETS_DIR"
