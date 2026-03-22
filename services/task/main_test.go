@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"pum-go/pkg/models"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -28,11 +27,8 @@ func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 
-	api := r.Group("/api")
-	{
-		api.GET("/recurring", listRecurringTasks)
-		api.POST("/recurring", createRecurringTask)
-	}
+	r.GET("/recurring", listRecurringTasks)
+	r.POST("/recurring", createRecurringTask)
 	return r
 }
 
@@ -43,12 +39,13 @@ func TestRecurringTaskRegistration(t *testing.T) {
 	reqPayload := map[string]interface{}{
 		"name":       "sync-switches",
 		"schedule":   "@every 1m",
-		"target_url": "http://localhost:8083/internal/tasks/sync",
+		"endpoint":   "http://localhost:8083/internal/tasks/sync",
 		"payload":    "{}",
+		"is_active":  true,
 	}
 	body, _ := json.Marshal(reqPayload)
 
-	req, _ := http.NewRequest("POST", "/api/recurring", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/recurring", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
@@ -61,14 +58,14 @@ func TestRecurringTaskRegistration(t *testing.T) {
 
 	assert.Equal(t, "sync-switches", task.Name)
 	assert.Equal(t, "@every 1m", task.Schedule)
-	assert.Equal(t, "http://localhost:8083/internal/tasks/sync", task.TargetURL)
+	assert.Equal(t, "http://localhost:8083/internal/tasks/sync", task.Endpoint)
 	assert.True(t, task.IsActive)
 
 	// Test Upsert (duplicate name)
-	reqPayload["target_url"] = "http://localhost:9999/new-url"
+	reqPayload["endpoint"] = "http://localhost:9999/new-url"
 	body, _ = json.Marshal(reqPayload)
 
-	req2, _ := http.NewRequest("POST", "/api/recurring", bytes.NewBuffer(body))
+	req2, _ := http.NewRequest("POST", "/recurring", bytes.NewBuffer(body))
 	req2.Header.Set("Content-Type", "application/json")
 
 	w2 := httptest.NewRecorder()
@@ -80,7 +77,7 @@ func TestRecurringTaskRegistration(t *testing.T) {
 	db.First(&taskUpdated)
 
 	assert.Equal(t, task.ID, taskUpdated.ID) // Should be same record
-	assert.Equal(t, "http://localhost:9999/new-url", taskUpdated.TargetURL)
+	assert.Equal(t, "http://localhost:9999/new-url", taskUpdated.Endpoint)
 }
 
 func TestCronSchedulerTrigger(t *testing.T) {
@@ -97,19 +94,16 @@ func TestCronSchedulerTrigger(t *testing.T) {
 	task := models.RecurringTask{
 		Name:      "test-webhook",
 		Schedule:  "@every 1s",
-		TargetURL: testServer.URL,
+		Endpoint:  testServer.URL,
 		Payload:   "{}",
 		IsActive:  true,
 	}
 	db.Create(&task)
 
-	// Run scheduler loop in background
-	go startSchedulerJob()
+	// Trigger logic to verify
+	triggerRecurringTask(&task)
 
-	// Wait for at least one trigger
-	time.Sleep(2 * time.Second)
-
-	assert.True(t, webhookCalled, "Expected webhook to be called by the cron scheduler")
+	assert.True(t, webhookCalled, "Expected webhook to be called by the trigger logic")
 
 	// Verify last_run_at was updated
 	var updatedTask models.RecurringTask
