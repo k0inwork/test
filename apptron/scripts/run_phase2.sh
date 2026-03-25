@@ -227,22 +227,30 @@ if [ ! -f "assets/wanix.wasm" ]; then
     make all
 else
     echo "Base Apptron assets found. Skipping make all to speed up startup."
-    echo "Installing worker dependencies..."
-    cd worker && npm ci && cd ..
+#    echo "Installing worker dependencies..."
+#    cd worker && npm ci && cd ..
 fi
 
 # Check if CLI needs rebuilding by comparing timestamps
+echo -n "Checking cli... " 
 CLI_CHANGED=false
 if [ ! -f "$REPO_ROOT/build/distro/bundle/bin/pum.wasm" ]; then
     CLI_CHANGED=true
+    echo -n "! no pum.wasm"
 elif [ -n "$(find "$REPO_ROOT/apptron/services/pum-cli" -newer "$REPO_ROOT/build/distro/bundle/bin/pum.wasm" 2>/dev/null | head -n 1)" ]; then
     CLI_CHANGED=true
+    echo -n "! changes in code are newer than pum.wasm"
+elif [ ! -f "$REPO_ROOT/apptron/cmd/pum-admin/assets/bundles/pum.tar.gz" ]; then
+    CLI_CHANGED=true
+    echo -n "! no REPO_ROOT/apptron/cmd/pum-admin/assets/bundles/pum.tar.gz"
 fi
 
 
 if [ "$CLI_CHANGED" = true ] || [ ! -f "assets/bundles/pum.tar.gz" ]; then
     echo "pum-cli source changed or pum.tar.gz missing, building..."
     (cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
+else
+    echo " no changes"
 fi
 
 echo "Copying sys.tar.gz and pum.tar.gz into worker assets..."

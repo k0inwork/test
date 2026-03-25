@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+//
 	registry := actions.NewRegistry()
 	registry.Register(actions.RebootAction{})
 
