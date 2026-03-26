@@ -12,9 +12,8 @@ PUM_CLI_DIR="$APPTRON_DIR/services/pum-cli/cmd/pum-cli"
 APPTRON_SRC="$APPTRON_DIR/apptron"
 
 echo "Initializing build directory..."
-
 rm -rf "$BUNDLE_DIR"
-mkdir "$BUNDLE_DIR"
+rm -rf "$BUILD_DIR/sys-bundle"
 mkdir -p "$BUNDLE_DIR/bin"
 mkdir -p "$FINAL_ASSETS_DIR"
 

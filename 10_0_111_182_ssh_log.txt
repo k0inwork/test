@@ -1,0 +1,132 @@
+OpenSSH_9.6p1 Ubuntu-3ubuntu13.14, OpenSSL 3.0.13 30 Jan 2024
+debug1: Reading configuration data /tmp/.ssh/config
+debug1: /tmp/.ssh/config line 5: Applying options for 10.0.111.182
+debug1: Setting implicit ProxyCommand from ProxyJump: ssh -F /tmp/.ssh/config -v -W '[%h]:%p' bridge
+debug1: Executing proxy command: exec ssh -F /tmp/.ssh/config -v -W '[10.0.111.182]:22' bridge
+debug1: identity file /tmp/.ssh/id_rsa_tablet type 0
+debug1: identity file /tmp/.ssh/id_rsa_tablet-cert type -1
+debug1: Local version string SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
+OpenSSH_9.6p1 Ubuntu-3ubuntu13.14, OpenSSL 3.0.13 30 Jan 2024
+debug1: Reading configuration data /tmp/.ssh/config
+debug1: /tmp/.ssh/config line 1: Applying options for bridge
+debug1: Connecting to 77.234.200.227 [77.234.200.227] port 22.
+debug1: Connection established.
+debug1: identity file /tmp/.ssh/id_rsa_tablet type 0
+debug1: identity file /tmp/.ssh/id_rsa_tablet-cert type -1
+debug1: Local version string SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.14
+debug1: Remote protocol version 2.0, remote software version OpenSSH_10.2
+debug1: compat_banner: match: OpenSSH_10.2 pat OpenSSH* compat 0x04000000
+debug1: Authenticating to 77.234.200.227:22 as 'root'
+debug1: load_hostkeys: fopen /home/jules/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+debug1: SSH2_MSG_KEXINIT sent
+debug1: SSH2_MSG_KEXINIT received
+debug1: kex: algorithm: sntrup761x25519-sha512@openssh.com
+debug1: kex: host key algorithm: ssh-ed25519
+debug1: kex: server->client cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug1: kex: client->server cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug1: expecting SSH2_MSG_KEX_ECDH_REPLY
+debug1: SSH2_MSG_KEX_ECDH_REPLY received
+debug1: Server host key: ssh-ed25519 SHA256:LqAm6VtVKvLWA4c4sV2C9OZmQ5QfWKa8IpaWFW7UxfM
+debug1: load_hostkeys: fopen /home/jules/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+debug1: Host '77.234.200.227' is known and matches the ED25519 host key.
+debug1: Found key in /home/jules/.ssh/known_hosts:1
+debug1: ssh_packet_send2_wrapped: resetting send seqnr 3
+debug1: rekey out after 134217728 blocks
+debug1: SSH2_MSG_NEWKEYS sent
+debug1: Sending SSH2_MSG_EXT_INFO
+debug1: expecting SSH2_MSG_NEWKEYS
+debug1: ssh_packet_read_poll2: resetting read seqnr 3
+debug1: SSH2_MSG_NEWKEYS received
+debug1: rekey in after 134217728 blocks
+debug1: SSH2_MSG_EXT_INFO received
+debug1: kex_ext_info_client_parse: server-sig-algs=<ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256>
+debug1: kex_ext_info_check_ver: publickey-hostbound@openssh.com=<0>
+debug1: kex_ext_info_check_ver: ping@openssh.com=<0>
+debug1: SSH2_MSG_SERVICE_ACCEPT received
+debug1: SSH2_MSG_EXT_INFO received
+debug1: kex_ext_info_client_parse: server-sig-algs=<ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256>
+debug1: Authentications that can continue: publickey,keyboard-interactive
+debug1: Next authentication method: publickey
+debug1: Will attempt key: /tmp/.ssh/id_rsa_tablet RSA SHA256:ElUK27/Az+Z3IctAX/KMEr2Ov39riO8qzOJTorZOHeY explicit
+debug1: Offering public key: /tmp/.ssh/id_rsa_tablet RSA SHA256:ElUK27/Az+Z3IctAX/KMEr2Ov39riO8qzOJTorZOHeY explicit
+debug1: Server accepts key: /tmp/.ssh/id_rsa_tablet RSA SHA256:ElUK27/Az+Z3IctAX/KMEr2Ov39riO8qzOJTorZOHeY explicit
+Authenticated to 77.234.200.227 ([77.234.200.227]:22) using "publickey".
+debug1: channel_connect_stdio_fwd: 10.0.111.182:22
+debug1: channel 0: new stdio-forward [stdio-forward] (inactive timeout: 0)
+debug1: Requesting no-more-sessions@openssh.com
+debug1: Entering interactive session.
+debug1: pledge: filesystem
+debug1: client_input_global_request: rtype hostkeys-00@openssh.com want_reply 0
+debug1: client_input_hostkeys: searching /home/jules/.ssh/known_hosts for 77.234.200.227 / (none)
+debug1: client_input_hostkeys: searching /home/jules/.ssh/known_hosts2 for 77.234.200.227 / (none)
+debug1: client_input_hostkeys: hostkeys file /home/jules/.ssh/known_hosts2 does not exist
+debug1: Remote: /root/.ssh/authorized_keys:12: key options: agent-forwarding port-forwarding pty user-rc x11-forwarding
+debug1: Remote: /root/.ssh/authorized_keys:12: key options: agent-forwarding port-forwarding pty user-rc x11-forwarding
+debug1: Remote protocol version 2.0, remote software version OpenSSH_9.8
+debug1: compat_banner: match: OpenSSH_9.8 pat OpenSSH* compat 0x04000000
+debug1: Authenticating to 10.0.111.182:22 as 'root'
+debug1: load_hostkeys: fopen /home/jules/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+debug1: SSH2_MSG_KEXINIT sent
+Learned new hostkey: RSA SHA256:/pv5KmZz1kvDlYR6qF8ChbRik5vTqmLON/XmkSud16Y
+Learned new hostkey: ECDSA SHA256:iAC30NYPSoQcxGUKCxue1CcdnbazKtwDXaW0ex7OPwg
+Adding new key for 77.234.200.227 to /home/jules/.ssh/known_hosts: ssh-rsa SHA256:/pv5KmZz1kvDlYR6qF8ChbRik5vTqmLON/XmkSud16Y
+Adding new key for 77.234.200.227 to /home/jules/.ssh/known_hosts: ecdsa-sha2-nistp256 SHA256:iAC30NYPSoQcxGUKCxue1CcdnbazKtwDXaW0ex7OPwg
+debug1: update_known_hosts: known hosts file /home/jules/.ssh/known_hosts2 does not exist
+debug1: pledge: fork
+debug1: SSH2_MSG_KEXINIT received
+debug1: kex: algorithm: sntrup761x25519-sha512@openssh.com
+debug1: kex: host key algorithm: ssh-ed25519
+debug1: kex: server->client cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug1: kex: client->server cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug1: expecting SSH2_MSG_KEX_ECDH_REPLY
+debug1: SSH2_MSG_KEX_ECDH_REPLY received
+debug1: Server host key: ssh-ed25519 SHA256:V1oVWBwQpp2zRG1EfVeLjWAJIr9qy8Gca+MFwwide3M
+debug1: load_hostkeys: fopen /home/jules/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+Warning: Permanently added '10.0.111.182' (ED25519) to the list of known hosts.
+debug1: check_host_key: hostkey not known or explicitly trusted: disabling UpdateHostkeys
+debug1: ssh_packet_send2_wrapped: resetting send seqnr 3
+debug1: rekey out after 134217728 blocks
+debug1: SSH2_MSG_NEWKEYS sent
+debug1: Sending SSH2_MSG_EXT_INFO
+debug1: expecting SSH2_MSG_NEWKEYS
+debug1: ssh_packet_read_poll2: resetting read seqnr 3
+debug1: SSH2_MSG_NEWKEYS received
+debug1: rekey in after 134217728 blocks
+debug1: SSH2_MSG_EXT_INFO received
+debug1: kex_ext_info_client_parse: server-sig-algs=<ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256>
+debug1: kex_ext_info_check_ver: publickey-hostbound@openssh.com=<0>
+debug1: kex_ext_info_check_ver: ping@openssh.com=<0>
+debug1: SSH2_MSG_SERVICE_ACCEPT received
+debug1: SSH2_MSG_EXT_INFO received
+debug1: kex_ext_info_client_parse: server-sig-algs=<ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256>
+debug1: Authentications that can continue: publickey,keyboard-interactive
+debug1: Next authentication method: publickey
+debug1: Will attempt key: /tmp/.ssh/id_rsa_tablet RSA SHA256:ElUK27/Az+Z3IctAX/KMEr2Ov39riO8qzOJTorZOHeY explicit
+debug1: Offering public key: /tmp/.ssh/id_rsa_tablet RSA SHA256:ElUK27/Az+Z3IctAX/KMEr2Ov39riO8qzOJTorZOHeY explicit
+debug1: Server accepts key: /tmp/.ssh/id_rsa_tablet RSA SHA256:ElUK27/Az+Z3IctAX/KMEr2Ov39riO8qzOJTorZOHeY explicit
+Authenticated to 10.0.111.182 (via proxy) using "publickey".
+debug1: channel 0: new session [client-session] (inactive timeout: 0)
+debug1: Requesting no-more-sessions@openssh.com
+debug1: Entering interactive session.
+debug1: pledge: proc
+debug1: client_input_global_request: rtype hostkeys-00@openssh.com want_reply 0
+debug1: Remote: /root/.ssh/authorized_keys:9: key options: agent-forwarding port-forwarding pty user-rc x11-forwarding
+debug1: Remote: /root/.ssh/authorized_keys:9: key options: agent-forwarding port-forwarding pty user-rc x11-forwarding
+debug1: Sending command: hostname
+debug1: pledge: fork
+debug1: client_input_channel_req: channel 0 rtype exit-status reply 0
+arm-dev-2.svm
+debug1: channel 0: free: client-session, nchannels 1
+Transferred: sent 4156, received 4280 bytes, in 0.6 seconds
+Bytes per second: sent 6958.8, received 7166.4
+debug1: Exit status 0
+debug1: channel 0: free: direct-tcpip: listening port 0 for 10.0.111.182 port 22, connect from 127.0.0.1 port 65535 to UNKNOWN port 65536, nchannels 1
+Killed by signal 1.
