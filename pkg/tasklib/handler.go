@@ -1,3 +1,5 @@
+// Package tasklib provides handlers for receiving and processing task callbacks
+// or webhooks from the central task execution engine.
 package tasklib
 
 import (

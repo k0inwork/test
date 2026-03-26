@@ -1,3 +1,5 @@
+// Package main contains tests verifying the startup and routing configurations
+// of the inventory microservice.
 package main
 
 import (
@@ -67,7 +69,7 @@ func TestInventoryAPI(t *testing.T) {
 
 	// Test POST /configurable
 	cfg := config.Config{
-		ExternalModules: map[string]struct{
+		ExternalModules: map[string]struct {
 			Mode         string `yaml:"mode"`
 			Endpoint     string `yaml:"endpoint"`
 			RealEndpoint string `yaml:"real_endpoint"`

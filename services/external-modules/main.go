@@ -1,3 +1,5 @@
+// Package main starts the external-modules microservice, responsible for
+// orchestrating interactions with external hardware APIs or modules.
 package main
 
 import (

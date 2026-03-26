@@ -1,3 +1,5 @@
+// Package main executes the task microservice, serving as the central hub for
+// asynchronous job states, resource alarms, and recurring scheduling tasks.
 package main
 
 import (

@@ -120,9 +120,9 @@ func main() {
 	// Mock Hanko/Auth
 	mux.HandleFunc("/auth/user", func(w http.ResponseWriter, r *http.Request) {
 		user := map[string]interface{}{
-			"id": "1",
+			"id":       "1",
 			"username": "admin",
-			"email": "admin@example.com",
+			"email":    "admin@example.com",
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(user)

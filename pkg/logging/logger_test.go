@@ -1,3 +1,5 @@
+// Package logging contains unit tests for the structured logger and custom
+// Gin middleware to ensure logs and capabilities are correctly registered.
 package logging
 
 import (

@@ -1,3 +1,5 @@
+// Package external contains tests for the factory implementation to ensure
+// proper instantiation of external integration providers.
 package external
 
 import (

@@ -1,3 +1,5 @@
+// Package models provides GORM definitions for network-related entities such as
+// IP addresses, subnets, and VLANs used within the infrastructure management context.
 package models
 
 import (

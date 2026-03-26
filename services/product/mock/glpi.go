@@ -1,7 +1,8 @@
+// Package mock implements a mock GLPI provider for the product service, loading
+// JSON test data to simulate an external asset management system during local dev.
 package mock
 
-import (
-)
+import ()
 
 type GLPIAsset struct {
 	ID      string `json:"id"`

@@ -1,3 +1,5 @@
+// Package main runs the terminal microservice, potentially handling web-based
+// SSH sessions or interacting directly with device consoles.
 package main
 
 import (

@@ -1,3 +1,5 @@
+// Package main is the entry point for the identity microservice, handling user
+// authentication, role/capability management, and acting as the audit log sink.
 package main
 
 import (

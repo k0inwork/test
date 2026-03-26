@@ -1,3 +1,5 @@
+// Package main is the entry point for the external-data microservice, handling
+// GraphQL server setup, database connections, and external provider integration.
 package main
 
 import (

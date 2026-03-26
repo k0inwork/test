@@ -1,3 +1,5 @@
+// Package main tests the registry microservice's capability storage and dynamic
+// registration endpoints to ensure robust service discovery.
 package main
 
 import (
@@ -65,7 +67,7 @@ func TestRegistry(t *testing.T) {
 
 	t.Run("Register service", func(t *testing.T) {
 		info := ServiceInfo{
-			Name: "test-svc",
+			Name:     "test-svc",
 			Endpoint: "http://test:123",
 			Capabilities: []logging.CapabilityRegistration{
 				{Name: "test", Endpoints: []string{"/test"}},

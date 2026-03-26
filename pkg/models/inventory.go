@@ -1,3 +1,5 @@
+// Package models defines the inventory-related GORM models, representing
+// physical and logical assets within the system's database structure.
 package models
 
 import (

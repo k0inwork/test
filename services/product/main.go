@@ -1,3 +1,5 @@
+// Package main boots the product microservice, which manages server node lifecycles,
+// gateway integrations, and exposes related endpoints and GraphQL APIs.
 package main
 
 import (
@@ -84,13 +86,13 @@ func main() {
 	tasklib.RegisterEndpoint(
 		"http://localhost:8088", // registry URL
 		r,
-		"/product/task/sync",                      // local webhook path
-		"@every 1m",                               // schedule
+		"/product/task/sync", // local webhook path
+		"@every 1m",          // schedule
 		"http://localhost:8082/product/task/sync", // target URL reachable by task service
-		"system",                                  // username
-		"sync-products",                           // operation
-		"product-all",                             // object ID
-		"Product",                                 // class name
+		"system",        // username
+		"sync-products", // operation
+		"product-all",   // object ID
+		"Product",       // class name
 		func(ctx context.Context, payload []byte) error {
 			slog.Info("Executing recurring product sync")
 			return engine.Run(ctx)

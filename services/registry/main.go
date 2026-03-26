@@ -1,3 +1,5 @@
+// Package main starts the centralized registry microservice, which collects and
+// exposes capabilities, navigation menus, and endpoints from all other microservices.
 package main
 
 import (
@@ -125,14 +127,18 @@ func main() {
 		mu.RLock()
 		defer mu.RUnlock()
 		all := make([]ServiceInfo, 0)
-		for _, s := range registry { all = append(all, *s) }
+		for _, s := range registry {
+			all = append(all, *s)
+		}
 		sort.Slice(all, func(i, j int) bool { return all[i].OrderID < all[j].OrderID })
 		c.JSON(http.StatusOK, all)
 	})
 
 	r.POST("/admin/services/:name/toggle", func(c *gin.Context) {
 		name := c.Param("name")
-		var body struct { Enabled bool `json:"enabled"` }
+		var body struct {
+			Enabled bool `json:"enabled"`
+		}
 		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

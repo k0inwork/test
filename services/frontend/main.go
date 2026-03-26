@@ -1,3 +1,5 @@
+// Package main runs the frontend Go microservice, which serves static HTML/JS/CSS
+// assets, dynamically rendered templates, and proxies requests to backend APIs.
 package main
 
 import (
