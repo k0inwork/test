@@ -33,6 +33,61 @@ func initDB() {
 	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{}, &models.Ipmi{}, &models.PDU{})
 }
 
+func setupRouter(database *gorm.DB, engine *sync.SyncEngine) *gin.Engine {
+	r := gin.Default()
+	r.Use(otelgin.Middleware("inventory"))
+	r.Use(logging.GinMiddleware())
+
+	// Register recurring sync task
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088", // registry URL
+		r,
+		"/inventory/task/sync",                       // local webhook path
+		"@every 5m",                                  // schedule
+		"http://localhost:8083/inventory/task/sync", // target URL reachable by task service
+		"system",                                     // username
+		"sync-switches",                              // operation
+		"inventory-all",                              // object ID
+		"Switch",                                     // class name
+		func(ctx context.Context, payload []byte) error {
+			slog.Info("Executing recurring inventory sync")
+			return engine.Run(ctx)
+		},
+	)
+
+	r.GET("/switches", func(c *gin.Context) {
+		var switches []models.Switch
+		database.Find(&switches)
+		c.JSON(http.StatusOK, switches)
+	})
+
+	r.GET("/pdus", func(c *gin.Context) {
+		var pdus []models.PDU
+		database.Find(&pdus)
+		c.JSON(http.StatusOK, pdus)
+	})
+
+	r.GET("/ipmi", func(c *gin.Context) {
+		var ipmi []models.Ipmi
+		database.Find(&ipmi)
+		c.JSON(http.StatusOK, ipmi)
+	})
+
+	r.POST("/sync", func(c *gin.Context) {
+		if err := engine.Run(c.Request.Context()); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "success"})
+	})
+
+	r.POST("/configurable", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "success"})
+	})
+
+	return r
+}
+
 func main() {
 	tp, _ := tracing.InitTracer("inventory")
 	defer func() {
@@ -61,44 +116,7 @@ func main() {
 	// Initialize tasklib to communicate with the central task microservice
 	tasklib.Init("http://localhost:8085")
 
-	r := gin.Default()
-	r.Use(otelgin.Middleware("inventory"))
-	r.Use(logging.GinMiddleware())
-
-	// Register recurring sync task
-	tasklib.RegisterEndpoint(
-		"http://localhost:8088", // registry URL
-		r,
-		"/inventory/task/sync",                       // local webhook path
-		"@every 5m",                                  // schedule
-		"http://localhost:8083/inventory/task/sync", // target URL reachable by task service
-		"system",                                     // username
-		"sync-switches",                              // operation
-		"inventory-all",                              // object ID
-		"Switch",                                     // class name
-		func(ctx context.Context, payload []byte) error {
-			slog.Info("Executing recurring inventory sync")
-			return engine.Run(ctx)
-		},
-	)
-
-	r.GET("/switches", func(c *gin.Context) {
-		var switches []models.Switch
-		db.Find(&switches)
-		c.JSON(http.StatusOK, switches)
-	})
-
-	r.GET("/pdus", func(c *gin.Context) {
-		var pdus []models.PDU
-		db.Find(&pdus)
-		c.JSON(http.StatusOK, pdus)
-	})
-
-	r.GET("/ipmi", func(c *gin.Context) {
-		var ipmi []models.Ipmi
-		db.Find(&ipmi)
-		c.JSON(http.StatusOK, ipmi)
-	})
+	r := setupRouter(db, engine)
 
 	slog.Info("Inventory starting", "port", 8083)
 	r.Run(":8083")
