@@ -12,4 +12,5 @@ terminal: go run services/terminal/main.go
 external-data: go run services/external-data/main.go
 frontend: go run services/frontend/main.go
 compatibility: go run services/compatibility/main.go
+gws: go run services/gws/main.go
 keyservice: go run services/keyservice/main.go

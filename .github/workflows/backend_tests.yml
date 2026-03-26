@@ -1,20 +1,13 @@
-name: Backend Tests (Standard)
+name: Backend Tests (Generated)
 
 on:
   push:
-    branches:
-      - master
-      - development
-      - merge-day
     paths:
       - 'services/**'
       - 'pkg/**'
       - 'e2e_tests/backend_integration/**'
       - '.github/workflows/backend_tests.yml'
   pull_request:
-    branches:
-      - master
-      - development
     paths:
       - 'services/**'
       - 'pkg/**'
@@ -37,14 +30,32 @@ jobs:
       - name: Verify Dependencies
         run: go mod download
 
+      - name: Skip External Dependencies
+        run: echo "Skipping Prometheus and Jaeger as requested for basic backend tests."
+
       - name: Run Unit Tests
         run: |
-          services=("external-data" "external-modules" "frontend" "identity" "inventory" "network" "product" "registry" "task" "terminal")
-          for s in "${services[@]}"; do
-            echo "Testing services/$s..."
-            (cd "services/$s" && go test ./...)
-          done
+          echo "Testing services/external-data..."
+          (cd services/external-data && go test ./...)
+          echo "Testing services/external-modules..."
+          (cd services/external-modules && go test ./...)
+          echo "Testing services/frontend..."
+          (cd services/frontend && go test ./...)
+          echo "Testing services/identity..."
+          (cd services/identity && go test ./...)
+          echo "Testing services/inventory..."
+          (cd services/inventory && go test ./...)
+          echo "Testing services/network..."
+          (cd services/network && go test ./...)
+          echo "Testing services/product..."
+          (cd services/product && go test ./...)
+          echo "Testing services/registry..."
+          (cd services/registry && go test ./...)
+          echo "Testing services/task..."
+          (cd services/task && go test ./...)
+          echo "Testing services/terminal..."
+          (cd services/terminal && go test ./...)
 
       - name: Run Integration Tests
         run: |
-          CI=true go test -v ./e2e_tests/backend_integration/...
+          go test ./e2e_tests/backend_integration/...
