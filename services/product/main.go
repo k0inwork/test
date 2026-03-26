@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
 	"pum-go/pkg/tasklib"
@@ -18,35 +19,76 @@ import (
 
 var db *gorm.DB
 
-func initDB() {
-	var err error
-	db, err = gorm.Open(sqlite.Open("product.db"), &gorm.Config{})
+func initDB(dialector gorm.Dialector) *gorm.DB {
+	d, err := gorm.Open(dialector, &gorm.Config{})
 	if err == nil {
-		if err := db.Use(otelgorm.NewPlugin()); err != nil {
+		if err := d.Use(otelgorm.NewPlugin()); err != nil {
 			slog.Error("failed to install gorm otel plugin", "err", err)
 		}
 	}
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&models.Product{})
+	d.AutoMigrate(&models.Product{}, &models.Gw{}, &models.Session{})
+	return d
 }
 
-func setupRouter(dbConn *gorm.DB, engine *sync.SyncEngine) *gin.Engine {
+func setupRouter(database *gorm.DB, engine *sync.SyncEngine) *gin.Engine {
 	r := gin.Default()
 	r.Use(otelgin.Middleware("product"))
 	r.Use(logging.GinMiddleware())
-	db = dbConn
+
+	// Register recurring sync task
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088", // registry URL
+		r,
+		"/product/task/sync",                       // local webhook path
+		"@every 5m",                                // schedule
+		"http://localhost:8082/product/task/sync", // target URL reachable by task service
+		"system",                                   // username
+		"sync-products",                            // operation
+		"product-all",                              // object ID
+		"Product",                                  // class name
+		func(ctx context.Context, payload []byte) error {
+			slog.Info("Executing recurring product sync")
+			return engine.Run(ctx)
+		},
+	)
 
 	r.GET("/nodes", func(c *gin.Context) {
 		var products []models.Product
-		db.WithContext(c.Request.Context()).Find(&products)
-		c.JSON(200, products)
+		database.Find(&products)
+		c.JSON(http.StatusOK, products)
+	})
+
+	r.GET("/gateways", func(c *gin.Context) {
+		var gws []models.Gw
+		database.Find(&gws)
+		c.JSON(http.StatusOK, gws)
+	})
+
+	r.POST("/gateways", func(c *gin.Context) {
+		var gw models.Gw
+		if err := c.ShouldBindJSON(&gw); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		database.Save(&gw)
+		c.JSON(http.StatusOK, gw)
+	})
+
+	r.GET("/sessions", func(c *gin.Context) {
+		var sessions []models.Session
+		database.Find(&sessions)
+		c.JSON(http.StatusOK, sessions)
 	})
 
 	r.POST("/sync", func(c *gin.Context) {
-		engine.Run(c.Request.Context())
-		c.JSON(200, gin.H{"message": "Sync completed"})
+		if err := engine.Run(c.Request.Context()); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "success"})
 	})
 
 	return r
@@ -60,7 +102,7 @@ func main() {
 		}
 	}()
 	logging.Init("product")
-	initDB()
+	db = initDB(sqlite.Open("product.db"))
 	engine := sync.NewSyncEngine(db, nil)
 
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
@@ -69,33 +111,21 @@ func main() {
 		Capabilities: []logging.CapabilityRegistration{
 			{Name: "nodes", Endpoints: []string{"/nodes"}},
 			{Name: "sync", Endpoints: []string{"/sync"}},
+			{Name: "gateways", Endpoints: []string{"/gateways"}},
+			{Name: "sessions", Endpoints: []string{"/sessions"}},
+		},
+		Menu: []logging.MenuItem{
+			{Label: "Nodes", Path: "/nodes"},
+			{Label: "Gateways", Path: "/gateways"},
 		},
 		IsCore:  true,
 		OrderID: 1,
-		Menu:    []logging.MenuItem{{Label: "Nodes", Path: "/nodes"}},
 	})
 
 	// Initialize tasklib to communicate with the central task microservice
 	tasklib.Init("http://localhost:8085")
 
 	r := setupRouter(db, engine)
-
-	// Register recurring sync task
-	tasklib.RegisterEndpoint(
-		"http://localhost:8088", // registry URL
-		r,
-		"/product/task/sync",                      // local webhook path
-		"@every 1m",                               // schedule
-		"http://localhost:8082/product/task/sync", // target URL reachable by task service
-		"system",                                  // username
-		"sync-products",                           // operation
-		"product-all",                             // object ID
-		"Product",                                 // class name
-		func(ctx context.Context, payload []byte) error {
-			slog.Info("Executing recurring product sync")
-			return engine.Run(ctx)
-		},
-	)
 
 	slog.Info("Product starting", "port", 8082)
 	r.Run(":8082")

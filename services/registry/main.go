@@ -1,28 +1,25 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"log/slog"
 	"net/http"
-	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
-	"sort"
 	"sync"
 	"time"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 )
 
 type ServiceInfo struct {
-	Name         string                           `json:"name"`
-	Endpoint     string                           `json:"endpoint"`
+	Name         string                       `json:"name"`
+	Endpoint     string                       `json:"endpoint"`
 	Capabilities []logging.CapabilityRegistration `json:"capabilities"`
-	IsCore       bool                             `json:"is_core"`
-	Enabled      bool                             `json:"enabled"`
-	OrderID      int                              `json:"order_id"`
-	Menu         []logging.MenuItem               `json:"menu"`
-	LastUpdate   time.Time                        `json:"last_update"`
+	IsCore       bool                         `json:"is_core"`
+	Enabled      bool                         `json:"enabled"`
+	OrderID      int                          `json:"order_id"`
+	Menu         []logging.MenuItem           `json:"menu"`
+	LastUpdate   time.Time                    `json:"last_update"`
 }
 
 var (
@@ -32,18 +29,9 @@ var (
 
 func main() {
 	logging.Init("registry")
-	cfg, err := config.LoadConfig("system.yaml")
-	if err != nil {
-		slog.Error("Failed to load system.yaml", "error", err)
-	}
-
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery(), logging.GinMiddleware())
-
-	r.GET("/config", func(c *gin.Context) {
-		c.JSON(http.StatusOK, cfg)
-	})
 
 	r.POST("/register", func(c *gin.Context) {
 		var info ServiceInfo
@@ -60,30 +48,6 @@ func main() {
 		}
 		registry[info.Name] = &info
 		mu.Unlock()
-
-		// If service has configurable capability, push config to it asynchronously
-		for _, cap := range info.Capabilities {
-			if cap.Name == "configurable" && len(cap.Endpoints) > 0 {
-				configEndpoint := info.Endpoint + cap.Endpoints[0]
-				go func(endpoint string, name string) {
-					slog.Info("Pushing configuration to service", "service", name, "endpoint", endpoint)
-					payload, _ := json.Marshal(cfg)
-					resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(payload))
-					if err != nil {
-						slog.Error("Failed to push configuration", "service", name, "error", err)
-					} else {
-						resp.Body.Close()
-						if resp.StatusCode != http.StatusOK {
-							slog.Error("Service returned non-200 on configuration push", "service", name, "status", resp.StatusCode)
-						} else {
-							slog.Info("Successfully pushed configuration", "service", name)
-						}
-					}
-				}(configEndpoint, info.Name)
-				break
-			}
-		}
-
 		c.JSON(http.StatusOK, gin.H{"status": "registered"})
 	})
 
@@ -99,26 +63,6 @@ func main() {
 		}
 		sort.Slice(active, func(i, j int) bool { return active[i].OrderID < active[j].OrderID })
 		c.JSON(http.StatusOK, active)
-	})
-
-	r.GET("/capabilities/:name", func(c *gin.Context) {
-		name := c.Param("name")
-		mu.RLock()
-		defer mu.RUnlock()
-		now := time.Now()
-		for _, s := range registry {
-			if now.Sub(s.LastUpdate) < 60*time.Second && s.Enabled {
-				for _, cap := range s.Capabilities {
-					if cap.Name == name {
-						if len(cap.Endpoints) > 0 {
-							c.JSON(http.StatusOK, gin.H{"endpoint": s.Endpoint + cap.Endpoints[0]})
-							return
-						}
-					}
-				}
-			}
-		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "capability not found"})
 	})
 
 	r.GET("/admin/services", func(c *gin.Context) {
@@ -161,6 +105,21 @@ func main() {
 			return
 		}
 		c.JSON(http.StatusNotFound, gin.H{"error": "not registered"})
+	})
+
+	r.GET("/capabilities/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		mu.RLock()
+		defer mu.RUnlock()
+		for _, s := range registry {
+			for _, cap := range s.Capabilities {
+				if cap.Name == name {
+					c.JSON(http.StatusOK, gin.H{"endpoint": s.Endpoint + cap.Endpoints[0]})
+					return
+				}
+			}
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "capability not found"})
 	})
 
 	slog.Info("Registry starting", "port", 8088)

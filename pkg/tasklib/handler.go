@@ -1,6 +1,7 @@
 package tasklib
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -8,68 +9,70 @@ import (
 	"log/slog"
 	"net/http"
 	"pum-go/pkg/logging"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterEndpoint registers a reverse endpoint for the task microservice scheduler to call.
-// It also spawns a goroutine to wait for the task service to be available and automatically
-// registers its schedule.
-func RegisterEndpoint(registryURL string, router *gin.Engine, path, schedule, targetURL, username, operation, objectID, className string, handler func(ctx context.Context, payload []byte) error) {
-	// Setup the webhook endpoint to receive triggers
-	router.POST(path, func(c *gin.Context) {
-		payload, err := io.ReadAll(c.Request.Body)
+// RecurringTaskHandler is the function signature for recurring task callbacks
+type RecurringTaskHandler func(ctx context.Context, payload []byte) error
+
+// RegisterEndpoint registers a local webhook endpoint for recurring tasks and
+// announces it to the central task microservice.
+func RegisterEndpoint(registryURL string, r *gin.Engine, path, schedule, targetURL, username, operation, objectID, className string, handler RecurringTaskHandler) {
+	// 1. Define the local webhook
+	r.POST(path, func(c *gin.Context) {
+		body, err := io.ReadAll(c.Request.Body)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read payload"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read body"})
 			return
 		}
 
-		// Spawn the task using the standard tasklib flow
-		taskID, err := Spawn(c.Request.Context(), username, operation, objectID, className, func(ctx context.Context) error {
-			return handler(ctx, payload)
-		})
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to spawn task"})
+		slog.Info("Executing recurring task", "operation", operation, "object_id", objectID)
+		if err := handler(c.Request.Context(), body); err != nil {
+			slog.Error("Recurring task execution failed", "error", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusAccepted, gin.H{
-			"status":  "accepted",
-			"task_id": taskID,
-		})
+		c.JSON(http.StatusOK, gin.H{"status": "success"})
 	})
 
-	// Background orchestration: Wait for task service and register schedule
+	// 2. Register with Task service asynchronously
 	go func() {
-		// Wait for the task microservice to be marked active in the central registry
-		logging.WaitForService(registryURL, "task")
+		// Wait for registry to be available
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+		_ = logging.WaitForService(ctx, registryURL+"/discovery")
 
 		// Register the recurring task
 		reqBody := map[string]interface{}{
-			"name":       fmt.Sprintf("%s:%s:%s", operation, objectID, className),
+			"name":       fmt.Sprintf("%s:%s", className, operation),
 			"schedule":   schedule,
 			"target_url": targetURL,
-			"payload":    "{}", // Optional initial payload
+			"payload":    "{}",
+			"is_active":  true,
 		}
+		body, _ := json.Marshal(reqBody)
 
-		bodyBytes, _ := json.Marshal(reqBody)
-		if taskServiceURL == "" {
-			slog.Error("Cannot register schedule: tasklib not initialized with Init()")
-			return
-		}
-
-		resp, err := postWithRetry(context.Background(), taskServiceURL+"/api/recurring", bodyBytes)
-		if err != nil {
-			slog.Error("Failed to register recurring task with task service", "error", err)
-			return
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
-			slog.Info("Successfully registered recurring task schedule", "url", targetURL)
-		} else {
-			slog.Error("Unexpected response registering recurring task", "status", resp.StatusCode)
+		for {
+			if taskServiceURL == "" {
+				time.Sleep(1 * time.Second)
+				continue
+			}
+			resp, err := httpClient.Post(taskServiceURL+"/api/recurring", "application/json", bytes.NewBuffer(body))
+			if err == nil && (resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated) {
+				resp.Body.Close()
+				slog.Info("Recurring task registered successfully", "operation", operation)
+				break
+			}
+			if err != nil {
+				slog.Warn("Failed to register recurring task, retrying...", "error", err)
+			} else {
+				slog.Warn("Failed to register recurring task, unexpected status", "status", resp.StatusCode)
+				resp.Body.Close()
+			}
+			time.Sleep(10 * time.Second)
 		}
 	}()
 }
