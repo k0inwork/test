@@ -144,7 +144,7 @@ func main() {
 	r.Use(logging.GinMiddleware())
 	r.LoadHTMLGlob("services/frontend/templates/*.html")
 
-	// Fixed WebSocket route - register BEFORE auth middleware
+	// Fixed WebSocket route
 	r.GET("/ws", func(c *gin.Context) {
 		user, _ := c.Cookie("pum_user")
 		if user == "" { user = "guest" }
@@ -196,8 +196,12 @@ func main() {
 			var svcs []RegisteredService
 			if err := json.NewDecoder(resp.Body).Decode(&svcs); err == nil {
 				c.Set("services", svcs)
+			} else {
+				slog.Error("Failed to decode services", "error", err)
 			}
 			resp.Body.Close()
+		} else {
+			slog.Error("Failed to fetch services", "error", err)
 		}
 		c.Next()
 	})

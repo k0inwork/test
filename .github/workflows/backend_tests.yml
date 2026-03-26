@@ -9,7 +9,6 @@ on:
     paths:
       - 'services/**'
       - 'pkg/**'
-      - 'e2e_tests/**'
       - '.github/workflows/backend_tests.yml'
   pull_request:
     branches:
@@ -18,7 +17,6 @@ on:
     paths:
       - 'services/**'
       - 'pkg/**'
-      - 'e2e_tests/**'
       - '.github/workflows/backend_tests.yml'
 
 jobs:
@@ -44,7 +42,7 @@ jobs:
 
       - name: Install Frontend Test Dependencies
         run: |
-          cd e2e_tests
+          cd services/frontend/ui_tests
           npm install
           npx playwright install chromium --with-deps
 
@@ -102,8 +100,8 @@ jobs:
 
       - name: Run UI Tests
         run: |
-          cd e2e_tests
-          npx playwright test frontend_menu.spec.js
+          cd services/frontend/ui_tests
+          npx playwright test
 
       - name: Archive logs and screenshots
         if: always()
@@ -113,4 +111,4 @@ jobs:
           path: |
             *.log
             services/**/*.log
-            e2e_tests/test-results/
+            services/frontend/ui_tests/test-results/

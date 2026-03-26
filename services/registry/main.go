@@ -12,14 +12,14 @@ import (
 )
 
 type ServiceInfo struct {
-	Name         string                       `json:"name"`
-	Endpoint     string                       `json:"endpoint"`
+	Name         string                           `json:"name"`
+	Endpoint     string                           `json:"endpoint"`
 	Capabilities []logging.CapabilityRegistration `json:"capabilities"`
-	IsCore       bool                         `json:"is_core"`
-	Enabled      bool                         `json:"enabled"`
-	OrderID      int                          `json:"order_id"`
-	Menu         []logging.MenuItem           `json:"menu"`
-	LastUpdate   time.Time                    `json:"last_update"`
+	IsCore       bool                             `json:"is_core"`
+	Enabled      bool                             `json:"enabled"`
+	OrderID      int                              `json:"order_id"`
+	Menu         []logging.MenuItem               `json:"menu"`
+	LastUpdate   time.Time                        `json:"last_update"`
 }
 
 var (
