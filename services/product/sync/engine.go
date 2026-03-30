@@ -4,7 +4,6 @@ package sync
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"pum-go/pkg/external"
 	"pum-go/pkg/models"
@@ -59,27 +58,6 @@ func (e *SyncEngine) Run(ctx context.Context) error {
 	}
 	slog.Debug("Fetched assets from provider", "count", len(assets))
 
-	// Fetch all existing products to avoid N+1 queries
-	var existingProducts []models.Product
-	if err := e.DB.WithContext(ctx).Find(&existingProducts).Error; err != nil {
-		slog.Error("Failed to fetch existing products", "error", err)
-		return err
-	}
-
-	// Create lookup maps
-	byIndex := make(map[string]*models.Product)
-	byUUID := make(map[string]*models.Product)
-	for i := range existingProducts {
-		p := &existingProducts[i]
-		indexKey := fmt.Sprintf("%s|%d|%s", p.Region, p.SequentialNumber, p.Name)
-		byIndex[indexKey] = p
-		if p.GlpiUUID != "" {
-			byUUID[p.GlpiUUID] = p
-		}
-	}
-
-	var productsToSave []models.Product
-
 	for _, asset := range assets {
 		region, seq, pouType, name := ParseName(asset.Name)
 
@@ -91,18 +69,16 @@ func (e *SyncEngine) Run(ctx context.Context) error {
 			"seq", seq,
 		)
 
-		var product *models.Product
-		indexKey := fmt.Sprintf("%s|%d|%s", region, seq, name)
-
+		var product models.Product
 		// 1. Search by Index (Name, Region, SeqNum)
-		if p, ok := byIndex[indexKey]; ok {
-			product = p
-			slog.Debug("Matching node found in database", "id", product.ID, "name", product.Name)
-		} else {
+		result := e.DB.WithContext(ctx).Where("name = ? AND region = ? AND sequential_number = ?", name, region, seq).First(&product)
+
+		if result.Error == gorm.ErrRecordNotFound {
 			slog.Debug("Node not found by name index, checking for rename", "glpi_id", asset.ID)
+
 			// 2. Search by Foreign ID (GLPI UUID) - Rename Detection
-			if p, ok := byUUID[asset.ID]; ok {
-				product = p
+			result = e.DB.WithContext(ctx).Where("glpi_uuid = ?", asset.ID).First(&product)
+			if result.Error == nil {
 				slog.Info("Rename detected",
 					"glpi_id", asset.ID,
 					"old_name", product.Name,
@@ -111,8 +87,10 @@ func (e *SyncEngine) Run(ctx context.Context) error {
 				)
 			} else {
 				slog.Info("New node discovered", "name", name, "glpi_id", asset.ID)
-				product = &models.Product{GlpiUUID: asset.ID}
+				product = models.Product{GlpiUUID: asset.ID}
 			}
+		} else {
+			slog.Debug("Matching node found in database", "id", product.ID, "name", product.Name)
 		}
 
 		// Update fields
@@ -126,15 +104,11 @@ func (e *SyncEngine) Run(ctx context.Context) error {
 		product.Geo = asset.Lat + ";" + asset.Long
 		product.GlpiUUID = asset.ID
 
-		productsToSave = append(productsToSave, *product)
-	}
-
-	if len(productsToSave) > 0 {
-		if err := e.DB.WithContext(ctx).Save(&productsToSave).Error; err != nil {
-			slog.Error("Failed to save products in batch", "error", err)
-			return err
+		if err := e.DB.WithContext(ctx).Save(&product).Error; err != nil {
+			slog.Error("Failed to save product", "name", name, "error", err)
+		} else {
+			slog.Debug("Product updated successfully", "id", product.ID, "name", product.Name)
 		}
-		slog.Debug("Products updated successfully in batch", "count", len(productsToSave))
 	}
 
 	slog.Info("Synchronization complete")

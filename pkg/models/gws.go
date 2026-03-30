@@ -23,3 +23,23 @@ func (g *Gw) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 	return
 }
+
+type Session struct {
+	ID           string `gorm:"primaryKey"`
+	Name         string
+	Gw1ID        string
+	Gw2ID        string
+	UserID       string
+	Subnet       string
+	Successful   int
+	Unsuccessful int
+	TxBytes      int
+	TxBytesOld   int
+}
+
+func (s *Session) BeforeCreate(tx *gorm.DB) (err error) {
+	if s.ID == "" {
+		s.ID = uuid.New().String()
+	}
+	return
+}
