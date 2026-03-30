@@ -32,7 +32,7 @@ func waitForService(url string) bool {
 func TestExternalModulesProxy(t *testing.T) {
 	// Let's skip if the service isn't running so it doesn't fail pure go test ./... locally
 	// without the environment booted.
-	if !waitForService("http://localhost:8088/discovery") {
+	if !waitForService("http://localhost:8088/services") {
 		t.Skip("Skipping integration test: Registry not available (run start.sh first)")
 	}
 
@@ -61,7 +61,7 @@ func TestExternalModulesProxy(t *testing.T) {
 }
 
 func TestPDUCommandProxy(t *testing.T) {
-	if !waitForService("http://localhost:8088/discovery") {
+	if !waitForService("http://localhost:8088/services") {
 		t.Skip("Skipping integration test: Registry not available (run start.sh first)")
 	}
 
