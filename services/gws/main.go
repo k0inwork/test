@@ -32,7 +32,7 @@ func initDB() {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&models.Gw{}, &models.Session{})
+	db.AutoMigrate(&models.Gw{})
 }
 
 func main() {
@@ -62,7 +62,6 @@ func main() {
 		OrderID: 6,
 		Menu: []logging.MenuItem{
 			{Label: "Gateways", Path: "/gateways"},
-			{Label: "Sessions", Path: "/sessions"},
 		},
 	})
 
@@ -84,12 +83,6 @@ func main() {
 		}
 		db.WithContext(c.Request.Context()).Create(&gateway)
 		c.JSON(http.StatusCreated, gateway)
-	})
-
-	r.GET("/sessions", func(c *gin.Context) {
-		var sessions []models.Session
-		db.WithContext(c.Request.Context()).Find(&sessions)
-		c.JSON(http.StatusOK, sessions)
 	})
 
 	slog.Info("GWS service starting", "port", 8091)
