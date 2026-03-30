@@ -24,7 +24,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.24'
           cache: true
 
       - name: Verify Dependencies
@@ -58,4 +58,36 @@ jobs:
 
       - name: Run Integration Tests
         run: |
-          go test ./e2e_tests/backend_integration/...
+          # These will skip the telemetry tests because RUN_TELEMETRY_TESTS is not set
+          go test -v ./e2e_tests/backend_integration/...
+
+  telemetry-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Pre-download Dependencies
+        run: go mod download
+
+      - name: Start Telemetry Stack
+        run: |
+          docker compose -f docker-compose.telemetry.yml up -d
+          # Wait for services to be ready
+          sleep 15
+
+      - name: Run Telemetry E2E Test
+        env:
+          RUN_TELEMETRY_TESTS: "true"
+        run: |
+          go test -v e2e_tests/backend_integration/telemetry_flow_test.go e2e_tests/backend_integration/tracing_test.go
+
+      - name: Stop Telemetry Stack
+        if: always()
+        run: docker compose -f docker-compose.telemetry.yml down
