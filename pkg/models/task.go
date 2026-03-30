@@ -1,3 +1,5 @@
+// Package models defines GORM models for asynchronous tasks and their history,
+// keeping track of job execution states across the platform.
 package models
 
 import (
@@ -36,28 +38,28 @@ const (
 )
 
 type Alarm struct {
-	ID              uint           `gorm:"primaryKey" json:"id"`
-	TaskID          uint           `json:"task_id"` // ID of the task that created this alarm
-	ClosedByTaskID  *uint          `json:"closed_by_task_id"`
-	ObjectID        string         `json:"object_id"`
-	ClassName       string         `json:"class_name"`
-	Status          string         `json:"status"` // RAISED or CLOSED
-	Message         string         `json:"message"`
-	CreatedAt       time.Time      `json:"created_at"`
-	UpdatedAt       time.Time      `json:"updated_at"`
-	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
+	ID             uint           `gorm:"primaryKey" json:"id"`
+	TaskID         uint           `json:"task_id"` // ID of the task that created this alarm
+	ClosedByTaskID *uint          `json:"closed_by_task_id"`
+	ObjectID       string         `json:"object_id"`
+	ClassName      string         `json:"class_name"`
+	Status         string         `json:"status"` // RAISED or CLOSED
+	Message        string         `json:"message"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 type RecurringTask struct {
-	ID          uint           `gorm:"primaryKey" json:"id"`
-	Name        string         `json:"name"`
-	Schedule    string         `json:"schedule"`    // e.g. "@every 5m" or cron expression
-	TargetURL   string         `json:"target_url"`  // The webhook URL to call
-	Payload     string         `json:"payload"`     // JSON payload to send
-	IsActive    bool           `json:"is_active"`   // Whether the task is currently scheduled
-	LastRunAt   *time.Time     `json:"last_run_at"` // Track the last execution
-	NextRunAt   *time.Time     `json:"next_run_at"` // Optional: used by some schedulers
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+	ID        uint           `gorm:"primaryKey" json:"id"`
+	Name      string         `json:"name"`
+	Schedule  string         `json:"schedule"`    // e.g. "@every 5m" or cron expression
+	TargetURL string         `json:"target_url"`  // The webhook URL to call
+	Payload   string         `json:"payload"`     // JSON payload to send
+	IsActive  bool           `json:"is_active"`   // Whether the task is currently scheduled
+	LastRunAt *time.Time     `json:"last_run_at"` // Track the last execution
+	NextRunAt *time.Time     `json:"next_run_at"` // Optional: used by some schedulers
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }

@@ -1,3 +1,5 @@
+// Package models defines data structures and GORM models for Gateway (gws)
+// entities, facilitating database operations for gateway management.
 package models
 
 import (

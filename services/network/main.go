@@ -1,3 +1,5 @@
+// Package main is the entry point for the network microservice, handling
+// subnets, IP allocation, DHCP/DNS configuration, and physical proxy commands.
 package main
 
 import (

@@ -1,3 +1,5 @@
+// Package ldap provides a mocked LDAP authentication provider for testing and
+// local development within the identity microservice context.
 package ldap
 
 import (

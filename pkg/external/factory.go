@@ -1,3 +1,5 @@
+// Package external provides factory patterns and interfaces for external
+// integrations like GLPI or legacy mock providers, allowing seamless swapping of implementations.
 package external
 
 // NewMessageBroker acts as a factory, resolving the requested configuration mode

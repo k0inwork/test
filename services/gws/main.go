@@ -1,3 +1,5 @@
+// Package main represents the deprecated gws (Gateways) microservice entry point.
+// Functionality has mostly been migrated, but this remains for backward compatibility.
 package main
 
 import (

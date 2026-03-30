@@ -1,3 +1,5 @@
+// Package tracing implements OpenTelemetry (OTel) setup and helper functions
+// for distributed tracing across Gin HTTP servers, GORM, and outbound HTTP calls.
 package tracing
 
 import (

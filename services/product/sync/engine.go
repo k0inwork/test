@@ -1,3 +1,5 @@
+// Package sync defines a synchronization engine for the product service to
+// reconcile local product records with an external source of truth.
 package sync
 
 import (

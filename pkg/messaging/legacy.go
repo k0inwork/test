@@ -1,3 +1,5 @@
+// Package messaging contains logic for interacting with legacy messaging formats
+// or protocols to ensure backward compatibility during the transition phase.
 package messaging
 
 import (

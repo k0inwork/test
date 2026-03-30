@@ -1,3 +1,5 @@
+// Package graph provides the GraphQL resolver implementation for the
+// external-data microservice, binding GraphQL operations to backend Go logic.
 package graph
 
 import "pum-go/pkg/external"

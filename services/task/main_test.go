@@ -1,3 +1,5 @@
+// Package main holds unit and integration tests for the task microservice, ensuring
+// proper routing, task status updates, and database handling logic.
 package main
 
 import (

@@ -1,3 +1,5 @@
+// Package sync contains unit tests for the inventory synchronization engine
+// to ensure accurate mapping and updating of local asset records.
 package sync
 
 import (

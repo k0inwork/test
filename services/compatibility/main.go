@@ -1,3 +1,5 @@
+// Package main provides the entry point for the compatibility microservice,
+// which acts as a bridge for legacy endpoints and legacy JSON mock responses.
 package main
 
 import (
@@ -103,7 +105,7 @@ func stubHandler(contextKey string) gin.HandlerFunc {
 			c.JSON(http.StatusOK, LegacyResponse{
 				Context: map[string]interface{}{
 					contextKey: []interface{}{},
-					"message":    fmt.Sprintf("Legacy endpoint for %s is not yet implemented in Go microservices.", contextKey),
+					"message":  fmt.Sprintf("Legacy endpoint for %s is not yet implemented in Go microservices.", contextKey),
 				},
 				Errors: []string{},
 			})

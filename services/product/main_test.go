@@ -1,3 +1,5 @@
+// Package main contains integration tests for the product microservice, verifying
+// database migration, routing logic, and OTel trace propagation context.
 package main
 
 import (
@@ -5,8 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"pum-go/pkg/external"
-	"pum-go/pkg/models"
 	"pum-go/pkg/logging"
+	"pum-go/pkg/models"
 	"pum-go/services/product/sync"
 	"testing"
 

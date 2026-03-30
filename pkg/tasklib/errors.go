@@ -1,3 +1,5 @@
+// Package tasklib defines custom error types and constants used specifically
+// within the task library and task management context.
 package tasklib
 
 import "fmt"

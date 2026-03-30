@@ -1,9 +1,11 @@
+// Package external contains unit tests for the generic external provider
+// interface and any common provider-related logic.
 package external
 
 import (
 	"context"
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestMockProvider_GetPDUs(t *testing.T) {

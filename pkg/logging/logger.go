@@ -1,3 +1,5 @@
+// Package logging offers standardized, structured logging and HTTP middleware
+// for auditing and request tracking across all microservices using the Go standard library.
 package logging
 
 import (
@@ -19,7 +21,7 @@ import (
 var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 var (
-	L *slog.Logger
+	L                *slog.Logger
 	registryEndpoint string
 	auditEndpoint    string
 	auditMu          sync.RWMutex
@@ -96,7 +98,9 @@ func getAuditEndpoint() string {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		var res struct{ Endpoint string `json:"endpoint"` }
+		var res struct {
+			Endpoint string `json:"endpoint"`
+		}
 		if err := json.NewDecoder(resp.Body).Decode(&res); err == nil && res.Endpoint != "" {
 			auditMu.Lock()
 			auditEndpoint = res.Endpoint

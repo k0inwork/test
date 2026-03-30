@@ -1,3 +1,5 @@
+// Package models defines GORM models for key management entities, storing
+// cryptographic keys or access credentials securely.
 package models
 
 import (

@@ -1,3 +1,5 @@
+// Package models defines the user and authentication-related GORM models for
+// the identity service, handling user profiles and permissions.
 package models
 
 import (

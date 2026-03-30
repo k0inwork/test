@@ -1,3 +1,5 @@
+// Package sync provides background synchronization engines for the inventory
+// service to map and pull external data into the local database models.
 package sync
 
 import (
