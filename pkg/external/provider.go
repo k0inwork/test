@@ -1,3 +1,5 @@
+// Package external defines interfaces and common structures for external data
+// providers, supporting standard operations across different external systems.
 package external
 
 import (

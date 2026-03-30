@@ -1,0 +1,41 @@
+--- services/external-modules/main.go
++++ services/external-modules/main.go
+@@ -34,16 +34,8 @@
+	return commandRegex.MatchString(cmd)
+ }
+
+-func main() {
+-	tp, _ := tracing.InitTracer("external-modules")
+-	defer func() {
+-		if err := tp.Shutdown(context.Background()); err != nil {
+-			slog.Error("failed to shutdown tracer", "err", err)
+-		}
+-	}()
+-	logging.Init("external-modules")
+-
+-	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
++func setupRouter() *gin.Engine {
++    logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
+		Name:     "external-modules",
+		Endpoint: "http://localhost:8086",
+		Capabilities: []logging.CapabilityRegistration{
+@@ -165,6 +157,17 @@
+		})
+	})
+
++	return r
++}
++
++func main() {
++	tp, _ := tracing.InitTracer("external-modules")
++	defer func() {
++		if err := tp.Shutdown(context.Background()); err != nil {
++			slog.Error("failed to shutdown tracer", "err", err)
++		}
++	}()
++	logging.Init("external-modules")
++
++	r := setupRouter()
+	slog.Info("External Modules Proxy starting", "port", 8086)
+	r.Run(":8086")
+ }

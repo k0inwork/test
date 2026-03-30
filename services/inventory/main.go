@@ -1,3 +1,5 @@
+// Package main starts the inventory microservice, configuring its Gin router,
+// database, background sync engines, and GraphQL endpoints.
 package main
 
 import (

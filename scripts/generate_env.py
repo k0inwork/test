@@ -26,7 +26,7 @@ def generate_procfile(config):
     for name, service in config.get('services', {}).items():
         path = service.get('path')
         if path:
-            lines.append(f"{name}: go run {path}")
+            lines.append(f"{name}: OTEL_EXPORTER_OTLP_INSECURE=true go run {path}")
 
     with open(PROCFILE, 'w') as f:
         f.write('\n'.join(lines) + '\n')
@@ -55,6 +55,9 @@ def generate_docker_compose(config):
             'image': 'golang:1.21',
             'volumes': ['.:/app'],
             'working_dir': '/app',
+            'environment': {
+                'OTEL_EXPORTER_OTLP_INSECURE': 'true',
+            },
             'command': f"go run {path}",
             'ports': [f"{service['port']}:{service['port']}"],
             'depends_on': list(config.get('external_dependencies', {}).keys())

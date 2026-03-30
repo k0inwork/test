@@ -1,3 +1,5 @@
+// Package external provides a RabbitMQ client implementation for publishing
+// and subscribing to message queues, maintaining legacy system compatibility.
 package external
 
 import (

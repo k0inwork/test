@@ -1,0 +1,18 @@
+--- services/external-modules/main.go
++++ services/external-modules/main.go
+@@ -131,6 +131,16 @@
+			return
+		}
+
++		if !isValidIP(req.TargetIP) {
++			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid target_ip format"})
++			return
++		}
++
++		if !isValidCommand(req.Command) {
++			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid command format"})
++			return
++		}
++
+		slog.Info("Executing IPMI power command via module", "ip", req.TargetIP, "cmd", req.Command)
+		time.Sleep(1 * time.Second)

@@ -1,3 +1,5 @@
+// Package models defines GORM models for key management entities, storing
+// cryptographic keys or access credentials securely.
 package models
 
 import (
@@ -8,9 +10,9 @@ import (
 type KeyService struct {
 	ID                    string `gorm:"primaryKey"`
 	Order                 string
-	Gw1ID                 string
+	Node1ID               string
 	Port1                 string
-	Gw2ID                 string
+	Node2ID               string
 	Port2                 string
 	Client                string
 	KeyLength             int

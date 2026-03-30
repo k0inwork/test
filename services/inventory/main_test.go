@@ -1,3 +1,5 @@
+// Package main contains tests verifying the startup and routing configurations
+// of the inventory microservice.
 package main
 
 import (

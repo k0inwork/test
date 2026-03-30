@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/tracing"
+	"regexp"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,15 +22,18 @@ type ModuleRequest struct {
 	Param    string `json:"param"`
 }
 
-func main() {
-	tp, _ := tracing.InitTracer("external-modules")
-	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
-			slog.Error("failed to shutdown tracer", "err", err)
-		}
-	}()
-	logging.Init("external-modules")
+var commandRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
 
+func isValidIP(ip string) bool {
+	parsedIP := net.ParseIP(ip)
+	return parsedIP != nil
+}
+
+func isValidCommand(cmd string) bool {
+	return commandRegex.MatchString(cmd)
+}
+
+func setupRouter() *gin.Engine {
 	logging.RegisterWithDiscovery("http://localhost:8088", logging.ServiceRegistration{
 		Name:     "external-modules",
 		Endpoint: "http://localhost:8086",
@@ -71,6 +76,16 @@ func main() {
 			return
 		}
 
+		if !isValidIP(req.TargetIP) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid target_ip format"})
+			return
+		}
+
+		if !isValidCommand(req.Command) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid command format"})
+			return
+		}
+
 		slog.Info("Proxying request to external module", "ip", req.TargetIP, "cmd", req.Command)
 
 		// Simulate RabbitMQ/Remote call delay
@@ -87,6 +102,16 @@ func main() {
 		var req ModuleRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if !isValidIP(req.TargetIP) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid target_ip format"})
+			return
+		}
+
+		if !isValidCommand(req.Command) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid command format"})
 			return
 		}
 
@@ -107,6 +132,16 @@ func main() {
 			return
 		}
 
+		if !isValidIP(req.TargetIP) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid target_ip format"})
+			return
+		}
+
+		if !isValidCommand(req.Command) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid command format"})
+			return
+		}
+
 		slog.Info("Executing IPMI power command via module", "ip", req.TargetIP, "cmd", req.Command)
 		time.Sleep(1 * time.Second)
 
@@ -115,6 +150,20 @@ func main() {
 			"message": fmt.Sprintf("IPMI Command %s initiated on %s", req.Command, req.TargetIP),
 		})
 	})
+
+	return r
+}
+
+func main() {
+	tp, _ := tracing.InitTracer("external-modules")
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			slog.Error("failed to shutdown tracer", "err", err)
+		}
+	}()
+	logging.Init("external-modules")
+
+	r := setupRouter()
 
 	slog.Info("External Modules Proxy starting", "port", 8086)
 	r.Run(":8086")

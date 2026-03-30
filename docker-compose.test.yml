@@ -20,6 +20,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/registry/main.go
     ports:
     - 8088:8088
@@ -32,6 +34,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/identity/main.go
     ports:
     - 8081:8081
@@ -44,6 +48,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/product/main.go
     ports:
     - 8082:8082
@@ -56,6 +62,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/inventory/main.go
     ports:
     - 8083:8083
@@ -68,6 +76,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/network/main.go
     ports:
     - 8084:8084
@@ -80,6 +90,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/task/main.go
     ports:
     - 8085:8085
@@ -92,6 +104,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/external-modules/main.go
     ports:
     - 8086:8086
@@ -104,6 +118,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/terminal/main.go
     ports:
     - 8087:8087
@@ -116,6 +132,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/external-data/main.go
     ports:
     - 8089:8089
@@ -128,6 +146,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/frontend/main.go
     ports:
     - 8080:8080
@@ -140,6 +160,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/compatibility/main.go
     ports:
     - 8090:8090
@@ -147,11 +169,12 @@ services:
     - prometheus
     - otelcol
     - jaeger
-  gws:
     image: golang:1.21
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/gws/main.go
     ports:
     - 8091:8091
@@ -164,6 +187,8 @@ services:
     volumes:
     - .:/app
     working_dir: /app
+    environment:
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
     command: go run services/keyservice/main.go
     ports:
     - 8092:8092

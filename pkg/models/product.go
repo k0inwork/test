@@ -1,3 +1,5 @@
+// Package models outlines the GORM models for products (nodes/servers) and
+// associated hardware configurations managed by the platform.
 package models
 
 import (

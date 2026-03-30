@@ -1,3 +1,5 @@
+// Package main tests the network microservice setup, validating its REST
+// handlers and internal routing configurations.
 package main
 
 import (
@@ -78,7 +80,6 @@ func TestNetworkAPI(t *testing.T) {
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-
 	// Test GET /dhcp
 	req, _ = http.NewRequest("GET", "/dhcp", nil)
 	w = httptest.NewRecorder()
@@ -111,7 +112,6 @@ func TestNetworkAPI(t *testing.T) {
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-
 
 	// Test GET /dns
 	req, _ = http.NewRequest("GET", "/dns", nil)

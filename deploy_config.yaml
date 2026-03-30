@@ -68,9 +68,7 @@ services:
   compatibility:
     port: 8090
     path: 'services/compatibility/main.go'
-  gws:
     port: 8091
-    path: 'services/gws/main.go'
   keyservice:
     port: 8092
     path: 'services/keyservice/main.go'

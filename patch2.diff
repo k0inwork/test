@@ -1,0 +1,20 @@
+--- services/external-modules/main.go
++++ services/external-modules/main.go
+@@ -23,6 +23,17 @@
+	Param    string `json:"param"`
+ }
+
++var commandRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
++
++func isValidIP(ip string) bool {
++	parsedIP := net.ParseIP(ip)
++	return parsedIP != nil
++}
++
++func isValidCommand(cmd string) bool {
++	return commandRegex.MatchString(cmd)
++}
++
+ func main() {
+	tp, _ := tracing.InitTracer("external-modules")
+	defer func() {

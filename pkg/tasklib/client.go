@@ -1,3 +1,5 @@
+// Package tasklib provides a client library for interacting with the central
+// task microservice, allowing other services to dispatch and monitor tasks.
 package tasklib
 
 import (

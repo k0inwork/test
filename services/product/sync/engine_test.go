@@ -1,3 +1,5 @@
+// Package sync contains tests for the product synchronization engine, verifying
+// correct model updates and lifecycle tracking during external data syncs.
 package sync
 
 import (

@@ -1,3 +1,5 @@
+// Package external contains tests for the RabbitMQ client to verify connection
+// handling and message publishing/consuming logic.
 package external
 
 import (

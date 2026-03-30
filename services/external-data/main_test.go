@@ -1,3 +1,5 @@
+// Package main contains integration and setup tests for the external-data
+// microservice to verify routing and fundamental GraphQL operations.
 package main
 
 import (

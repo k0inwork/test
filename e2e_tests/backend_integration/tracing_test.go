@@ -2,13 +2,19 @@ package backend_integration
 
 import (
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTracingConnections(t *testing.T) {
-	resp, err := http.Get("http://localhost:16686")
+	if os.Getenv("RUN_TELEMETRY_TESTS") != "true" {
+		t.Skip("Skipping telemetry test: RUN_TELEMETRY_TESTS not set to true")
+	}
+
+	// 1. Verify Jaeger UI is reachable
+	resp, err := http.Get("http://127.0.0.1:16686")
 	if err != nil {
 		handleMissingEnv(t, "Jaeger UI not reachable")
 	} else {
@@ -16,7 +22,8 @@ func TestTracingConnections(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	}
 
-	resp, err = http.Get("http://localhost:9090")
+	// 2. Verify Prometheus is reachable
+	resp, err = http.Get("http://127.0.0.1:9090")
 	if err != nil {
 		handleMissingEnv(t, "Prometheus not reachable")
 	} else {
@@ -24,7 +31,8 @@ func TestTracingConnections(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	}
 
-	resp, err = http.Get("http://localhost:14269/metrics")
+	// 3. Verify Jaeger Metrics endpoint (the one Prometheus scrapes)
+	resp, err = http.Get("http://127.0.0.1:14269/metrics")
 	if err != nil {
 		handleMissingEnv(t, "Jaeger Metrics endpoint not reachable")
 	} else {
@@ -32,7 +40,8 @@ func TestTracingConnections(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	}
 
-	resp, err = http.Get("http://localhost:4318")
+	// 4. Verify OTel Collector OTLP HTTP port is open
+	resp, err = http.Get("http://127.0.0.1:4318")
 	if err != nil {
 		handleMissingEnv(t, "OTel Collector not reachable")
 	} else {

@@ -1,3 +1,5 @@
+// Package main boots the product microservice, which manages server node lifecycles,
+// gateway integrations, and exposes related endpoints and GraphQL APIs.
 package main
 
 import (

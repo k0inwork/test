@@ -1,3 +1,5 @@
+// Package main includes unit and integration tests for the identity microservice
+// covering routing, middleware, and mock database initializations.
 package main
 
 import (

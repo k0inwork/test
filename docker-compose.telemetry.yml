@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.47.1
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    command: ["--config=/etc/otelcol-config.yaml"]
+    volumes:
+      - ./otelcol-telemetry.yaml:/etc/otelcol-config.yaml
+    ports:
+      - "4318:4318"
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    ports:
+      - "16686:16686"
+      - "14269:14269"
+
+  registry:
+    image: golang:1.24
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - OTEL_EXPORTER_OTLP_INSECURE=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4318
+    command: go run services/registry/main.go
+    ports:
+      - "8088:8088"
+    depends_on:
+      - otelcol

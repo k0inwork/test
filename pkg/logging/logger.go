@@ -1,3 +1,5 @@
+// Package logging offers standardized, structured logging and HTTP middleware
+// for auditing and request tracking across all microservices using the Go standard library.
 package logging
 
 import (
@@ -17,7 +19,7 @@ import (
 var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 var (
-	L *slog.Logger
+	L                *slog.Logger
 	registryEndpoint string
 	auditEndpoint    string
 	auditMu          sync.RWMutex
@@ -54,16 +56,27 @@ func Init(serviceName string) {
 func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
 	registryEndpoint = registryURL
 	go func() {
+		backoff := 1 * time.Second
+		maxBackoff := 30 * time.Second
+
 		for {
 			data, _ := json.Marshal(info)
 			resp, err := otelClient.Post(registryURL+"/register", "application/json", bytes.NewBuffer(data))
-			if err == nil {
+			if err == nil && resp.StatusCode == http.StatusOK {
 				resp.Body.Close()
 				slog.Info("Registered with service discovery", "url", registryURL)
 				break
 			}
+			if err == nil {
+				resp.Body.Close()
+			}
 			slog.Warn("Failed to register with discovery, retrying...", "error", err)
-			time.Sleep(5 * time.Second)
+			time.Sleep(backoff)
+
+			backoff *= 2
+			if backoff > maxBackoff {
+				backoff = maxBackoff
+			}
 		}
 		for {
 			time.Sleep(30 * time.Second)
@@ -94,7 +107,9 @@ func getAuditEndpoint() string {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		var res struct{ Endpoint string `json:"endpoint"` }
+		var res struct {
+			Endpoint string `json:"endpoint"`
+		}
 		if err := json.NewDecoder(resp.Body).Decode(&res); err == nil && res.Endpoint != "" {
 			auditMu.Lock()
 			auditEndpoint = res.Endpoint
