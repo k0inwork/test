@@ -2,13 +2,12 @@ name: Run Phase 2 Worker & Capture Result
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "main", "master" ]
     paths:
       - 'apptron/**'
       - '.github/workflows/phase2.yml'
       - 'e2e_tests/**'
   pull_request:
-    branches: [ "**" ]
     paths:
       - 'apptron/**'
       - '.github/workflows/phase2.yml'
