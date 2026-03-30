@@ -147,12 +147,10 @@ services:
     - prometheus
     - otelcol
     - jaeger
-  gws:
     image: golang:1.21
     volumes:
     - .:/app
     working_dir: /app
-    command: go run services/gws/main.go
     ports:
     - 8091:8091
     depends_on:
