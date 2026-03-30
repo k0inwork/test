@@ -20,7 +20,7 @@ func TestTelemetryEndToEnd(t *testing.T) {
 	// Add a retry loop for the initial call to account for service startup.
 	var resp *http.Response
 	var err error
-	registryURL := "http://127.0.0.1:8088/discovery"
+	registryURL := "http://127.0.0.1:8088/services"
 	for i := 0; i < 15; i++ {
 		resp, err = http.Get(registryURL)
 		if err == nil {
