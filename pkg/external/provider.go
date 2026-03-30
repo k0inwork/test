@@ -9,13 +9,21 @@ import (
 )
 
 // GLPI Models
+type GNetworkPort struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Vlan        int    `json:"vlan"`
+}
+
 type GNetworkEquipment struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Model  string `json:"model"`
-	IP     string `json:"ip"`
-	Status string `json:"status"`
-	Serial string `json:"serial"`
+	ID     string          `json:"id"`
+	Name   string          `json:"name"`
+	Model  string          `json:"model"`
+	IP     string          `json:"ip"`
+	Status string          `json:"status"`
+	Serial string          `json:"serial"`
+	Ports  []*GNetworkPort `json:"ports"`
 }
 
 type Gpdu struct {
@@ -66,8 +74,22 @@ func (p *MockProvider) GetNetworkEquipment(ctx context.Context) ([]*GNetworkEqui
 	defer span.End()
 
 	return []*GNetworkEquipment{
-		{ID: "sw-1", Name: "MSK-SW-01", Model: "Cisco 9300", IP: "10.10.1.1", Status: "Active", Serial: "SN12345"},
-		{ID: "sw-2", Name: "SPB-SW-02", Model: "Cisco 9200", IP: "10.20.1.1", Status: "Active", Serial: "SN67890"},
+		{
+			ID: "sw-1", Name: "MSK-SW-01", Model: "Cisco 9300", IP: "10.10.1.1", Status: "Active", Serial: "SN12345",
+			Ports: []*GNetworkPort{
+				{ID: "p-sw-1-1", Name: "MSK-SW-01:Port 1", Vlan: 10},
+				{ID: "p-sw-1-2", Name: "MSK-SW-01:Port 2", Vlan: 10},
+				{ID: "p-sw-1-3", Name: "MSK-SW-01:Port 3", Vlan: 10},
+			},
+		},
+		{
+			ID: "sw-2", Name: "SPB-SW-02", Model: "Cisco 9200", IP: "10.20.1.1", Status: "Active", Serial: "SN67890",
+			Ports: []*GNetworkPort{
+				{ID: "p-sw-2-1", Name: "SPB-SW-02:Port 1", Vlan: 10},
+				{ID: "p-sw-2-2", Name: "SPB-SW-02:Port 2", Vlan: 10},
+				{ID: "p-sw-2-3", Name: "SPB-SW-02:Port 3", Vlan: 10},
+			},
+		},
 	}, nil
 }
 
