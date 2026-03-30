@@ -169,7 +169,6 @@ services:
     - prometheus
     - otelcol
     - jaeger
-  gws:
     image: golang:1.21
     volumes:
     - .:/app
