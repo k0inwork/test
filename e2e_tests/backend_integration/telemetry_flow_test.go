@@ -2,7 +2,6 @@ package backend_integration
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"testing"
