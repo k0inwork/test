@@ -1,17 +1,22 @@
-name: Backend Tests (Generated)
+name: Backend and UI Tests
 
 on:
   push:
+    branches:
+      - master
+      - development
+      - merge-day-consolidation
     paths:
       - 'services/**'
       - 'pkg/**'
-      - 'e2e_tests/backend_integration/**'
       - '.github/workflows/backend_tests.yml'
   pull_request:
+    branches:
+      - master
+      - development
     paths:
       - 'services/**'
       - 'pkg/**'
-      - 'e2e_tests/backend_integration/**'
       - '.github/workflows/backend_tests.yml'
 
 jobs:
@@ -27,37 +32,86 @@ jobs:
           go-version: '1.24'
           cache: true
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Verify Dependencies
         run: go mod download
 
-      - name: Skip External Dependencies
-        run: echo "Skipping Prometheus and Jaeger as requested for basic backend tests."
+      - name: Install Frontend Test Dependencies
+        run: |
+          cd services/frontend/ui_tests
+          npm install
+          npx playwright install chromium --with-deps
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y wget tar curl
+          go install github.com/mattn/goreman@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
       - name: Run Unit Tests
         run: |
-          echo "Testing services/external-data..."
-          (cd services/external-data && go test ./...)
-          echo "Testing services/external-modules..."
-          (cd services/external-modules && go test ./...)
-          echo "Testing services/frontend..."
-          (cd services/frontend && go test ./...)
-          echo "Testing services/identity..."
-          (cd services/identity && go test ./...)
-          echo "Testing services/inventory..."
-          (cd services/inventory && go test ./...)
-          echo "Testing services/network..."
-          (cd services/network && go test ./...)
-          echo "Testing services/product..."
-          (cd services/product && go test ./...)
-          echo "Testing services/registry..."
-          (cd services/registry && go test ./...)
-          echo "Testing services/task..."
-          (cd services/task && go test ./...)
-          echo "Testing services/terminal..."
-          (cd services/terminal && go test ./...)
+          services=(
+            "external-data"
+            "external-modules"
+            "frontend"
+            "identity"
+            "inventory"
+            "network"
+            "product"
+            "registry"
+            "task"
+            "terminal"
+            "keyservice"
+            "compatibility"
+          )
+          for service in "${services[@]}"; do
+            echo "Testing services/$service..."
+            (cd "services/$service" && go test ./...)
+          done
 
       - name: Run Integration Tests
+        env:
+          CI: true
         run: |
+          ./start.sh > all_services.log 2>&1 &
+
+          echo "Waiting for registry..."
+          MAX_RETRIES=90
+          RETRY_COUNT=0
+          until curl -s http://localhost:8088/discovery > /dev/null || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
+            sleep 1
+            RETRY_COUNT=$((RETRY_COUNT+1))
+            echo -n "."
+          done
+
+          if ! curl -s http://localhost:8088/discovery > /dev/null; then
+             echo "Registry failed to start"
+             cat all_services.log
+             false
+          fi
+
+          echo "Registry is UP"
+          sleep 20
+          go test -v ./e2e_tests/backend_integration/backend_integration_test.go ./e2e_tests/backend_integration/helpers_test.go
+
+      - name: Run UI Tests
+        run: |
+          cd services/frontend/ui_tests
+          npx playwright test
+
+      - name: Archive logs and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            *.log
+            services/**/*.log
+            services/frontend/ui_tests/test-results/
           # These will skip the telemetry tests because RUN_TELEMETRY_TESTS is not set
           go test -v ./e2e_tests/backend_integration/...
 
@@ -86,7 +140,7 @@ jobs:
         env:
           RUN_TELEMETRY_TESTS: "true"
         run: |
-          go test -v e2e_tests/backend_integration/telemetry_flow_test.go e2e_tests/backend_integration/tracing_test.go
+          go test -v e2e_tests/backend_integration/telemetry_flow_test.go e2e_tests/backend_integration/tracing_test.go e2e_tests/backend_integration/helpers_test.go
 
       - name: Stop Telemetry Stack
         if: always()

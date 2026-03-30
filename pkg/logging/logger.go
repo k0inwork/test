@@ -4,18 +4,16 @@ package logging
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-)
-
-import (
-	"sync"
 )
 
 var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
@@ -82,7 +80,7 @@ func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
 		}
 		for {
 			time.Sleep(30 * time.Second)
-			resp, err := otelClient.Post(registryURL+"/heartbeat/"+info.Name, "application/json", nil)
+			resp, err := http.Post(registryURL+"/heartbeat/"+info.Name, "application/json", nil)
 			if err == nil {
 				resp.Body.Close()
 			}
@@ -172,23 +170,18 @@ func GinMiddleware() gin.HandlerFunc {
 	}
 }
 
-func WaitForService(registryURL, targetServiceName string) {
+func WaitForService(ctx context.Context, url string) error {
 	for {
-		resp, err := otelClient.Get(registryURL + "/services")
-		if err == nil && resp.StatusCode == http.StatusOK {
-			var services []ServiceRegistration
-			if err := json.NewDecoder(resp.Body).Decode(&services); err == nil {
-				for _, s := range services {
-					if s.Name == targetServiceName {
-						resp.Body.Close()
-						slog.Info("Service is now available", "service", targetServiceName)
-						return
-					}
-				}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			resp, err := http.Get(url)
+			if err == nil {
+				resp.Body.Close()
+				return nil
 			}
-			resp.Body.Close()
+			time.Sleep(1 * time.Second)
 		}
-		slog.Info("Waiting for service to become available...", "service", targetServiceName)
-		time.Sleep(5 * time.Second)
 	}
 }

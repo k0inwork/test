@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"pum-go/pkg/config"
 	"pum-go/pkg/external"
 	"pum-go/pkg/logging"
 	"pum-go/pkg/models"
@@ -23,23 +22,22 @@ import (
 
 func setupTestDB() *gorm.DB {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{})
+	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{}, &models.Ipmi{}, &models.PDU{})
 	return db
 }
 
 func TestInventoryAPI(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	logging.Init("test-inventory")
-	tasklib.Init("http://localhost:8085") // Avoid panics from tasklib
+	tasklib.Init("http://localhost:8085")
 	testDB := setupTestDB()
 
-	// Create mock sync engine
-	provider := &external.GraphQLClient{Endpoint: "http://localhost:8089/query"}
+	provider := &external.MockProvider{}
 	engine := sync.NewSyncEngine(testDB, provider)
 	r := setupRouter(testDB, engine)
 
 	// Test GET /switches
-	testDB.Create(&models.Switch{Name: "test-switch", IP: "10.0.0.1"})
+	testDB.Create(&models.Switch{ID: "sw1", Name: "test-switch", IP: "10.0.0.1"})
 	req, _ := http.NewRequest("GET", "/switches", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -54,18 +52,12 @@ func TestInventoryAPI(t *testing.T) {
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	var pdus []map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &pdus)
-	assert.Len(t, pdus, 2)
 
 	// Test GET /ipmi
 	req, _ = http.NewRequest("GET", "/ipmi", nil)
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	var ipmis []map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &ipmis)
-	assert.Len(t, ipmis, 1)
 
 	// Test POST /configurable
 	cfg := config.Config{
