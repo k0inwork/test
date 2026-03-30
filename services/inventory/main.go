@@ -120,6 +120,23 @@ func main() {
 
 	r := setupRouter(db, engine)
 
+	// Register recurring sync task
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088", // registry URL
+		r,
+		"/inventory/task/sync", // local webhook path
+		"@every 1m",            // schedule
+		"http://localhost:8083/inventory/task/sync", // target URL reachable by task service
+		"system",        // username
+		"sync-switches", // operation
+		"inventory-all", // object ID
+		"Switch",        // class name
+		func(ctx context.Context, payload []byte) error {
+			slog.Info("Executing recurring inventory sync")
+			return engine.Run(ctx)
+		},
+	)
+
 	slog.Info("Inventory starting", "port", 8083)
 	r.Run(":8083")
 }

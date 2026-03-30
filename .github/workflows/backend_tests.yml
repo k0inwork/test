@@ -112,6 +112,8 @@ jobs:
             *.log
             services/**/*.log
             services/frontend/ui_tests/test-results/
+          # These will skip the telemetry tests because RUN_TELEMETRY_TESTS is not set
+          go test -v ./e2e_tests/backend_integration/...
 
   telemetry-test:
     runs-on: ubuntu-latest

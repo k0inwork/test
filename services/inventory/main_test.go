@@ -60,7 +60,17 @@ func TestInventoryAPI(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Test POST /configurable
-	req, _ = http.NewRequest("POST", "/configurable", bytes.NewBuffer([]byte(`{}`)))
+	cfg := config.Config{
+		ExternalModules: map[string]struct {
+			Mode         string `yaml:"mode"`
+			Endpoint     string `yaml:"endpoint"`
+			RealEndpoint string `yaml:"real_endpoint"`
+		}{
+			"test-module": {Mode: "mock"},
+		},
+	}
+	jsonValue, _ := json.Marshal(cfg)
+	req, _ = http.NewRequest("POST", "/configurable", bytes.NewBuffer(jsonValue))
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)

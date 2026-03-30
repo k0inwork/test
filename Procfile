@@ -12,4 +12,5 @@ terminal: OTEL_EXPORTER_OTLP_INSECURE=true go run services/terminal/main.go
 external-data: OTEL_EXPORTER_OTLP_INSECURE=true go run services/external-data/main.go
 frontend: OTEL_EXPORTER_OTLP_INSECURE=true go run services/frontend/main.go
 compatibility: OTEL_EXPORTER_OTLP_INSECURE=true go run services/compatibility/main.go
+gws: OTEL_EXPORTER_OTLP_INSECURE=true go run services/gws/main.go
 keyservice: OTEL_EXPORTER_OTLP_INSECURE=true go run services/keyservice/main.go

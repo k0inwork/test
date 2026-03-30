@@ -32,6 +32,7 @@ func TestTracingConnections(t *testing.T) {
 	}
 
 	// 3. Verify Jaeger Metrics endpoint (the one Prometheus scrapes)
+	// Default Jaeger admin port is 14269
 	resp, err = http.Get("http://127.0.0.1:14269/metrics")
 	if err != nil {
 		handleMissingEnv(t, "Jaeger Metrics endpoint not reachable")

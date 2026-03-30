@@ -129,6 +129,23 @@ func main() {
 
 	r := setupRouter(db, engine)
 
+	// Register recurring sync task
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088", // registry URL
+		r,
+		"/product/task/sync", // local webhook path
+		"@every 1m",          // schedule
+		"http://localhost:8082/product/task/sync", // target URL reachable by task service
+		"system",        // username
+		"sync-products", // operation
+		"product-all",   // object ID
+		"Product",       // class name
+		func(ctx context.Context, payload []byte) error {
+			slog.Info("Executing recurring product sync")
+			return engine.Run(ctx)
+		},
+	)
+
 	slog.Info("Product starting", "port", 8082)
 	r.Run(":8082")
 }
