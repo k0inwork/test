@@ -58,16 +58,27 @@ func Init(serviceName string) {
 func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
 	registryEndpoint = registryURL
 	go func() {
+		backoff := 1 * time.Second
+		maxBackoff := 30 * time.Second
+
 		for {
 			data, _ := json.Marshal(info)
 			resp, err := otelClient.Post(registryURL+"/register", "application/json", bytes.NewBuffer(data))
-			if err == nil {
+			if err == nil && resp.StatusCode == http.StatusOK {
 				resp.Body.Close()
 				slog.Info("Registered with service discovery", "url", registryURL)
 				break
 			}
+			if err == nil {
+				resp.Body.Close()
+			}
 			slog.Warn("Failed to register with discovery, retrying...", "error", err)
-			time.Sleep(5 * time.Second)
+			time.Sleep(backoff)
+
+			backoff *= 2
+			if backoff > maxBackoff {
+				backoff = maxBackoff
+			}
 		}
 		for {
 			time.Sleep(30 * time.Second)
