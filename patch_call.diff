@@ -1,0 +1,19 @@
+--- services/external-modules/main.go
++++ services/external-modules/main.go
+@@ -83,6 +83,16 @@
+			return
+		}
+
++		if !isValidIP(req.TargetIP) {
++			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid target_ip format"})
++			return
++		}
++
++		if !isValidCommand(req.Command) {
++			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid command format"})
++			return
++		}
++
+		slog.Info("Proxying request to external module", "ip", req.TargetIP, "cmd", req.Command)
+
+		// Simulate RabbitMQ/Remote call delay
