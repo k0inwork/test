@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -19,11 +20,25 @@ import (
 func InitTracer(serviceName string) (*sdktrace.TracerProvider, error) {
 	ctx := context.Background()
 
-	// Configure the OTLP HTTP exporter to send traces to localhost:4318 (OpenTelemetry Collector)
-	exporter, err := otlptracehttp.New(ctx,
-		otlptracehttp.WithEndpoint("localhost:4318"),
-		otlptracehttp.WithInsecure(), // no TLS
-	)
+	// Configure the OTLP HTTP exporter.
+	// It respects OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_INSECURE env vars.
+	// We provide defaults for local development if not set.
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "localhost:4318"
+	}
+
+	opts := []otlptracehttp.Option{
+		otlptracehttp.WithEndpoint(endpoint),
+	}
+
+	// Use insecure connection only if explicitly requested via environment variable.
+	// In production, this should be false or unset to ensure encrypted traffic.
+	if os.Getenv("OTEL_EXPORTER_OTLP_INSECURE") == "true" {
+		opts = append(opts, otlptracehttp.WithInsecure())
+	}
+
+	exporter, err := otlptracehttp.New(ctx, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
 	}

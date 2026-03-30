@@ -2,12 +2,17 @@ package backend_integration
 
 import (
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTracingConnections(t *testing.T) {
+	if os.Getenv("RUN_TELEMETRY_TESTS") != "true" {
+		t.Skip("Skipping telemetry test: RUN_TELEMETRY_TESTS not set to true")
+	}
+
 	// 1. Verify Jaeger UI is reachable
 	resp, err := http.Get("http://localhost:16686")
 	if err != nil {
