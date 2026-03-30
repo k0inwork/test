@@ -1,4 +1,5 @@
 #!/bin/bash
+export PUM_ENV="development"
 
 # Setup Python virtual environment
 VENV_DIR=".venv"

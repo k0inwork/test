@@ -131,16 +131,18 @@ func main() {
 		var res struct{ Username, Role, Capabilities string }
 		json.NewDecoder(resp.Body).Decode(&res)
 		resp.Body.Close()
-		c.SetCookie("pum_user", res.Username, 3600, "/", "", false, true)
-		c.SetCookie("pum_role", res.Role, 3600, "/", "", false, true)
-		c.SetCookie("pum_caps", res.Capabilities, 3600, "/", "", false, true)
+		secureCookie := os.Getenv("PUM_ENV") != "development"
+		c.SetCookie("pum_user", res.Username, 3600, "/", "", secureCookie, true)
+		c.SetCookie("pum_role", res.Role, 3600, "/", "", secureCookie, true)
+		c.SetCookie("pum_caps", res.Capabilities, 3600, "/", "", secureCookie, true)
 		c.Redirect(http.StatusFound, "/")
 	})
 
 	r.GET("/logout", func(c *gin.Context) {
-		c.SetCookie("pum_user", "", -1, "/", "", false, true)
-		c.SetCookie("pum_role", "", -1, "/", "", false, true)
-		c.SetCookie("pum_caps", "", -1, "/", "", false, true)
+		secureCookie := os.Getenv("PUM_ENV") != "development"
+		c.SetCookie("pum_user", "", -1, "/", "", secureCookie, true)
+		c.SetCookie("pum_role", "", -1, "/", "", secureCookie, true)
+		c.SetCookie("pum_caps", "", -1, "/", "", secureCookie, true)
 		c.Redirect(http.StatusFound, "/login")
 	})
 
