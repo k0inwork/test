@@ -77,7 +77,6 @@ jobs:
         env:
           CI: true
         run: |
-<<<<<<< HEAD
           ./start.sh > all_services.log 2>&1 &
 
           echo "Waiting for registry..."
@@ -97,7 +96,7 @@ jobs:
 
           echo "Registry is UP"
           sleep 20
-          go test -v ./e2e_tests/backend_integration/...
+          go test -v ./e2e_tests/backend_integration/backend_integration_test.go ./e2e_tests/backend_integration/helpers_test.go
 
       - name: Run UI Tests
         run: |
@@ -113,9 +112,6 @@ jobs:
             *.log
             services/**/*.log
             services/frontend/ui_tests/test-results/
-=======
-          # These will skip the telemetry tests because RUN_TELEMETRY_TESTS is not set
-          go test -v ./e2e_tests/backend_integration/...
 
   telemetry-test:
     runs-on: ubuntu-latest
@@ -142,9 +138,8 @@ jobs:
         env:
           RUN_TELEMETRY_TESTS: "true"
         run: |
-          go test -v e2e_tests/backend_integration/telemetry_flow_test.go e2e_tests/backend_integration/tracing_test.go
+          go test -v e2e_tests/backend_integration/telemetry_flow_test.go e2e_tests/backend_integration/tracing_test.go e2e_tests/backend_integration/helpers_test.go
 
       - name: Stop Telemetry Stack
         if: always()
         run: docker compose -f docker-compose.telemetry.yml down
->>>>>>> origin/master
