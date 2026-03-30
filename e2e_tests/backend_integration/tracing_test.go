@@ -14,35 +14,38 @@ func TestTracingConnections(t *testing.T) {
 	}
 
 	// 1. Verify Jaeger UI is reachable
-	// Use 127.0.0.1 for CI stability.
 	resp, err := http.Get("http://127.0.0.1:16686")
 	if err != nil {
-		t.Skip("Jaeger UI not reachable")
+		handleMissingEnv(t, "Jaeger UI not reachable")
+	} else {
+		defer resp.Body.Close()
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	}
-	defer resp.Body.Close()
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// 2. Verify Prometheus is reachable
 	resp, err = http.Get("http://127.0.0.1:9090")
 	if err != nil {
-		t.Skip("Prometheus not reachable")
+		handleMissingEnv(t, "Prometheus not reachable")
+	} else {
+		defer resp.Body.Close()
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	}
-	defer resp.Body.Close()
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// 3. Verify Jaeger Metrics endpoint (the one Prometheus scrapes)
 	// Default Jaeger admin port is 14269
 	resp, err = http.Get("http://127.0.0.1:14269/metrics")
 	if err != nil {
-		t.Skip("Jaeger Metrics endpoint not reachable")
+		handleMissingEnv(t, "Jaeger Metrics endpoint not reachable")
+	} else {
+		defer resp.Body.Close()
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	}
-	defer resp.Body.Close()
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// 4. Verify OTel Collector OTLP HTTP port is open
 	resp, err = http.Get("http://127.0.0.1:4318")
 	if err != nil {
-		t.Skip("OTel Collector not reachable")
+		handleMissingEnv(t, "OTel Collector not reachable")
+	} else {
+		defer resp.Body.Close()
 	}
-	defer resp.Body.Close()
 }
