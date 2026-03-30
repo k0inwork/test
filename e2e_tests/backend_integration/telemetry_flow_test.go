@@ -16,12 +16,23 @@ func TestTelemetryEndToEnd(t *testing.T) {
 	}
 
 	// 1. Trigger an action that should generate a trace
-	// Assuming the registry is running at localhost:8088
-	resp, err := http.Get("http://localhost:8088/discovery")
-	if err != nil {
-		t.Fatalf("Failed to call registry: %v", err)
+	// Use 127.0.0.1 to avoid dual-stack resolution issues in CI.
+	// Add a retry loop for the initial call to account for service startup.
+	var resp *http.Response
+	var err error
+	registryURL := "http://127.0.0.1:8088/discovery"
+	for i := 0; i < 15; i++ {
+		resp, err = http.Get(registryURL)
+		if err == nil {
+			resp.Body.Close()
+			break
+		}
+		t.Logf("Registry not ready yet (attempt %d/15): %v", i+1, err)
+		time.Sleep(2 * time.Second)
 	}
-	resp.Body.Close()
+	if err != nil {
+		t.Fatalf("Failed to call registry after retries: %v", err)
+	}
 
 	// 2. Wait for the trace to propagate to Jaeger
 	t.Log("Waiting for trace to propagate to Jaeger...")
@@ -29,7 +40,7 @@ func TestTelemetryEndToEnd(t *testing.T) {
 
 	// 3. Query Jaeger API for traces from the 'registry' service
 	// Jaeger Query API is usually at :16686
-	jaegerURL := "http://localhost:16686/api/traces?service=registry"
+	jaegerURL := "http://127.0.0.1:16686/api/traces?service=registry"
 
 	var traces struct {
 		Data []interface{} `json:"data"`
