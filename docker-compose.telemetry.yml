@@ -23,10 +23,14 @@ services:
   jaeger:
     image: jaegertracing/all-in-one:1.50
     environment:
-      - COLLECTOR_OTLP_HTTP_HOST_PORT=:4318
+      # Change Jaeger's OTLP gRPC receiver to 14317 to match otelcol config
+      - COLLECTOR_OTLP_GRPC_HOST_PORT=:14317
+      # Change Jaeger's OTLP HTTP receiver to something else or disable it
+      - COLLECTOR_OTLP_HTTP_HOST_PORT=:14318
     ports:
       - "16686:16686"
-      - "4318:4318"
+      # Expose Jaeger metrics for the e2e test
+      - "14269:14269"
 
   registry:
     image: golang:1.24

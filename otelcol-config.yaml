@@ -20,7 +20,7 @@ connectors:
 
 exporters:
   otlp/jaeger:
-    endpoint: "localhost:14317" # Jaeger's gRPC receiver (we will reconfigure Jaeger to use this)
+    endpoint: "jaeger:14317" # Export to jaeger container directly
     tls:
       insecure: true
 
