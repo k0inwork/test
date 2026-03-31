@@ -1,15 +1,14 @@
+// Package main starts the centralized registry microservice, which collects and
+// exposes capabilities, navigation menus, and endpoints from all other microservices.
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"log/slog"
 	"net/http"
-	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
-	"sort"
 	"sync"
 	"time"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,18 +31,9 @@ var (
 
 func main() {
 	logging.Init("registry")
-	cfg, err := config.LoadConfig("system.yaml")
-	if err != nil {
-		slog.Error("Failed to load system.yaml", "error", err)
-	}
-
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery(), logging.GinMiddleware())
-
-	r.GET("/config", func(c *gin.Context) {
-		c.JSON(http.StatusOK, cfg)
-	})
 
 	r.POST("/register", func(c *gin.Context) {
 		var info ServiceInfo
@@ -60,30 +50,6 @@ func main() {
 		}
 		registry[info.Name] = &info
 		mu.Unlock()
-
-		// If service has configurable capability, push config to it asynchronously
-		for _, cap := range info.Capabilities {
-			if cap.Name == "configurable" && len(cap.Endpoints) > 0 {
-				configEndpoint := info.Endpoint + cap.Endpoints[0]
-				go func(endpoint string, name string) {
-					slog.Info("Pushing configuration to service", "service", name, "endpoint", endpoint)
-					payload, _ := json.Marshal(cfg)
-					resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(payload))
-					if err != nil {
-						slog.Error("Failed to push configuration", "service", name, "error", err)
-					} else {
-						resp.Body.Close()
-						if resp.StatusCode != http.StatusOK {
-							slog.Error("Service returned non-200 on configuration push", "service", name, "status", resp.StatusCode)
-						} else {
-							slog.Info("Successfully pushed configuration", "service", name)
-						}
-					}
-				}(configEndpoint, info.Name)
-				break
-			}
-		}
-
 		c.JSON(http.StatusOK, gin.H{"status": "registered"})
 	})
 
@@ -101,38 +67,22 @@ func main() {
 		c.JSON(http.StatusOK, active)
 	})
 
-	r.GET("/capabilities/:name", func(c *gin.Context) {
-		name := c.Param("name")
-		mu.RLock()
-		defer mu.RUnlock()
-		now := time.Now()
-		for _, s := range registry {
-			if now.Sub(s.LastUpdate) < 60*time.Second && s.Enabled {
-				for _, cap := range s.Capabilities {
-					if cap.Name == name {
-						if len(cap.Endpoints) > 0 {
-							c.JSON(http.StatusOK, gin.H{"endpoint": s.Endpoint + cap.Endpoints[0]})
-							return
-						}
-					}
-				}
-			}
-		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "capability not found"})
-	})
-
 	r.GET("/admin/services", func(c *gin.Context) {
 		mu.RLock()
 		defer mu.RUnlock()
 		all := make([]ServiceInfo, 0)
-		for _, s := range registry { all = append(all, *s) }
+		for _, s := range registry {
+			all = append(all, *s)
+		}
 		sort.Slice(all, func(i, j int) bool { return all[i].OrderID < all[j].OrderID })
 		c.JSON(http.StatusOK, all)
 	})
 
 	r.POST("/admin/services/:name/toggle", func(c *gin.Context) {
 		name := c.Param("name")
-		var body struct { Enabled bool `json:"enabled"` }
+		var body struct {
+			Enabled bool `json:"enabled"`
+		}
 		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -161,6 +111,21 @@ func main() {
 			return
 		}
 		c.JSON(http.StatusNotFound, gin.H{"error": "not registered"})
+	})
+
+	r.GET("/capabilities/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		mu.RLock()
+		defer mu.RUnlock()
+		for _, s := range registry {
+			for _, cap := range s.Capabilities {
+				if cap.Name == name {
+					c.JSON(http.StatusOK, gin.H{"endpoint": s.Endpoint + cap.Endpoints[0]})
+					return
+				}
+			}
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "capability not found"})
 	})
 
 	slog.Info("Registry starting", "port", 8088)

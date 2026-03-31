@@ -1,3 +1,5 @@
+// Package sync contains unit tests for the inventory synchronization engine
+// to ensure accurate mapping and updating of local asset records.
 package sync
 
 import (
@@ -20,4 +22,19 @@ func TestSyncEngine(t *testing.T) {
 
 	err := engine.Run(context.Background())
 	assert.NoError(t, err)
+}
+
+func BenchmarkSyncEngine_SwitchPorts(b *testing.B) {
+	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	db.AutoMigrate(&models.Switch{}, &models.SwitchPort{})
+
+	provider := &external.MockProvider{}
+	engine := NewSyncEngine(db, provider)
+
+	ctx := context.Background()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = engine.Run(ctx)
+	}
 }

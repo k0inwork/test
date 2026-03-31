@@ -1,25 +1,25 @@
+// Package logging offers standardized, structured logging and HTTP middleware
+// for auditing and request tracking across all microservices using the Go standard library.
 package logging
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-import (
-	"sync"
-)
-
 var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 var (
-	L *slog.Logger
+	L                *slog.Logger
 	registryEndpoint string
 	auditEndpoint    string
 	auditMu          sync.RWMutex
@@ -56,20 +56,31 @@ func Init(serviceName string) {
 func RegisterWithDiscovery(registryURL string, info ServiceRegistration) {
 	registryEndpoint = registryURL
 	go func() {
+		backoff := 1 * time.Second
+		maxBackoff := 30 * time.Second
+
 		for {
 			data, _ := json.Marshal(info)
 			resp, err := otelClient.Post(registryURL+"/register", "application/json", bytes.NewBuffer(data))
-			if err == nil {
+			if err == nil && resp.StatusCode == http.StatusOK {
 				resp.Body.Close()
 				slog.Info("Registered with service discovery", "url", registryURL)
 				break
 			}
+			if err == nil {
+				resp.Body.Close()
+			}
 			slog.Warn("Failed to register with discovery, retrying...", "error", err)
-			time.Sleep(5 * time.Second)
+			time.Sleep(backoff)
+
+			backoff *= 2
+			if backoff > maxBackoff {
+				backoff = maxBackoff
+			}
 		}
 		for {
 			time.Sleep(30 * time.Second)
-			resp, err := otelClient.Post(registryURL+"/heartbeat/"+info.Name, "application/json", nil)
+			resp, err := http.Post(registryURL+"/heartbeat/"+info.Name, "application/json", nil)
 			if err == nil {
 				resp.Body.Close()
 			}
@@ -96,7 +107,9 @@ func getAuditEndpoint() string {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		var res struct{ Endpoint string `json:"endpoint"` }
+		var res struct {
+			Endpoint string `json:"endpoint"`
+		}
 		if err := json.NewDecoder(resp.Body).Decode(&res); err == nil && res.Endpoint != "" {
 			auditMu.Lock()
 			auditEndpoint = res.Endpoint
@@ -157,23 +170,18 @@ func GinMiddleware() gin.HandlerFunc {
 	}
 }
 
-func WaitForService(registryURL, targetServiceName string) {
+func WaitForService(ctx context.Context, url string) error {
 	for {
-		resp, err := otelClient.Get(registryURL + "/services")
-		if err == nil && resp.StatusCode == http.StatusOK {
-			var services []ServiceRegistration
-			if err := json.NewDecoder(resp.Body).Decode(&services); err == nil {
-				for _, s := range services {
-					if s.Name == targetServiceName {
-						resp.Body.Close()
-						slog.Info("Service is now available", "service", targetServiceName)
-						return
-					}
-				}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			resp, err := http.Get(url)
+			if err == nil {
+				resp.Body.Close()
+				return nil
 			}
-			resp.Body.Close()
+			time.Sleep(1 * time.Second)
 		}
-		slog.Info("Waiting for service to become available...", "service", targetServiceName)
-		time.Sleep(5 * time.Second)
 	}
 }

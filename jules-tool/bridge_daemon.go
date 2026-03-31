@@ -1,3 +1,5 @@
+// Package main implements a bridge daemon to facilitate communication between
+// local development tools and remote SSH environments, handling proxy setups and connections.
 package main
 
 import (

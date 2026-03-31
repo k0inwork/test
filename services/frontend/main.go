@@ -1,3 +1,5 @@
+// Package main runs the frontend Go microservice, which serves static HTML/JS/CSS
+// assets, dynamically rendered templates, and proxies requests to backend APIs.
 package main
 
 import (
@@ -11,13 +13,40 @@ import (
 	"os"
 	"pum-go/pkg/config"
 	"pum-go/pkg/logging"
+	"pum-go/pkg/tasklib"
 	"pum-go/pkg/tracing"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
+
+var (
+	upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
+	clients   = make(map[*websocket.Conn]string) // conn -> username
+	clientsMu sync.Mutex
+)
+
+func broadcastMessage(user string, message string) {
+	clientsMu.Lock()
+	defer clientsMu.Unlock()
+	for conn, u := range clients {
+		if user == "" || user == "all" || u == user {
+			err := conn.WriteMessage(websocket.TextMessage, []byte(message))
+			if err != nil {
+				slog.Error("WebSocket write error", "error", err)
+				conn.Close()
+				delete(clients, conn)
+			}
+		}
+	}
+}
 
 var otelClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
@@ -27,6 +56,7 @@ type RegisteredService struct {
 	Capabilities []logging.CapabilityRegistration `json:"capabilities"`
 	Enabled      bool                             `json:"enabled"`
 	IsCore       bool                             `json:"is_core"`
+	OrderID      int                              `json:"order_id"`
 	Menu         []logging.MenuItem               `json:"menu"`
 }
 
@@ -35,14 +65,62 @@ var GlobalConfig *config.Config
 func getCommonH(c *gin.Context) gin.H {
 	user, _ := c.Get("pum_user")
 	role, _ := c.Get("pum_role")
-	caps, _ := c.Get("pum_caps")
-	svcs, _ := c.Get("services")
+	capsStr, _ := c.Get("pum_caps")
+	svcsObj, _ := c.Get("services")
+
+	var caps []string
+	if str, ok := capsStr.(string); ok && str != "" {
+		caps = strings.Split(str, ",")
+	}
+	hasAll := false
+	for _, cap := range caps {
+		if cap == "*" || cap == "all" {
+			hasAll = true
+			break
+		}
+	}
+
+	type NavItem struct {
+		Label string
+		URL   string
+	}
+	nav := []NavItem{}
+
+	if svcsObj != nil {
+		if svcs, ok := svcsObj.([]RegisteredService); ok {
+			for _, s := range svcs {
+				allowed := false
+				if len(s.Capabilities) == 0 || hasAll {
+					allowed = true
+				} else {
+					for _, reqCap := range s.Capabilities {
+						for _, userCap := range caps {
+							if reqCap.Name == userCap && reqCap.Name != "" {
+								allowed = true
+								break
+							}
+						}
+						if allowed { break }
+					}
+				}
+
+				if allowed {
+					for _, item := range s.Menu {
+						nav = append(nav, NavItem{
+							Label: item.Label,
+							URL:   fmt.Sprintf("/m/%s%s", s.Name, item.Path),
+						})
+					}
+				}
+			}
+		}
+	}
 
 	return gin.H{
-		"User":         user,
-		"Role":         role,
-		"Capabilities": caps,
-		"Services":     svcs,
+		"User":    user,
+		"Role":    role,
+		"Nav":     nav,
+		"IsAdmin": role == "admin",
 	}
 }
 
@@ -61,13 +139,44 @@ func main() {
 		slog.Error("failed to load system.yaml", "err", err)
 	}
 
+	tasklib.Init("http://localhost:8085")
+
 	r := gin.Default()
 	r.Use(otelgin.Middleware("frontend"))
 	r.Use(logging.GinMiddleware())
 	r.LoadHTMLGlob("services/frontend/templates/*.html")
 
+	// Fixed WebSocket route
+	r.GET("/ws", func(c *gin.Context) {
+		user, _ := c.Cookie("pum_user")
+		if user == "" { user = "guest" }
+
+		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+		if err != nil {
+			slog.Error("Failed to upgrade websocket", "error", err)
+			return
+		}
+
+		clientsMu.Lock()
+		clients[conn] = user
+		clientsMu.Unlock()
+
+		defer func() {
+			clientsMu.Lock()
+			delete(clients, conn)
+			clientsMu.Unlock()
+			conn.Close()
+		}()
+
+		for {
+			_, _, err := conn.ReadMessage()
+			if err != nil { break }
+		}
+	})
+
 	r.Use(func(c *gin.Context) {
-		if c.Request.URL.Path == "/login" {
+		path := c.Request.URL.Path
+		if path == "/login" || path == "/api/notify" || strings.HasPrefix(path, "/frontend/task/") || path == "/ws" {
 			c.Next()
 			return
 		}
@@ -87,9 +196,14 @@ func main() {
 		resp, err := otelClient.Do(req)
 		if err == nil {
 			var svcs []RegisteredService
-			json.NewDecoder(resp.Body).Decode(&svcs)
+			if err := json.NewDecoder(resp.Body).Decode(&svcs); err == nil {
+				c.Set("services", svcs)
+			} else {
+				slog.Error("Failed to decode services", "error", err)
+			}
 			resp.Body.Close()
-			c.Set("services", svcs)
+		} else {
+			slog.Error("Failed to fetch services", "error", err)
 		}
 		c.Next()
 	})
@@ -103,8 +217,7 @@ func main() {
 		pw := c.PostForm("password")
 		data, _ := json.Marshal(map[string]string{"username": un, "password": pw})
 
-		// Find identity service endpoint from registry
-		identityEndpoint := "http://localhost:8081" // fallback
+		identityEndpoint := "http://localhost:8081"
 		reqReg, _ := http.NewRequestWithContext(c.Request.Context(), "GET", "http://localhost:8088/services", nil)
 		respReg, err := otelClient.Do(reqReg)
 		if err == nil {
@@ -129,16 +242,18 @@ func main() {
 		var res struct{ Username, Role, Capabilities string }
 		json.NewDecoder(resp.Body).Decode(&res)
 		resp.Body.Close()
-		c.SetCookie("pum_user", res.Username, 3600, "/", "", false, true)
-		c.SetCookie("pum_role", res.Role, 3600, "/", "", false, true)
-		c.SetCookie("pum_caps", res.Capabilities, 3600, "/", "", false, true)
+		secureCookie := os.Getenv("PUM_ENV") != "development"
+		c.SetCookie("pum_user", res.Username, 3600, "/", "", secureCookie, true)
+		c.SetCookie("pum_role", res.Role, 3600, "/", "", secureCookie, true)
+		c.SetCookie("pum_caps", res.Capabilities, 3600, "/", "", secureCookie, true)
 		c.Redirect(http.StatusFound, "/")
 	})
 
 	r.GET("/logout", func(c *gin.Context) {
-		c.SetCookie("pum_user", "", -1, "/", "", false, true)
-		c.SetCookie("pum_role", "", -1, "/", "", false, true)
-		c.SetCookie("pum_caps", "", -1, "/", "", false, true)
+		secureCookie := os.Getenv("PUM_ENV") != "development"
+		c.SetCookie("pum_user", "", -1, "/", "", secureCookie, true)
+		c.SetCookie("pum_role", "", -1, "/", "", secureCookie, true)
+		c.SetCookie("pum_caps", "", -1, "/", "", secureCookie, true)
 		c.Redirect(http.StatusFound, "/login")
 	})
 
@@ -146,10 +261,45 @@ func main() {
 		c.HTML(200, "base.html", appendH(getCommonH(c), gin.H{"IsIndex": true}))
 	})
 
+	r.POST("/api/notify", func(c *gin.Context) {
+		var payload struct {
+			User    string `json:"user"`
+			Message string `json:"message"`
+		}
+		if err := c.ShouldBindJSON(&payload); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		broadcastMessage(payload.User, payload.Message)
+		c.JSON(http.StatusOK, gin.H{"status": "sent"})
+	})
+
+	tasklib.RegisterEndpoint(
+		"http://localhost:8088",
+		r,
+		"/frontend/task/notify",
+		"@every 1m",
+		"http://localhost:8080/frontend/task/notify",
+		"system",
+		"send-timer-notification",
+		"timer",
+		"Notification",
+		func(ctx context.Context, payload []byte) error {
+			msg := fmt.Sprintf("System Timer Notification: %s", time.Now().Format(time.RFC3339))
+			broadcastMessage("all", msg)
+			return nil
+		},
+	)
+
 	r.GET("/m/:module/*path", func(c *gin.Context) {
 		mod := c.Param("module")
 		path := c.Param("path")
-		svcs := c.MustGet("services").([]RegisteredService)
+		svcsObj, exists := c.Get("services")
+		if !exists {
+			c.String(404, "Modules not loaded")
+			return
+		}
+		svcs := svcsObj.([]RegisteredService)
 		var target *RegisteredService
 		for _, s := range svcs {
 			if s.Name == mod {
@@ -171,7 +321,6 @@ func main() {
 			c.String(500, "Failed to build request")
 			return
 		}
-		// Forward cookies so backend services know the user
 		for _, cookie := range c.Request.Cookies() {
 			req.AddCookie(cookie)
 		}
@@ -190,7 +339,6 @@ func main() {
 			"ModuleData":   data,
 		})
 
-		// Check if a specific template exists for this module+path
 		importPath := fmt.Sprintf("services/frontend/templates/%s_%s.html", mod, strings.Trim(path, "/"))
 		if _, err := os.Stat(importPath); err == nil {
 			h["HasCustomTemplate"] = true
@@ -214,7 +362,6 @@ func main() {
 		json.NewDecoder(resp.Body).Decode(&svcs)
 		resp.Body.Close()
 
-		// Collect external modules configuration to show in Admin UI
 		extModules := make(map[string]map[string]string)
 		if GlobalConfig != nil && GlobalConfig.ExternalModules != nil {
 			for name, moduleConf := range GlobalConfig.ExternalModules {
@@ -253,8 +400,7 @@ func main() {
 			return
 		}
 
-		// Resolve identity endpoint from registry first
-		identityEndpoint := "http://localhost:8081" // fallback
+		identityEndpoint := "http://localhost:8081"
 		reqReg, _ := http.NewRequestWithContext(c.Request.Context(), "GET", "http://localhost:8088/services", nil)
 		respReg, err := otelClient.Do(reqReg)
 		if err == nil {
@@ -269,7 +415,6 @@ func main() {
 			}
 		}
 
-		// Fetch users from identity service
 		reqU, _ := http.NewRequestWithContext(c.Request.Context(), "GET", identityEndpoint+"/users", nil)
 		for _, cookie := range c.Request.Cookies() {
 			reqU.AddCookie(cookie)
@@ -281,7 +426,6 @@ func main() {
 			respUsers.Body.Close()
 		}
 
-		// Fetch groups from identity service
 		reqG, _ := http.NewRequestWithContext(c.Request.Context(), "GET", identityEndpoint+"/groups", nil)
 		for _, cookie := range c.Request.Cookies() {
 			reqG.AddCookie(cookie)
@@ -293,7 +437,6 @@ func main() {
 			respGroups.Body.Close()
 		}
 
-		// Check if we need to parse groups to an array of objects to render remove buttons correctly.
 		var processedUsers []map[string]interface{}
 		if users != nil {
 			if uArr, ok := users.([]interface{}); ok {

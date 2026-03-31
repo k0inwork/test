@@ -1,13 +1,15 @@
+// Package sync provides background synchronization engines for the inventory
+// service to map and pull external data into the local database models.
 package sync
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"pum-go/pkg/external"
 	"pum-go/pkg/models"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type SyncEngine struct {
@@ -50,18 +52,19 @@ func (e *SyncEngine) Run(ctx context.Context) error {
 		}
 
 		// Update or Create ports
-		for i := 1; i <= 3; i++ {
-			portID := fmt.Sprintf("p-%s-%d", sw.ID, i)
-			var port models.SwitchPort
-			if err := e.DB.WithContext(ctx).Where("id = ?", portID).First(&port).Error; err == gorm.ErrRecordNotFound {
-				port = models.SwitchPort{
-					ID:       portID,
-					SwitchID: sw.ID,
-					Vlan:     10,
-				}
-			}
-			port.Port = fmt.Sprintf("%s:Port %d", sw.Name, i)
-			e.DB.WithContext(ctx).Save(&port)
+		var ports []models.SwitchPort
+		for _, p := range eq.Ports {
+			ports = append(ports, models.SwitchPort{
+				ID:          p.ID,
+				SwitchID:    sw.ID,
+				Port:        p.Name,
+				Description: p.Description,
+				Vlan:        p.Vlan,
+			})
+		}
+
+		if len(ports) > 0 {
+			e.DB.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(&ports)
 		}
 	}
 

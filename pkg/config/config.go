@@ -1,3 +1,5 @@
+// Package config provides centralized configuration loading and management for
+// the microservices, typically reading from environment variables or YAML files.
 package config
 
 import (

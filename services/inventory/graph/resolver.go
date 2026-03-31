@@ -1,8 +1,10 @@
+// Package graph implements the root GraphQL resolver for the inventory service,
+// managing resolution context and dependencies for queries/mutations.
 package graph
 
 import (
-	"pum-go/services/inventory/sync"
 	"gorm.io/gorm"
+	"pum-go/services/inventory/sync"
 )
 
 // This file will not be regenerated automatically.

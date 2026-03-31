@@ -1,9 +1,11 @@
+// Package graph acts as the root GraphQL resolver for the product service,
+// enabling data fetching for products, nodes, and gateways.
 package graph
 
 import (
+	"gorm.io/gorm"
 	"pum-go/pkg/external"
 	"pum-go/services/product/sync"
-	"gorm.io/gorm"
 )
 
 // This file will not be regenerated automatically.

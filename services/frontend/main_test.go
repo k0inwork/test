@@ -1,3 +1,5 @@
+// Package main contains tests for the frontend microservice, ensuring that
+// HTTP routes, static file serving, and template rendering function correctly.
 package main
 
 import (

@@ -1,3 +1,5 @@
+// Package main runs the keyservice microservice, which securely manages and
+// provides cryptographic keys or credentials to authorized services.
 package main
 
 import (

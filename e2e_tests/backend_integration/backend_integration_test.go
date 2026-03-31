@@ -11,10 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// This integration test assumes that all services (including external-modules and registry)
-// are either running via start.sh or docker-compose, or can be queried directly via localhost ports.
-// Let's create a test that verifies making a proxy request to the external modules.
-
 const ExternalModulesURL = "http://localhost:8086"
 
 func waitForService(url string) bool {
@@ -30,17 +26,16 @@ func waitForService(url string) bool {
 }
 
 func TestExternalModulesProxy(t *testing.T) {
-	// Let's skip if the service isn't running so it doesn't fail pure go test ./... locally
-	// without the environment booted.
 	if !waitForService("http://localhost:8088/discovery") {
-		t.Skip("Skipping integration test: Registry not available (run start.sh first)")
+		handleMissingEnv(t, "Skipping integration test: Registry not available (run start.sh first)")
+		return
 	}
 
 	if !waitForService(ExternalModulesURL) {
-		t.Skip("Skipping integration test: External Modules proxy not available")
+		handleMissingEnv(t, "Skipping integration test: External Modules proxy not available")
+		return
 	}
 
-	// Payload matching what external-modules expects
 	reqBody := map[string]interface{}{
 		"target_ip": "10.0.0.5",
 		"command":   "dhcp host add",
@@ -50,7 +45,10 @@ func TestExternalModulesProxy(t *testing.T) {
 	jsonValue, _ := json.Marshal(reqBody)
 	resp, err := http.Post(fmt.Sprintf("%s/call", ExternalModulesURL), "application/json", bytes.NewBuffer(jsonValue))
 
-	assert.NoError(t, err)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var res map[string]interface{}
@@ -62,7 +60,13 @@ func TestExternalModulesProxy(t *testing.T) {
 
 func TestPDUCommandProxy(t *testing.T) {
 	if !waitForService("http://localhost:8088/discovery") {
-		t.Skip("Skipping integration test: Registry not available (run start.sh first)")
+		handleMissingEnv(t, "Skipping integration test: Registry not available (run start.sh first)")
+		return
+	}
+
+	if !waitForService(ExternalModulesURL) {
+		handleMissingEnv(t, "Skipping integration test: External Modules proxy not available")
+		return
 	}
 
 	reqBody := map[string]interface{}{
@@ -74,7 +78,10 @@ func TestPDUCommandProxy(t *testing.T) {
 	jsonValue, _ := json.Marshal(reqBody)
 	resp, err := http.Post(fmt.Sprintf("%s/pdu/relay", ExternalModulesURL), "application/json", bytes.NewBuffer(jsonValue))
 
-	assert.NoError(t, err)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var res map[string]interface{}
