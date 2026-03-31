@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"pum-go/pkg/config"
 )
 
 func setupTestDB() *gorm.DB {
