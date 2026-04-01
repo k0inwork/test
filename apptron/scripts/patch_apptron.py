@@ -15,7 +15,7 @@ def process_file(filepath, callback):
         print(f"Error patching {filepath}: {e}")
 
 def patch_auth_js(content):
-    pattern = r\'\(if \(\!getMeta\("auth-url"\)\) \{\n\s\*throw new Error\("auth-url meta tag not found"\);\n\s\*\}\)\'
+    pattern = r'(if \(!getMeta\("auth-url"\)\) \{\n\s*throw new Error\("auth-url meta tag not found"\);\n\s*\}\))'
     replacement = """const authUrl = getMeta("auth-url");
 if (!authUrl) {
     throw new Error("auth-url meta tag not found");
