@@ -15,7 +15,7 @@ def process_file(filepath, callback):
         print(f"Error patching {filepath}: {e}")
 
 def patch_auth_js(content):
-    pattern = r'(const authUrl = getMeta\("auth-url"\);\s*if \(!authUrl\) \{\s*throw new Error\("auth-url meta tag not found"\);\s*\})'
+    pattern = r\'\(if \(\!getMeta\("auth-url"\)\) \{\n\s\*throw new Error\("auth-url meta tag not found"\);\n\s\*\}\)\'
     replacement = """const authUrl = getMeta("auth-url");
 if (!authUrl) {
     throw new Error("auth-url meta tag not found");
@@ -95,15 +95,14 @@ def patch_boot_go(content):
 	k.AddModule("#web", webMod)"""
     return content.replace('k.AddModule("#web", web.New(k))', replacement)
 
+def patch_bundle(content):
+    return content.replace('getBundle("/bundles/sys.tar.gz");', 'getBundle("/bundles/sys.tar.gz");\n    getBundle("/bundles/pum.tar.gz");')
+
 if __name__ == "__main__":
     process_file("assets/lib/apptron.js", patch_auth_js)
     process_file("assets/signin.html", patch_signin_html)
     process_file("worker/src/worker.ts", patch_worker_ts)
     process_file("worker/src/auth.ts", patch_auth_ts)
     process_file("boot.go", patch_boot_go)
-
-def patch_bundle(content):
-    return content.replace('getBundle("/bundles/sys.tar.gz");', 'getBundle("/bundles/sys.tar.gz");\n    getBundle("/bundles/pum.tar.gz");')
-
-process_file("assets/signin.html", patch_bundle)
-process_file("assets/dashboard.html", patch_bundle)
+    process_file("assets/signin.html", patch_bundle)
+    process_file("assets/dashboard.html", patch_bundle)
