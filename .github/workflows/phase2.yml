@@ -2,12 +2,13 @@ name: Run Phase 2 Worker & Capture Result
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "fix-apptron-run-phase2-4006898412508730602", "master", "main" ]
     paths:
       - 'apptron/**'
       - '.github/workflows/phase2.yml'
       - 'e2e_tests/**'
   pull_request:
+    branches: [ "fix-apptron-run-phase2-4006898412508730602", "master", "main" ]
     paths:
       - 'apptron/**'
       - '.github/workflows/phase2.yml'
