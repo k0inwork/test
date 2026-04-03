@@ -73,42 +73,11 @@ if [ "$CLI_CHANGED" = true ] || [ ! -f "assets/bundles/pum.tar.gz" ]; then
     (cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
 fi
 
-echo "Re-packing sys.tar.gz using Python tarfile to guarantee precise ./ paths for Wanix..."
+echo "Re-packing sys.tar.gz using standard tar to guarantee precise ./ paths for Wanix..."
 TMP_BUNDLE_DIR=$(mktemp -d)
 tar -xzf "assets/bundles/sys.tar.gz" -C "$TMP_BUNDLE_DIR"
 TARGET_TAR="$(pwd)/assets/bundles/sys.tar.gz"
-
-cat << 'PY_TAR' > repack.py
-import tarfile
-import os
-
-src = "$TMP_BUNDLE_DIR"
-target = "$TARGET_TAR"
-
-with tarfile.open(target, "w:gz") as tar:
-    # Add root directory explicitly
-    ti = tarfile.TarInfo(name="./")
-    ti.type = tarfile.DIRTYPE
-    ti.mode = 0o755
-    tar.addfile(ti)
-
-    for root, dirs, files in os.walk(src):
-        for d in dirs:
-            full_path = os.path.join(root, d)
-            rel_path = os.path.relpath(full_path, src)
-            arcname = "./" + rel_path + "/"
-            tar.add(full_path, arcname=arcname, recursive=False)
-        for f in files:
-            full_path = os.path.join(root, f)
-            rel_path = os.path.relpath(full_path, src)
-            arcname = "./" + rel_path
-            tar.add(full_path, arcname=arcname, recursive=False)
-PY_TAR
-
-sed -i "s|\$TMP_BUNDLE_DIR|$TMP_BUNDLE_DIR|g" repack.py
-sed -i "s|\$TARGET_TAR|$TARGET_TAR|g" repack.py
-python3 repack.py
-rm repack.py
+(cd "$TMP_BUNDLE_DIR" && tar -czf "$TARGET_TAR" .)
 rm -rf "$TMP_BUNDLE_DIR"
 
 echo "Copying sys.tar.gz and pum.tar.gz into worker assets..."
