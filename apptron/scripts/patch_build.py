@@ -37,5 +37,5 @@ def patch_makefile(content, pum_admin_assets):
 
 if __name__ == "__main__":
     pum_admin_assets = os.getenv("PUM_ADMIN_ASSETS", "")
-    process_file("Dockerfile", patch_dockerfile)
+    process_file("worker/Dockerfile", patch_dockerfile)
     process_file("Makefile", lambda c: patch_makefile(c, pum_admin_assets))
