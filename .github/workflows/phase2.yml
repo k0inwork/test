@@ -2,13 +2,13 @@ name: Run Phase 2 Worker & Capture Result
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "fix-apptron-run-phase2-4006898412508730602", "master", "main" ]
     paths:
       - 'apptron/**'
       - '.github/workflows/phase2.yml'
       - 'e2e_tests/**'
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "fix-apptron-run-phase2-4006898412508730602", "master", "main" ]
     paths:
       - 'apptron/**'
       - '.github/workflows/phase2.yml'
@@ -61,7 +61,7 @@ jobs:
           echo "Waiting for Cloudflare Worker to start on port 8788..."
 
           # Wait up to 300 seconds for the server to be ready (building takes time)
-          TIMEOUT=300
+          TIMEOUT=900
           until curl -s --max-time 2 http://localhost:8788 > /dev/null; do
             sleep 2
             TIMEOUT=$((TIMEOUT-2))

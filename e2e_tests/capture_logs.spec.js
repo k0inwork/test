@@ -1,9 +1,14 @@
 const { test, expect } = require('@playwright/test');
 
 test('Capture console logs during project creation and edit view', async ({ page }) => {
-  // Capture console logs
+// Capture console logs
+  let panicDetected = false;
   page.on('console', msg => {
-    console.log(`BROWSER CONSOLE [${msg.type()}]: ${msg.text()}`);
+    const text = msg.text();
+    console.log(`BROWSER CONSOLE [${msg.type()}]: ${text}`);
+    if (text.includes("panic: runtime error") || text.includes("[signal 0xb") || text.includes("panic:")) {
+      panicDetected = true;
+    }
   });
 
   // Capture page errors
@@ -43,8 +48,12 @@ test('Capture console logs during project creation and edit view', async ({ page
   // Wait for the redirect to the edit page
   await page.waitForURL(/.*\/edit\/test-log-capture-project.*/);
 
-  console.log("Navigated to /edit view. Waiting 10 seconds for Wanix runtime to initialize and print logs...");
+console.log("Navigated to /edit view. Waiting 10 seconds for Wanix runtime to initialize and print logs...");
 
   // Wait for Wanix to initialize and potentially panic
   await page.waitForTimeout(10000);
+
+  if (panicDetected) {
+    throw new Error("Wanix booted with a panic!");
+  }
 });
