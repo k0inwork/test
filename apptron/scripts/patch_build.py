@@ -15,9 +15,19 @@ def process_file(filepath, callback):
         print(f"Error patching {filepath}: {e}")
 
 def patch_dockerfile(content):
-    # Replace the worker container copying bundles from multi-stage builds
-    # with copying them directly from the host's assets/bundles/ directory
-    return re.sub(r'COPY --from=bundle-sys /bundles/\* /bundles/', 'COPY assets/bundles/sys.tar.gz /bundles/sys.tar.gz', content)
+    # Strip the problematic stages to bypass i386 alpine dependencies
+    content = re.sub(r'FROM --platform=\$LINUX_386.*?FROM alpine:\$ALPINE_VERSION AS bundle-base',
+                     'FROM alpine:$ALPINE_VERSION AS bundle-base',
+                     content, flags=re.DOTALL)
+
+    # Remove 'bundle-sys' block completely
+    content = re.sub(r'FROM bundle-base AS bundle-sys.*?FROM golang:\$GO_VERSION-alpine AS worker-build',
+                     'FROM golang:$GO_VERSION-alpine AS worker-build',
+                     content, flags=re.DOTALL)
+
+    # Replace copying from bundle-sys with local bundles
+    content = re.sub(r'COPY --from=bundle-sys /bundles/\* /bundles/', 'COPY assets/bundles/* /bundles/', content)
+    return content
 
 def patch_makefile(content, pum_admin_assets):
     # 1. Update vscode extraction target to prevent curl errors and unzip natively
