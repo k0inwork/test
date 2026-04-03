@@ -52,6 +52,12 @@ if (document.querySelector("meta[name='auth-url']")?.content === "/auth") {
 </script>""")
 
 def patch_worker_ts(content):
+    content = re.sub(
+        r'async fetch\(req: Request, env: any\) \{',
+        r'async fetch(req: Request, env: any) {\n        env.AUTH_URL = "/auth";',
+        content
+    )
+
     pattern = r'(if \(url\.pathname === "/" && req\.method === "GET"\) \{)(.*?)(^\s*\})'
     replacement = r"""    if (url.pathname === "/" && req.method === "GET") {
         await ensureSystemDirs(req, env);
