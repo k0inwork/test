@@ -15,9 +15,15 @@ def process_file(filepath, callback):
         print(f"Error patching {filepath}: {e}")
 
 def patch_dockerfile(content):
-    # Replace the worker container copying bundles from multi-stage builds
-    # with copying them directly from the host's assets/bundles/ directory
-    return re.sub(r'COPY --from=bundle-sys /bundles/\* /bundles/', 'COPY assets/bundles/sys.tar.gz /bundles/sys.tar.gz', content)
+    # Completely replace the Dockerfile for local/CI Phase 2 testing to bypass
+    # Docker Hub rate limits and local Alpine overlayfs errors, and drastically speed up builds.
+    # We compile the worker locally in run_phase2.sh and just COPY it here.
+    return """FROM scratch AS worker
+COPY assets/bundles/* /bundles/
+COPY bin/worker /worker
+EXPOSE 8080
+CMD ["/worker"]
+"""
 
 def patch_makefile(content, pum_admin_assets):
     # 1. Update vscode extraction target to prevent curl errors and unzip natively
@@ -37,5 +43,5 @@ def patch_makefile(content, pum_admin_assets):
 
 if __name__ == "__main__":
     pum_admin_assets = os.getenv("PUM_ADMIN_ASSETS", "")
-    process_file("worker/Dockerfile", patch_dockerfile)
+    process_file("Dockerfile", patch_dockerfile)
     process_file("Makefile", lambda c: patch_makefile(c, pum_admin_assets))
