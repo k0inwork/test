@@ -40,23 +40,16 @@ EOP
 echo "Packaging custom pum.tar.gz into runner assets..."
 mkdir -p "$FINAL_ASSETS_DIR/bundles"
 
-# Apptron's boot.go expects the contents to be inside a 'rootfs' directory within the tar
+echo "Installing wanix CLI if missing..."
+mkdir -p "$REPO_ROOT/build/bin"
+if [ ! -f "$REPO_ROOT/build/bin/wanix" ]; then
+    echo "Building wanix CLI..."
+    rm -rf /tmp/wanix-build
+    git clone --depth 1 https://github.com/tractordev/wanix /tmp/wanix-build
+    (cd /tmp/wanix-build && go build -o "$REPO_ROOT/build/bin/wanix" ./cmd/wanix)
+fi
 
-
-
-echo "Creating pum.tar.gz bundle..."
-
-
-
-
-# Apptron expects contents to be inside a 'rootfs' directory within the tar
-mkdir -p "$BUNDLE_DIR/rootfs/bin"
-mkdir -p "$BUNDLE_DIR/rootfs/etc/profile.d"
-mv "$BUNDLE_DIR/bin/"* "$BUNDLE_DIR/rootfs/bin/"
-mv "$BUNDLE_DIR/etc/"* "$BUNDLE_DIR/rootfs/etc/"
-rmdir "$BUNDLE_DIR/bin" "$BUNDLE_DIR/etc"
-
-(cd "$BUNDLE_DIR" && tar -czf "$FINAL_ASSETS_DIR/bundles/pum.tar.gz" .)
-
+echo "Creating pum.tar.gz bundle via wanix bundle pack..."
+"$REPO_ROOT/build/bin/wanix" bundle pack "$BUNDLE_DIR" "$FINAL_ASSETS_DIR/bundles/pum.tar.gz"
 
 echo "Build complete! Custom Apptron assets are ready for embedding in $FINAL_ASSETS_DIR"
