@@ -18,6 +18,9 @@ if [ ! -f .env.local ]; then
     cp .env.example .env.local
 fi
 
+# Force AUTH_URL to /auth for Mock Mode in Phase 2 E2E testing
+sed -i 's|^AUTH_URL=.*|AUTH_URL="/auth"|' .env.local
+
 # Always start from a clean state to ensure patches apply correctly on multiple runs
 git checkout assets/lib/apptron.js assets/signin.html worker/src/worker.ts worker/src/auth.ts boot.go assets/dashboard.html Dockerfile Makefile 2>/dev/null || true
 
@@ -71,6 +74,12 @@ if [ "$CLI_CHANGED" = true ] || [ ! -f "assets/bundles/pum.tar.gz" ]; then
     (cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
 fi
 
+echo "Copying sys.tar.gz and pum.tar.gz into worker assets..."
+
+mkdir -p assets/bundles
+cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
+cp "$REPO_ROOT/apptron/cmd/pum-admin/assets/bundles/pum.tar.gz" "assets/bundles/pum.tar.gz"
+
 echo "Re-packing sys.tar.gz using wanix bundle pack..."
 TMP_BUNDLE_DIR=$(mktemp -d)
 tar -xzf "assets/bundles/sys.tar.gz" -C "$TMP_BUNDLE_DIR"
@@ -83,12 +92,6 @@ fi
 
 "$REPO_ROOT/build/bin/wanix" bundle pack "$TMP_BUNDLE_DIR" "$TARGET_TAR"
 rm -rf "$TMP_BUNDLE_DIR"
-
-echo "Copying sys.tar.gz and pum.tar.gz into worker assets..."
-
-mkdir -p assets/bundles
-cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
-cp "$REPO_ROOT/apptron/cmd/pum-admin/assets/bundles/pum.tar.gz" "assets/bundles/pum.tar.gz"
 
 echo "Compiling the Apptron worker locally to avoid Docker overlayfs issues..."
 mkdir -p bin
