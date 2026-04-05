@@ -45,7 +45,25 @@ mkdir -p "$REPO_ROOT/build/bin"
 if [ ! -f "$REPO_ROOT/build/bin/wanix" ]; then
     echo "Building wanix CLI..."
     rm -rf /tmp/wanix-build
-    git clone --depth 1 https://github.com/tractordev/wanix /tmp/wanix-build
+    git clone https://github.com/tractordev/wanix /tmp/wanix-build
+    (cd /tmp/wanix-build && git checkout 44f753f37865a842f5471f2874994deef30ee83d)
+
+    # Patch wanix CLI to handle symlinks correctly to avoid 'archive/tar: write too long'
+    cat << 'EOF' > /tmp/wanix-build/patch_wanix.py
+import sys
+with open("cmd/wanix/bundle.go", "r") as f:
+    c = f.read()
+c = c.replace('header, err := tar.FileInfoHeader(info, "")', '''link := ""
+\t\t\t\tif info.Mode()&os.ModeSymlink != 0 {
+\t\t\t\t\tlink, _ = os.Readlink(path)
+\t\t\t\t}
+\t\t\t\theader, err := tar.FileInfoHeader(info, link)''')
+c = c.replace("if !info.IsDir() {", "if info.Mode().IsRegular() {")
+with open("cmd/wanix/bundle.go", "w") as f:
+    f.write(c)
+EOF
+    (cd /tmp/wanix-build && python3 patch_wanix.py)
+
     (cd /tmp/wanix-build && go build -o "$REPO_ROOT/build/bin/wanix" ./cmd/wanix)
 fi
 

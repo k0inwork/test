@@ -92,7 +92,7 @@ cp "$REPO_ROOT/apptron/cmd/pum-admin/assets/bundles/pum.tar.gz" "assets/bundles/
 
 echo "Compiling the Apptron worker locally to avoid Docker overlayfs issues..."
 mkdir -p bin
-(cd worker && CGO_ENABLED=0 go build -o ../bin/worker ./cmd/worker)
+(cd worker && GOOS=linux CGO_ENABLED=0 go build -o ../bin/worker ./cmd/worker)
 
 echo "Starting Phase 2 Worker in dev mode..."
 echo "Mock Auth is ENABLED in apptron/worker/src/auth.ts."
