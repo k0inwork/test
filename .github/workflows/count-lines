@@ -1,57 +1,52 @@
 
-name: Count Lines in Repo
+name: Count Lines
 on: workflow_dispatch
-
 jobs:
-  count-lines:
+  count:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          repository: k0inwork/test
-          fetch-depth: 1
-
-      - name: Count lines per file and grand total
+      - uses: actions/checkout@v4
+      - name: Count lines per file and total
         run: |
-          echo "=== LINE COUNT BREAKDOWN ==="
-          find . -type f -not -path './.git/*' | sort | while read file; do
-            lines=$(wc -l < "$file" 2>/dev/null || echo 0)
-            echo "$lines $file"
-          done > line_counts.txt
-
-          echo "=== PER-FILE LINE COUNTS ==="
-          cat line_counts.txt
-
-          echo ""
+          echo "=== LINE COUNT PER FILE ==="
+          find . -type f -not -path './.git/*' -exec wc -l {} + 2>/dev/null || true
           echo "=== GRAND TOTAL ==="
-          total=$(find . -type f -not -path './.git/*' -exec cat {} + | wc -l)
-          echo "Total lines: $total"
-          echo "$total" > grand_total.txt
-
-          # Also produce a JSON output
-          echo "{" > line_counts.json
-          echo '  "repository": "k0inwork/test",' >> line_counts.json
-          echo '  "files": [' >> line_counts.json
-          first=true
-          find . -type f -not -path './.git/*' | sort | while read file; do
-            lines=$(wc -l < "$file" 2>/dev/null || echo 0)
-            if [ "$first" = true ]; then
-              first=false
-            else
-              echo "    ," >> line_counts.json
-            fi
-            echo "    {\"file\": \"$file\", \"lines\": $lines}" >> line_counts.json
-          done
-          echo '  ],' >> line_counts.json
-          echo "  \"grand_total\": $total" >> line_counts.json
-          echo "}" >> line_counts.json
-
-      - name: Upload results
-        uses: actions/upload-artifact@v4
+          find . -type f -not -path './.git/*' -exec cat {} + 2>/dev/null | wc -l
+      - name: Generate structured summary
+        run: |
+          mkdir -p results
+          {
+            echo "# Line Count Summary for k0inwork/test"
+            echo ""
+            echo "## Per-File Breakdown"
+            echo ""
+            echo "| File | Lines |"
+            echo "|------|-------|"
+            find . -type f -not -path './.git/*' -print0 | while IFS= read -r -d '' f; do
+              lines=$(wc -l < "$f" 2>/dev/null || echo 0)
+              echo "| \${f} | \${lines} |"
+            done
+            echo ""
+            total=$(find . -type f -not -path './.git/*' -exec cat {} + 2>/dev/null | wc -l)
+            echo "**Grand Total: \${total} lines**"
+          } > results/line-count.md
+          {
+            echo "{"
+            echo "  \"repository\": \"k0inwork/test\","
+            echo "  \"files\": ["
+            first=true
+            find . -type f -not -path './.git/*' -print0 | while IFS= read -r -d '' f; do
+              lines=$(wc -l < "$f" 2>/dev/null || echo 0)
+              if [ "$first" = true ]; then first=false; else echo ","; fi
+              echo "    {\"file\": \"$f\", \"lines\": $lines}"
+            done
+            echo ""
+            echo "  ],"
+            total=$(find . -type f -not -path './.git/*' -exec cat {} + 2>/dev/null | wc -l)
+            echo "  \"grand_total\": $total"
+            echo "}"
+          } > results/line-count.json
+      - uses: actions/upload-artifact@v4
         with:
           name: line-count-results
-          path: |
-            line_counts.txt
-            line_counts.json
-            grand_total.txt
+          path: results/
