@@ -1,0 +1,29 @@
+
+name: Count Lines of Code
+on: workflow_dispatch
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: k0inwork/test
+          fetch-depth: 0
+
+      - name: Install cloc
+        run: sudo apt-get update && sudo apt-get install -y cloc
+
+      - name: Count all lines
+        run: |
+          echo "=== CLOC OUTPUT ==="
+          cloc --version
+          echo ""
+          echo "=== Full CLOC Report ==="
+          cloc . --by-file --timeout 0
+          echo ""
+          echo "=== Summary ==="
+          cloc . --timeout 0
+          echo ""
+          echo "=== Also total line count using wc ==="
+          find . -type f -not -path '*/.git/*' | xargs wc -l | tail -1
