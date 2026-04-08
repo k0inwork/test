@@ -1,27 +1,18 @@
-
-name: Count File Lines
+name: Count Lines
 on: workflow_dispatch
-
 jobs:
-  count-lines:
+  count:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Count lines in all tracked files
-        id: count
+      - uses: actions/checkout@v4
+      - name: Count all file lines
         run: |
-          echo "=== Line count per file ==="
+          echo "=== Line Count Summary ==="
           git ls-files | while IFS= read -r file; do
-            lines=$(wc -l < "$file" 2>/dev/null || echo 0)
-            echo "$lines $file"
+            if [ -f "$file" ]; then
+              wc -l "$file"
+            fi
           done
-          echo "=== Total line count ==="
-          TOTAL=$(git ls-files | xargs wc -l 2>/dev/null | tail -n 1)
-          echo "total=$TOTAL" >> $GITHUB_OUTPUT
-          echo "$TOTAL"
-          echo ""
-          echo "## Total Line Count" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "$TOTAL" >> $GITHUB_STEP_SUMMARY
+          echo "=== Total Lines ==="
+          git ls-files | xargs wc -l | tail -n 1
+          echo "=== Done ===" 
