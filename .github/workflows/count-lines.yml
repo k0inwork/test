@@ -7,33 +7,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          repository: k0inwork/test
-          fetch-depth: 0
-
       - name: Count all lines
         run: |
-          echo "=== Line Count Summary ==="
-          echo "Total lines (all files):"
-          find . -type f -not -path './.git/*' -exec cat {} + | wc -l
-          echo ""
-          echo "=== Breakdown by file type ==="
-          find . -type f -not -path './.git/*' | sed 's/.*\\.//' | sort | uniq -c | sort -rn
-          echo ""
-          echo "=== Per-file line counts ==="
-          find . -type f -not -path './.git/*' -exec wc -l {} + | sort -rn
-
-      - name: Save count to file
+          TOTAL=$(find . -type f -exec cat {} + 2>/dev/null | wc -l)
+          echo "Total lines: $TOTAL"
+          echo "$TOTAL" > line_count.txt
+      - name: Also count with cloc for detail
         run: |
-          TOTAL=$(find . -type f -not -path './.git/*' -exec cat {} + | wc -l)
-          echo "total_lines=$TOTAL" > line-count.txt
-          echo "Total lines: $TOTAL" >> line-count.txt
-          echo "" >> line-count.txt
-          echo "=== Per-file breakdown ===" >> line-count.txt
-          find . -type f -not -path './.git/*' -exec wc -l {} + | sort -rn >> line-count.txt
-
-      - name: Upload artifact
+          sudo apt-get install -y cloc
+          cloc . --quiet || true
+      - name: Upload result
         uses: actions/upload-artifact@v4
         with:
-          name: line-count
-          path: line-count.txt
+          name: line-count-result
+          path: line_count.txt
