@@ -1,0 +1,39 @@
+
+name: Count Lines
+on: workflow_dispatch
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: k0inwork/test
+          fetch-depth: 0
+
+      - name: Count all lines
+        run: |
+          echo "=== Line Count Summary ==="
+          echo "Total lines (all files):"
+          find . -type f -not -path './.git/*' -exec cat {} + | wc -l
+          echo ""
+          echo "=== Breakdown by file type ==="
+          find . -type f -not -path './.git/*' | sed 's/.*\\.//' | sort | uniq -c | sort -rn
+          echo ""
+          echo "=== Per-file line counts ==="
+          find . -type f -not -path './.git/*' -exec wc -l {} + | sort -rn
+
+      - name: Save count to file
+        run: |
+          TOTAL=$(find . -type f -not -path './.git/*' -exec cat {} + | wc -l)
+          echo "total_lines=$TOTAL" > line-count.txt
+          echo "Total lines: $TOTAL" >> line-count.txt
+          echo "" >> line-count.txt
+          echo "=== Per-file breakdown ===" >> line-count.txt
+          find . -type f -not -path './.git/*' -exec wc -l {} + | sort -rn >> line-count.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: line-count
+          path: line-count.txt
