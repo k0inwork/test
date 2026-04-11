@@ -1,0 +1,18 @@
+name: Count Files
+on:
+  push: null
+  workflow_dispatch: {}
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          repository: k0inwork/test
+          fetch-depth: 0
+      - name: Count all files
+        run: |
+          FILE_COUNT=$(find . -type f | wc -l)
+          echo "Total file count: $FILE_COUNT"
+          echo "::notice::FILE_COUNT=$FILE_COUNT"
