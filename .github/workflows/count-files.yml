@@ -1,22 +1,22 @@
-name: Count Files in Repo
+name: Count Files
 on:
+  push: null
   workflow_dispatch: {}
 jobs:
-  count-files:
+  count:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v4
-        with:
-          repository: k0inwork/test
-          token: \${{ secrets.GITHUB_TOKEN }}
       - name: Count all files
-        id: count
-        run: |
-          FILE_COUNT=$(find . -type f | wc -l)
-          echo "FILE_COUNT=$FILE_COUNT" >> $GITHUB_OUTPUT
-          echo "=== Total file count: $FILE_COUNT ==="
-      - name: List all files
-        run: |
-          echo "=== Full file listing ==="
-          find . -type f | sort
+        env:
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: >
+          echo "Fetching tree for k0inwork/test..."
+
+          COUNT=$(gh api repos/k0inwork/test/git/trees/main?recursive=1 --jq
+          '.tree[] | select(.type=="blob")' | wc -l)
+
+          echo "FILE_COUNT=$COUNT"
+
+          echo "::notice::FILE_COUNT=$COUNT"
+
+          echo "Total file count: $COUNT"
