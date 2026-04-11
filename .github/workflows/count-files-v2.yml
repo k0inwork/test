@@ -1,0 +1,26 @@
+name: Count Files v2
+on:
+  push: null
+  workflow_dispatch: {}
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Count all files
+        env:
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: >
+          echo "Trying to get default branch..."
+
+          DEFAULT_BRANCH=$(gh api repos/k0inwork/test --jq '.default_branch'
+          2>/dev/null || echo "main")
+
+          echo "Default branch: $DEFAULT_BRANCH"
+
+          COUNT=$(gh api
+          "repos/k0inwork/test/git/trees/\${DEFAULT_BRANCH}?recursive=1" --jq
+          '.tree[] | select(.type=="blob")' | wc -l)
+
+          echo "FILE_COUNT=$COUNT"
+
+          echo "Total file count: $COUNT"
