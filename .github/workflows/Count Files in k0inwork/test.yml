@@ -1,0 +1,23 @@
+name: Count Files in k0inwork/test
+on:
+  workflow_dispatch: {}
+jobs:
+  count-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout k0inwork/test
+        uses: actions/checkout@v4
+        with:
+          repository: k0inwork/test
+      - name: Count all files
+        run: |
+          echo "=== FILE COUNT ==="
+          FILE_COUNT=$(find . -type f | wc -l)
+          echo "Total file count: $FILE_COUNT"
+          echo ""
+          echo "=== FULL FILE LIST ==="
+          find . -type f | sort
+          echo ""
+          echo "=== SUMMARY ==="
+          echo "Repository: k0inwork/test"
+          echo "Total files: $FILE_COUNT"
