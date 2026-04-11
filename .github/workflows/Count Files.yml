@@ -1,0 +1,36 @@
+name: Count Files
+on:
+  workflow_dispatch: {}
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Count all files via Git Trees API
+        env:
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: >
+          TOTAL=0
+
+          PAGE=1
+
+          PER_PAGE=100
+
+          while true; do
+            RESPONSE=$(gh api "repos/k0inwork/test/git/trees/main?recursive=1&per_page=$PER_PAGE&page=$PAGE" 2>/dev/null || echo '{"tree":[]}')
+            COUNT=$(echo "$RESPONSE" | jq '[.tree[] | select(.type == "blob")] | length')
+            TOTAL=$((TOTAL + COUNT))
+            TRUNCATED=$(echo "$RESPONSE" | jq -r '.truncated // "false"')
+            echo "Page $PAGE: found $COUNT files (total so far: $TOTAL, truncated: $TRUNCATED)"
+            if [ "$TRUNCATED" = "false" ]; then
+              break
+            fi
+            PAGE=$((PAGE + 1))
+          done
+
+          echo ""
+
+          echo "========================================"
+
+          echo "TOTAL_FILE_COUNT=$TOTAL"
+
+          echo "========================================"
