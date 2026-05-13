@@ -1,0 +1,22 @@
+{
+  "name": "OpenClaude Sandbox",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "customizations": {
+    "codespaces": {
+      "openFiles": [
+        "README.md"
+      ]
+    }
+  },
+  "secrets": {
+    "ZAI_API_KEY": {
+      "description": "Z.ai (Zhipu AI) API key for OpenClaude"
+    }
+  }
+}
