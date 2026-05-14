@@ -1,0 +1,9 @@
+{
+  "task_id": "task-1778751961-42a89f",
+  "task": "Search GitHub for the best open-source CMMS (Computerized Maintenance Management System) platforms. \n\nFor each project found, provide:\n- Repository name and URL\n- Star count\n- Tech stack (languages/frameworks)\n- Key features (work orders, preventive maintenance, asset tracking, etc.)\n- License\n- Whether it's actively maintained\n\nRank them by quality, stars, and activity. Include EAM (Enterprise Asset Management) platforms that overlap with CMMS functionality. \n\nBe thorough \u2014 check repos with keywords: CMMS, \"maintenance management\", EAM, \"asset management\", \"work order management\".\n\nOutput a well-structured markdown report.",
+  "model": "glm-5.1",
+  "working_repo": "",
+  "branch": "main",
+  "submitted_at": "2026-05-14T09:46:01Z",
+  "status": "pending"
+}
