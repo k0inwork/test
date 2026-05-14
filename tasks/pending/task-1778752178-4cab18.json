@@ -1,0 +1,9 @@
+{
+  "task_id": "task-1778752178-4cab18",
+  "task": "Search GitHub for the best open-source CMMS (Computerized Maintenance Management System) and EAM (Enterprise Asset Management) platforms. For each repo found, provide: name, URL, star count, tech stack, key features, license, and maintenance status. Rank by quality and stars. Search keywords: CMMS, maintenance management, EAM, asset management, work order. Output a well-structured markdown report.",
+  "model": "glm-5.1",
+  "working_repo": "",
+  "branch": "main",
+  "submitted_at": "2026-05-14T09:49:38Z",
+  "status": "pending"
+}
