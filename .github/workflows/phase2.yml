@@ -50,6 +50,23 @@ jobs:
           # by run_phase1.sh or manually.
           git clone --depth 1 https://github.com/tractordev/apptron apptron/apptron
 
+      - name: Build and Extract Base sys.tar.gz
+        run: |
+          cd apptron/apptron
+          docker build --platform linux/amd64 --target bundle-sys -t apptron-sys .
+          docker create --name apptron-sys-temp apptron-sys
+          mkdir -p assets/bundles
+          docker cp apptron-sys-temp:/bundles/sys.tar.gz assets/bundles/sys.tar.gz
+          docker rm -f apptron-sys-temp
+
+      - name: Upload sys.tar.gz Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apptron-sys-bundle
+          path: apptron/apptron/assets/bundles/sys.tar.gz
+          retention-days: 1
+
+
       - name: Run Phase 2 Worker Script
         env:
           CI: true
