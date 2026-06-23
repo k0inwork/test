@@ -18,14 +18,15 @@ if [ ! -f .env.local ]; then
     cp .env.example .env.local
 fi
 
+# Force AUTH_URL to /auth for Mock Mode in Phase 2 E2E testing
+sed -i 's|^AUTH_URL=.*|AUTH_URL="/auth"|' .env.local
+
+# Always start from a clean state to ensure patches apply correctly on multiple runs
+git checkout assets/lib/apptron.js assets/signin.html worker/src/worker.ts worker/src/auth.ts boot.go assets/dashboard.html Dockerfile Makefile 2>/dev/null || true
+
 # Run the patcher scripts
 echo "Applying Apptron source patches..."
 python3 "$SCRIPT_DIR/patch_apptron.py"
-
-
-# Always start from a clean Makefile to ensure patches apply correctly on multiple runs
-git checkout Makefile 2>/dev/null || true
-git checkout Dockerfile 2>/dev/null || true
 
 # Run the build patcher script
 echo "Applying Apptron build patches..."
@@ -73,49 +74,28 @@ if [ "$CLI_CHANGED" = true ] || [ ! -f "assets/bundles/pum.tar.gz" ]; then
     (cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
 fi
 
-echo "Re-packing sys.tar.gz using Python tarfile to guarantee precise ./ paths for Wanix..."
-TMP_BUNDLE_DIR=$(mktemp -d)
-tar -xzf "assets/bundles/sys.tar.gz" -C "$TMP_BUNDLE_DIR"
-TARGET_TAR="$(pwd)/assets/bundles/sys.tar.gz"
-
-cat << 'PY_TAR' > repack.py
-import tarfile
-import os
-
-src = "$TMP_BUNDLE_DIR"
-target = "$TARGET_TAR"
-
-with tarfile.open(target, "w:gz") as tar:
-    # Add root directory explicitly
-    ti = tarfile.TarInfo(name="./")
-    ti.type = tarfile.DIRTYPE
-    ti.mode = 0o755
-    tar.addfile(ti)
-
-    for root, dirs, files in os.walk(src):
-        for d in dirs:
-            full_path = os.path.join(root, d)
-            rel_path = os.path.relpath(full_path, src)
-            arcname = "./" + rel_path + "/"
-            tar.add(full_path, arcname=arcname, recursive=False)
-        for f in files:
-            full_path = os.path.join(root, f)
-            rel_path = os.path.relpath(full_path, src)
-            arcname = "./" + rel_path
-            tar.add(full_path, arcname=arcname, recursive=False)
-PY_TAR
-
-sed -i "s|\$TMP_BUNDLE_DIR|$TMP_BUNDLE_DIR|g" repack.py
-sed -i "s|\$TARGET_TAR|$TARGET_TAR|g" repack.py
-python3 repack.py
-rm repack.py
-rm -rf "$TMP_BUNDLE_DIR"
-
 echo "Copying sys.tar.gz and pum.tar.gz into worker assets..."
 
 mkdir -p assets/bundles
 cp "$REPO_ROOT/apptron/assets/bundles/sys.tar.gz" "assets/bundles/sys.tar.gz"
 cp "$REPO_ROOT/apptron/cmd/pum-admin/assets/bundles/pum.tar.gz" "assets/bundles/pum.tar.gz"
+
+echo "Re-packing sys.tar.gz using wanix bundle pack..."
+TMP_BUNDLE_DIR=$(mktemp -d)
+tar -xzf "assets/bundles/sys.tar.gz" -C "$TMP_BUNDLE_DIR"
+TARGET_TAR="$(pwd)/assets/bundles/sys.tar.gz"
+
+if [ ! -f "$REPO_ROOT/build/bin/wanix" ]; then
+    echo "wanix CLI missing, building it first..."
+    (cd "$REPO_ROOT" && bash "apptron/scripts/build_distro.sh")
+fi
+
+"$REPO_ROOT/build/bin/wanix" bundle pack "$TMP_BUNDLE_DIR" "$TARGET_TAR"
+rm -rf "$TMP_BUNDLE_DIR"
+
+echo "Compiling the Apptron worker locally to avoid Docker overlayfs issues..."
+mkdir -p bin
+(cd worker && GOOS=linux CGO_ENABLED=0 go build -o ../bin/worker ./cmd/worker)
 
 echo "Starting Phase 2 Worker in dev mode..."
 echo "Mock Auth is ENABLED in apptron/worker/src/auth.ts."
