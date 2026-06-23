@@ -15,7 +15,7 @@ def process_file(filepath, callback):
         print(f"Error patching {filepath}: {e}")
 
 def patch_auth_js(content):
-    pattern = r'(const authUrl = getMeta\("auth-url"\);\s*if \(!authUrl\) \{\s*throw new Error\("auth-url meta tag not found"\);\s*\})'
+    pattern = r'(if \(!getMeta\("auth-url"\)\) \{\s*throw new Error\("auth-url meta tag not found"\);\s*\})'
     replacement = """const authUrl = getMeta("auth-url");
 if (!authUrl) {
     throw new Error("auth-url meta tag not found");
@@ -52,6 +52,12 @@ if (document.querySelector("meta[name='auth-url']")?.content === "/auth") {
 </script>""")
 
 def patch_worker_ts(content):
+    content = re.sub(
+        r'async fetch\(req: Request, env: any\) \{',
+        r'async fetch(req: Request, env: any) {\n        env.AUTH_URL = "/auth";',
+        content
+    )
+
     pattern = r'(if \(url\.pathname === "/" && req\.method === "GET"\) \{)(.*?)(^\s*\})'
     replacement = r"""    if (url.pathname === "/" && req.method === "GET") {
         await ensureSystemDirs(req, env);
